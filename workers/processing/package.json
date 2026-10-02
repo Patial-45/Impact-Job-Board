@@ -1,0 +1,19 @@
+{
+  "name": "@executive-match/processing",
+  "version": "0.0.0",
+  "private": true,
+  "scripts": {
+    "build": "tsc --noEmit",
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint src",
+    "test": "vitest run --passWithNoTests"
+  },
+  "dependencies": {
+    "@executive-match/shared": "workspace:*",
+    "bullmq": "5.58.5"
+  },
+  "devDependencies": {
+    "@executive-match/eslint-config": "workspace:*",
+    "vitest": "3.2.4"
+  }
+}

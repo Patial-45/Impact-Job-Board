@@ -1,0 +1,7 @@
+# Security baseline
+
+Authenticate every protected API route. Authorize against database membership and workspace-scoped queries for employer data. Validate input with schemas and database constraints. Prisma parameterization prevents routine SQL injection; review raw SQL separately. Escape user content on rendering, avoid unsafe HTML. Use HttpOnly, Secure production, SameSite cookies, origin checks and CSRF tokens if cross-site use expands. Rate limit auth and later expensive actions; switch throttle storage to Redis before multiple replicas.
+
+Password hashing is Argon2id. Opaque session token hashes are stored, never raw tokens. OAuth needs state/PKCE, verified identity and safe account linking. Secrets belong in environment/secret manager. Do not log credentials, resumes, sensitive PII, tokens or AI prompts by default. Restrict AI provider data and redact telemetry; uploaded documents are untrusted against prompt injection.
+
+Future upload security: signed URLs, MIME/extension allowlist, size caps, checksum, content sniffing, malware scanning/quarantine before processing, private buckets, download authorization, expiration and retention. Prevent SSRF in remote file fetchers and integrations. Verify webhook signatures, replay window and idempotency. Audit sensitive reads and changes. Encrypt in transit, set backup/restore drills, dependency scanning and data deletion procedures before production. See [deployment](16-DEPLOYMENT.md).

@@ -1,0 +1,17 @@
+{
+  "name": "@executive-match/storage",
+  "version": "0.0.0",
+  "private": true,
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
+  "scripts": {
+    "build": "tsc --noEmit",
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint src",
+    "test": "vitest run --passWithNoTests"
+  },
+  "devDependencies": {
+    "@executive-match/eslint-config": "workspace:*",
+    "vitest": "3.2.4"
+  }
+}

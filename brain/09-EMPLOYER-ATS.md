@@ -1,0 +1,3 @@
+# Employer ATS
+
+Employer workflow: create workspace/company, invite members, draft/publish/close jobs, review applicants, shortlist, move stages, add notes/tags, collaborate, schedule interviews. All resources belong to a workspace. Role grants determine actions; candidate notes and tags are private to that workspace. Stage changes need transactional current-stage update plus history and audit event. Prevent duplicate applications and stale stage writes with optimistic versioning or explicit transition checks. Keep candidate-facing status separate from internal notes. Phase 4 adds company/jobs; Phase 5 adds applications/ATS.
