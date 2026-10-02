@@ -1,20 +1,22 @@
 # Current Development State
 
-Last Updated: 2026-09-29
+Last Updated: 2026-10-02
 
 Current Phase: Phase 0 — architecture and repository foundation
 
-Current Branch: `main` (local Git repository initialized; no commit or remote)
+Current Branch: `main` (tracking `origin/main` at `https://github.com/Patial-45/Impact-Job-Board.git`)
 
 ## Completed
 
 - All 24 Brain architecture and product documents.
 - pnpm monorepo, Next.js public/protected route structure, NestJS API structure.
+- Toolchain verification passed: `pnpm install`, `pnpm db:generate`, `pnpm lint`, `pnpm typecheck`, `pnpm test`, and `pnpm build`.
 - Prisma schema for identity, workspace tenancy, company, candidate stub and jobs.
 - Credential authentication architecture, session cookie flow, RBAC grants and workspace membership checks.
 - UI tokens, initial components and landing page.
 - Docker Compose, environment example and CI configuration.
 - Generated initial PostgreSQL migration (`packages/database/prisma/migrations/20260929_init`).
+- Published foundation repository to GitHub: `https://github.com/Patial-45/Impact-Job-Board`.
 
 ## Partially completed
 
