@@ -49,3 +49,12 @@ Decision: `/health/live` reports process liveness; `/health` checks PostgreSQL r
 ## ADR-012 — Root local infrastructure file
 
 Decision: keep `docker-compose.yml` at repository root instead of an `infrastructure/docker` tree. Context: local developer workflow is `docker compose up -d`. Reasoning: one discoverable command and no empty infrastructure wrapper. Alternatives: nested Compose file. Consequence: production manifests can be added under infrastructure when a target is chosen.
+
+## ADR-013 — Self-hosted Next.js Google Fonts and design token standardization
+
+Decision: Use `next/font/google` in `apps/web/src/app/layout.tsx` for `DM_Sans`, `Manrope`, and `Geist_Mono` with CSS variable injection and standard tokens in `globals.css`. Context: Eliminates external `@import` render-blocking stylesheet requests while maintaining strict typographic and color cadence across all public and shell pages. Reasoning: Zero-network-overhead font loading at build time with `display: 'swap'` ensures optimal LCP/CLS and privacy. Consequence: Fonts are bundled at build time; token changes remain centralized in `globals.css`.
+
+## ADR-014 — Modular UI component library with client boundary annotations
+
+Decision: Structure `@executive-match/ui` (`packages/ui`) into focused modules (primitives, forms, controls, navigation, feedback, data tables, and recruitment domain cards) with explicit `'use client';` annotations where React hooks/events are used. Context: Next.js 16 Server Components import packages without transpile boundaries by default; interactive components must declare client boundaries to be imported across both server and client pages. Reasoning: Avoids monolithic bundle overhead, maximizes server rendering for static parts, and enforces uniform accessible design primitives across all shells. Consequence: Pure server components must remain hook-free; interactive widgets declare `'use client'`.
+

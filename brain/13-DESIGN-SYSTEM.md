@@ -7,9 +7,42 @@ Visual direction: restrained editorial SaaS, neutral off-white background, dark 
 CSS source: `apps/web/src/app/globals.css`. Background `#f8f9f7`, paper `#fff`, ink `#182320`, muted `#60706a`, line `#dce3df`, accent `#315f4d`, soft `#e9efeb`. Radius: 5px controls, 12px cards. Shadow only for depth-sensitive surfaces. Spacing uses 4/8/12/16/24/32/40/55/70/95/130px cadence. Content container max 1320px, 80px desktop gutters, 36px mobile. Breakpoints around 760px and 1100px. Motion is limited to hover/focus transitions and native scroll; respect reduced motion.
 
 ## Typography
+ 
+Configured in `apps/web/src/app/layout.tsx` using `next/font/google` for zero render-blocking requests at runtime (`display: 'swap'`).
+- Display font: `Manrope` (`--font-display`), weights 700, 800.
+- Body font: `DM Sans` (`--font-body`), weights 400, 500, 700.
+- Code/Data font: `Geist Mono` (`--font-mono`), weights 400, 500.
 
-Current prototype uses Manrope display and DM Sans body with system fallback; self-host fonts before production to avoid an external CSS request. Type scale (desktop/mobile): display-xl 82/54, display-lg 68/44, h1 59/40, h2 43/32, h3 23/22, h4 19/18, body-lg 18/17, body 16/16, body-sm 14/14, caption 12/12, label 11/11, mono 12/12. Display line-height 1.08–1.2 and tracking −0.07 to −0.04em, weight 700–800. Body line-height 1.6–1.75, regular weight; labels 700 with expanded tracking. `font-display` should swap when self-hosted. Keep lines readable and contrast WCAG AA for functional text.
+Type scale (desktop/mobile classes in `globals.css`):
+- `display-xl`: 82px / 54px, line-height 1.08, tracking -0.05em
+- `display-lg`: 68px / 44px, line-height 1.12, tracking -0.04em
+- `display-md`: 52px / 36px, line-height 1.16, tracking -0.03em
+- `display-sm`: 38px / 28px, line-height 1.20, tracking -0.02em
+- `h1`: 59px / 40px, line-height 1.12, weight 800
+- `h2`: 43px / 32px, line-height 1.18, weight 700
+- `h3`: 23px / 22px, line-height 1.25, weight 700
+- `h4`: 19px / 18px, line-height 1.30, weight 700
+- `body-lg`: 18px / 17px, line-height 1.65, weight 400
+- `body`: 16px / 16px, line-height 1.70, weight 400
+- `body-sm`: 14px / 14px, line-height 1.60, weight 400
+- `caption`: 12px / 12px, line-height 1.50, weight 500
+- `label`: 11px / 11px, line-height 1.40, weight 700, tracking 0.08em uppercase
+- `mono`: 12px / 12px, line-height 1.50, family monospace
 
 ## Components
 
-`packages/ui` currently exports Button, Input, Textarea, Badge, Card, PageHeader, SectionHeader and EmptyState. Add accessible primitives when a real interaction needs them. Future: select, checkbox, radio, switch, avatar, dialog/modal, dropdown, tooltip, tabs, table/data shell, pagination, breadcrumb, command palette shell, sidebar, top nav, error/loading/skeleton, toast, search/filter, stat/candidate/job/match shells. Use semantic HTML, visible focus states and keyboard behavior; do not create decorative pseudo-controls.
+`packages/ui` (`@executive-match/ui`) exports accessible, modular primitives:
+- **Buttons**: `Button` (primary, secondary, subtle, outline, ghost, danger; sm, md, lg; loading state), `IconButton`.
+- **Forms & Inputs**: `Input`, `SearchInput` (with reset clear), `Textarea`, `Select`, `MultiSelect`.
+- **Controls**: `Checkbox`, `RadioGroup`, `Switch`.
+- **Badges**: `Badge` (neutral, brand, success, warning, danger, accent), `SkillBadge`, `ApplicationStatusBadge`, `PipelineStageBadge`.
+- **Cards**: `Card` (compound slots: Header, Title, Description, Content, Footer), `StatCard` (trend indicators).
+- **Avatars**: `Avatar` (initials fallback, presence status), `AvatarGroup`.
+- **Modals & Drawers**: `Dialog` (accessible keyboard/backdrop modal), `Sheet` (side drawer).
+- **Popovers & Menus**: `Dropdown`, `Tooltip`, `Popover`.
+- **Navigation**: `Tabs`, `Breadcrumb`, `Pagination`.
+- **Feedback & States**: `Skeleton`, `EmptyState`, `ErrorState`, `LoadingState`, `Toast`.
+- **Data Display**: `Table` (primitives: Header, Body, Row, Head, Cell), `DataTable`.
+- **Layout Headers**: `PageHeader`, `SectionHeader`, `FilterBar`.
+- **Recruitment Domain Cards**: `CandidateCard`, `JobCard`, `CompanyCard`, `MatchScore`, `ProfileCompletion`.
+
