@@ -1,5 +1,25 @@
 # Changelog
  
+## 2026-10-04 — Phase 3: Candidate profiles & signed object storage resume pipeline
+
+- Expanded `packages/database/prisma/schema.prisma` with `ResumeParsingStatus` enum and models: `CandidateExperience`, `CandidateEducation`, `CandidateSkill`, and `CandidateResume` with indexing and cascade constraints. Updated `CandidateProfile` with headline, bio, location, years of experience, contact URLs, and search visibility. Regenerated Prisma Client v6.19.3.
+- Added candidate validation schemas in `packages/validation`: `UpdateCandidateProfileSchema`, `CreateCandidateExperienceSchema`, `UpdateCandidateExperienceSchema`, `CreateCandidateEducationSchema`, `UpdateCandidateEducationSchema`, `AddCandidateSkillSchema`, `RequestResumeUploadSchema`, and `ConfirmResumeUploadSchema` with 16 comprehensive unit tests.
+- Implemented object storage providers in `@executive-match/storage`: `MemoryStorageProvider` and `LocalStorageProvider` with HMAC-signed upload/download URLs, TTL verification, and delete operations. Unit test suite added in `packages/storage/src/index.test.ts`.
+- Created NestJS `StorageModule` (`apps/api/src/platform/storage.module.ts`) providing injectable `OBJECT_STORAGE`.
+- Built `CandidatesModule` (`apps/api/src/modules/candidates.module.ts`) with `CandidatesController` and `CandidatesService`:
+  - `GET /candidates/me` and `PATCH /candidates/me` for profile lifecycle.
+  - CRUD operations for work experiences, educations, and skills with candidate ownership verification.
+  - Two-phase secure resume upload: `POST /candidates/me/resumes/upload-url` (generates signed URL, 10MB limit, PDF/DOCX only) and `POST /candidates/me/resumes/confirm`.
+  - Resume management: `GET /candidates/me/resumes`, `PATCH /candidates/me/resumes/:id/primary`, `DELETE /candidates/me/resumes/:id` (removes from storage provider and database), and `GET /candidates/me/resumes/:id/download`.
+  - Full test suite in `apps/api/src/modules/candidates.service.test.ts` (9 tests passing).
+- Built frontend candidate experiences in `apps/web`:
+  - `CandidateProfileForm` (`candidate-profile-form.tsx`): interactive profile editor for work history, education history, and skills.
+  - `CandidateResumeManager` (`candidate-resume-manager.tsx`): drag-and-drop resume uploader with primary toggle, signed download, and status indicators.
+  - Updated `/candidate` dashboard with profile strength scoring, stat cards, and primary resume status.
+  - Wired routes in `/candidate/[section]/page.tsx` for `profile` and `resume`.
+- Recorded ADR-016 in `brain/21-DECISIONS.md`.
+- Verified quality gates across all 14 packages: 52 tests passing, zero ESLint errors, clean typecheck, and full Next.js/NestJS production builds.
+
 ## 2026-10-04 — Phase 2: Authentication, RBAC, workspace tenancy & invitations
  
 - Added `EmailVerificationToken`, `PasswordResetToken`, and `WorkspaceInvitation` models to `packages/database/prisma/schema.prisma` with SHA-256 token hashing, expiration indexing, and relations. Regenerated Prisma Client v6.19.3.

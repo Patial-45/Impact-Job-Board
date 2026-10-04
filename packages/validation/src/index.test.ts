@@ -9,6 +9,12 @@ import {
   CreateWorkspaceSchema,
   InviteMemberSchema,
   UpdateMemberRoleSchema,
+  UpdateCandidateProfileSchema,
+  CreateCandidateExperienceSchema,
+  CreateCandidateEducationSchema,
+  AddCandidateSkillSchema,
+  RequestResumeUploadSchema,
+  ConfirmResumeUploadSchema,
 } from './index';
 
 describe('validation - Authentication schemas', () => {
@@ -81,4 +87,113 @@ describe('validation - Workspace and Member schemas', () => {
     expect(UpdateMemberRoleSchema.safeParse({ role: 'VIEWER' }).success).toBe(true);
   });
 });
+
+describe('validation - Candidate Profile and Resume schemas', () => {
+  it('validates candidate profile updates', () => {
+    expect(
+      UpdateCandidateProfileSchema.safeParse({
+        headline: 'Staff Software Engineer',
+        yearsOfExperience: 8,
+        websiteUrl: 'https://example.com',
+        githubUrl: 'https://github.com/developer',
+        searchVisible: true,
+      }).success,
+    ).toBe(true);
+
+    expect(
+      UpdateCandidateProfileSchema.safeParse({
+        websiteUrl: 'not-a-url',
+      }).success,
+    ).toBe(false);
+  });
+
+  it('validates candidate work experience', () => {
+    expect(
+      CreateCandidateExperienceSchema.safeParse({
+        companyName: 'Acme Systems',
+        title: 'Senior Engineer',
+        startDate: '2022-01-01T00:00:00.000Z',
+        isCurrent: true,
+        description: 'Led architecture and migrations.',
+      }).success,
+    ).toBe(true);
+
+    expect(
+      CreateCandidateExperienceSchema.safeParse({
+        companyName: '',
+        title: 'Senior Engineer',
+        startDate: 'invalid-date',
+      }).success,
+    ).toBe(false);
+  });
+
+  it('validates candidate education', () => {
+    expect(
+      CreateCandidateEducationSchema.safeParse({
+        institution: 'Stanford University',
+        degree: 'Bachelor of Science',
+        fieldOfStudy: 'Computer Science',
+        startDate: '2016-09-01T00:00:00.000Z',
+        endDate: '2020-06-15T00:00:00.000Z',
+      }).success,
+    ).toBe(true);
+  });
+
+  it('validates candidate skills', () => {
+    expect(
+      AddCandidateSkillSchema.safeParse({
+        name: 'TypeScript',
+        yearsOfExperience: 5,
+        isPrimary: true,
+      }).success,
+    ).toBe(true);
+
+    expect(
+      AddCandidateSkillSchema.safeParse({
+        name: '',
+      }).success,
+    ).toBe(false);
+  });
+
+  it('validates resume upload requests and size/format limits', () => {
+    expect(
+      RequestResumeUploadSchema.safeParse({
+        fileName: 'resume.pdf',
+        mimeType: 'application/pdf',
+        fileSize: 1024 * 1024,
+      }).success,
+    ).toBe(true);
+
+    // Rejects unsupported mime types (e.g. image/png or exe)
+    expect(
+      RequestResumeUploadSchema.safeParse({
+        fileName: 'malicious.exe',
+        mimeType: 'application/x-msdownload',
+        fileSize: 1024,
+      }).success,
+    ).toBe(false);
+
+    // Rejects files exceeding 10MB
+    expect(
+      RequestResumeUploadSchema.safeParse({
+        fileName: 'huge.pdf',
+        mimeType: 'application/pdf',
+        fileSize: 15 * 1024 * 1024,
+      }).success,
+    ).toBe(false);
+  });
+
+  it('validates resume upload confirmation', () => {
+    expect(
+      ConfirmResumeUploadSchema.safeParse({
+        fileKey: 'resumes/cand-123/uuid.pdf',
+        fileName: 'resume.pdf',
+        mimeType: 'application/pdf',
+        fileSize: 50000,
+        setAsPrimary: true,
+      }).success,
+    ).toBe(true);
+  });
+});
+
 

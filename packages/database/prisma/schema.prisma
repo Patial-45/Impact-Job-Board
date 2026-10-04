@@ -124,14 +124,103 @@ model Company {
 }
 
 model CandidateProfile {
-  id        String   @id @default(uuid()) @db.Uuid
-  userId    String   @unique @map("user_id") @db.Uuid
-  headline  String?  @db.VarChar(180)
-  createdAt DateTime @default(now()) @map("created_at")
-  updatedAt DateTime @updatedAt @map("updated_at")
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  id                String                @id @default(uuid()) @db.Uuid
+  userId            String                @unique @map("user_id") @db.Uuid
+  headline          String?               @db.VarChar(180)
+  bio               String?               @db.Text
+  location          String?               @db.VarChar(120)
+  yearsOfExperience Int?                  @map("years_of_experience")
+  phone             String?               @db.VarChar(40)
+  websiteUrl        String?               @map("website_url") @db.VarChar(256)
+  linkedinUrl       String?               @map("linkedin_url") @db.VarChar(256)
+  githubUrl         String?               @map("github_url") @db.VarChar(256)
+  searchVisible     Boolean               @default(true) @map("search_visible")
+  openToRemote      Boolean               @default(true) @map("open_to_remote")
+  createdAt         DateTime              @default(now()) @map("created_at")
+  updatedAt         DateTime              @updatedAt @map("updated_at")
+  user              User                  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  experiences       CandidateExperience[]
+  educations        CandidateEducation[]
+  skills            CandidateSkill[]
+  resumes           CandidateResume[]
 
   @@map("candidate_profiles")
+}
+
+model CandidateExperience {
+  id                 String           @id @default(uuid()) @db.Uuid
+  candidateProfileId String           @map("candidate_profile_id") @db.Uuid
+  companyName        String           @map("company_name") @db.VarChar(160)
+  title              String           @db.VarChar(160)
+  location           String?          @db.VarChar(120)
+  startDate          DateTime         @map("start_date")
+  endDate            DateTime?        @map("end_date")
+  isCurrent          Boolean          @default(false) @map("is_current")
+  description        String?          @db.Text
+  createdAt          DateTime         @default(now()) @map("created_at")
+  updatedAt          DateTime         @updatedAt @map("updated_at")
+  candidateProfile   CandidateProfile @relation(fields: [candidateProfileId], references: [id], onDelete: Cascade)
+
+  @@index([candidateProfileId, startDate])
+  @@map("candidate_experiences")
+}
+
+model CandidateEducation {
+  id                 String           @id @default(uuid()) @db.Uuid
+  candidateProfileId String           @map("candidate_profile_id") @db.Uuid
+  institution        String           @db.VarChar(160)
+  degree             String           @db.VarChar(120)
+  fieldOfStudy       String?          @map("field_of_study") @db.VarChar(120)
+  startDate          DateTime         @map("start_date")
+  endDate            DateTime?        @map("end_date")
+  description        String?          @db.Text
+  createdAt          DateTime         @default(now()) @map("created_at")
+  updatedAt          DateTime         @updatedAt @map("updated_at")
+  candidateProfile   CandidateProfile @relation(fields: [candidateProfileId], references: [id], onDelete: Cascade)
+
+  @@index([candidateProfileId, startDate])
+  @@map("candidate_educations")
+}
+
+model CandidateSkill {
+  id                 String           @id @default(uuid()) @db.Uuid
+  candidateProfileId String           @map("candidate_profile_id") @db.Uuid
+  name               String           @db.VarChar(80)
+  yearsOfExperience  Int?             @map("years_of_experience")
+  isPrimary          Boolean          @default(false) @map("is_primary")
+  createdAt          DateTime         @default(now()) @map("created_at")
+  updatedAt          DateTime         @updatedAt @map("updated_at")
+  candidateProfile   CandidateProfile @relation(fields: [candidateProfileId], references: [id], onDelete: Cascade)
+
+  @@unique([candidateProfileId, name])
+  @@map("candidate_skills")
+}
+
+enum ResumeParsingStatus {
+  PENDING
+  PROCESSING
+  COMPLETED
+  FAILED
+}
+
+model CandidateResume {
+  id                 String              @id @default(uuid()) @db.Uuid
+  candidateProfileId String              @map("candidate_profile_id") @db.Uuid
+  fileName           String              @map("file_name") @db.VarChar(255)
+  fileKey            String              @map("file_key") @db.VarChar(512)
+  fileSize           Int                 @map("file_size")
+  mimeType           String              @map("mime_type") @db.VarChar(100)
+  isPrimary          Boolean             @default(true) @map("is_primary")
+  parsedText         String?             @map("parsed_text") @db.Text
+  parsedData         Json?               @map("parsed_data")
+  parsingStatus      ResumeParsingStatus @default(PENDING) @map("parsing_status")
+  errorMessage       String?             @map("error_message") @db.Text
+  createdAt          DateTime            @default(now()) @map("created_at")
+  updatedAt          DateTime            @updatedAt @map("updated_at")
+  candidateProfile   CandidateProfile    @relation(fields: [candidateProfileId], references: [id], onDelete: Cascade)
+
+  @@index([candidateProfileId, isPrimary])
+  @@map("candidate_resumes")
 }
 
 model Job {

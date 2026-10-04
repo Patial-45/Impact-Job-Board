@@ -1,9 +1,13 @@
 import { notFound } from 'next/navigation';
 import { ShellPage } from '@/components/shell-page';
+import { getCandidateProfile } from '@/lib/api';
+import { CandidateProfileForm } from '@/components/candidate-profile-form';
+import { CandidateResumeManager } from '@/components/candidate-resume-manager';
+
 const pages: Record<string, { title: string; description: string }> = {
   profile: {
     title: 'Your profile',
-    description: 'Present your experience and goals in one place.',
+    description: 'Present your experience, education, skills, and goals in one place.',
   },
   jobs: { title: 'Discover jobs', description: 'Relevant opportunities will appear here.' },
   applications: {
@@ -13,10 +17,30 @@ const pages: Record<string, { title: string; description: string }> = {
   saved: { title: 'Saved jobs', description: 'Keep interesting opportunities close.' },
   resume: {
     title: 'Your resume',
-    description: 'Manage resume versions when uploads become available.',
+    description: 'Manage resume versions with private, secured object storage.',
   },
   settings: { title: 'Account settings', description: 'Manage your account preferences.' },
 };
+
+const fallbackProfile = {
+  id: '',
+  userId: '',
+  headline: '',
+  bio: '',
+  location: '',
+  yearsOfExperience: null,
+  phone: '',
+  websiteUrl: '',
+  linkedinUrl: '',
+  githubUrl: '',
+  searchVisible: true,
+  openToRemote: true,
+  experiences: [],
+  educations: [],
+  skills: [],
+  resumes: [],
+};
+
 export default async function CandidateSection({
   params,
 }: {
@@ -25,5 +49,39 @@ export default async function CandidateSection({
   const { section } = await params;
   const page = pages[section];
   if (!page) notFound();
+
+  if (section === 'profile') {
+    const profile = (await getCandidateProfile()) || fallbackProfile;
+    return (
+      <div className="space-y-6">
+        <div>
+          <p className="text-xs font-semibold tracking-wider uppercase text-primary mb-1">
+            CANDIDATE PROFILE
+          </p>
+          <h1 className="text-2xl font-bold tracking-tight text-foreground">{page.title}</h1>
+          <p className="text-sm text-muted-foreground">{page.description}</p>
+        </div>
+        <CandidateProfileForm initialProfile={profile} />
+      </div>
+    );
+  }
+
+  if (section === 'resume') {
+    const profile = (await getCandidateProfile()) || fallbackProfile;
+    return (
+      <div className="space-y-6">
+        <div>
+          <p className="text-xs font-semibold tracking-wider uppercase text-primary mb-1">
+            CANDIDATE ASSETS
+          </p>
+          <h1 className="text-2xl font-bold tracking-tight text-foreground">{page.title}</h1>
+          <p className="text-sm text-muted-foreground">{page.description}</p>
+        </div>
+        <CandidateResumeManager initialResumes={profile.resumes || []} />
+      </div>
+    );
+  }
+
   return <ShellPage eyebrow="CANDIDATE" title={page.title} description={page.description} />;
 }
+

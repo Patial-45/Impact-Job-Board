@@ -9,7 +9,9 @@
     "types": ["node"],
     "baseUrl": ".",
     "paths": {
-      "@executive-match/email": ["../../packages/email/src/index.ts"]
+      "@executive-match/email": ["../../packages/email/src/index.ts"],
+      "@executive-match/storage": ["../../packages/storage/src/index.ts"],
+      "@executive-match/shared": ["../../packages/shared/src/index.ts"]
     }
   },
   "include": ["src"]

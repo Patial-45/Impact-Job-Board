@@ -46,3 +46,74 @@ export async function getMyWorkspaces(): Promise<
   }
 }
 
+export type CandidateProfileData = {
+  id: string;
+  userId: string;
+  headline: string | null;
+  bio: string | null;
+  location: string | null;
+  yearsOfExperience: number | null;
+  phone: string | null;
+  websiteUrl: string | null;
+  linkedinUrl: string | null;
+  githubUrl: string | null;
+  searchVisible: boolean;
+  openToRemote: boolean;
+  experiences: Array<{
+    id: string;
+    companyName: string;
+    title: string;
+    location: string | null;
+    startDate: string;
+    endDate: string | null;
+    isCurrent: boolean;
+    description: string | null;
+  }>;
+  educations: Array<{
+    id: string;
+    institution: string;
+    degree: string;
+    fieldOfStudy: string | null;
+    startDate: string;
+    endDate: string | null;
+    description: string | null;
+  }>;
+  skills: Array<{
+    id: string;
+    name: string;
+    yearsOfExperience: number | null;
+    isPrimary: boolean;
+  }>;
+  resumes: Array<{
+    id: string;
+    fileName: string;
+    fileKey: string;
+    fileSize: number;
+    mimeType: string;
+    isPrimary: boolean;
+    parsingStatus: 'PENDING' | 'PROCESSING' | 'COMPLETED' | 'FAILED';
+    createdAt: string;
+  }>;
+  user?: {
+    id: string;
+    email: string;
+    profile?: {
+      displayName: string;
+    };
+  };
+};
+
+export async function getCandidateProfile(): Promise<CandidateProfileData | null> {
+  const cookie = (await cookies()).toString();
+  try {
+    const response = await fetch(`${apiUrl}/candidates/me`, {
+      headers: { cookie },
+      cache: 'no-store',
+    });
+    return response.ok ? await response.json() : null;
+  } catch {
+    return null;
+  }
+}
+
+
