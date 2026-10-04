@@ -15,6 +15,11 @@ import {
   AddCandidateSkillSchema,
   RequestResumeUploadSchema,
   ConfirmResumeUploadSchema,
+  UpdateCompanySchema,
+  JobSlugSchema,
+  CreateJobSchema,
+  UpdateJobStatusSchema,
+  JobQuerySchema,
 } from './index';
 
 describe('validation - Authentication schemas', () => {
@@ -195,5 +200,83 @@ describe('validation - Candidate Profile and Resume schemas', () => {
     ).toBe(true);
   });
 });
+
+describe('validation - Company and Job schemas', () => {
+  it('validates company updates', () => {
+    expect(
+      UpdateCompanySchema.safeParse({
+        name: 'Acme Technologies',
+        website: 'https://acme.tech',
+        industry: 'FinTech',
+        size: '51-200',
+        location: 'San Francisco, CA',
+      }).success,
+    ).toBe(true);
+
+    expect(
+      UpdateCompanySchema.safeParse({
+        website: 'not-a-valid-url',
+      }).success,
+    ).toBe(false);
+  });
+
+  it('validates job slugs', () => {
+    expect(JobSlugSchema.safeParse('staff-software-engineer').success).toBe(true);
+    expect(JobSlugSchema.safeParse('ai_engineer').success).toBe(false);
+    expect(JobSlugSchema.safeParse('invalid--slug').success).toBe(false);
+    expect(JobSlugSchema.safeParse('trailing-').success).toBe(false);
+  });
+
+  it('validates job creation payloads with skills', () => {
+    expect(
+      CreateJobSchema.safeParse({
+        title: 'Senior Backend Engineer',
+        description: 'We are seeking an experienced Go/PostgreSQL engineer.',
+        department: 'Engineering',
+        location: 'New York, NY',
+        remoteType: 'HYBRID',
+        employmentType: 'FULL_TIME',
+        experienceLevel: 'SENIOR',
+        minSalary: 160000,
+        maxSalary: 210000,
+        skills: [
+          { name: 'Go', isRequired: true },
+          { name: 'PostgreSQL', isRequired: true },
+          { name: 'Kubernetes', isRequired: false },
+        ],
+      }).success,
+    ).toBe(true);
+
+    // Rejects too-short descriptions
+    expect(
+      CreateJobSchema.safeParse({
+        title: 'Too short',
+        description: 'short',
+      }).success,
+    ).toBe(false);
+  });
+
+  it('validates job status transitions', () => {
+    expect(UpdateJobStatusSchema.safeParse({ status: 'PUBLISHED' }).success).toBe(true);
+    expect(UpdateJobStatusSchema.safeParse({ status: 'CLOSED' }).success).toBe(true);
+    expect(UpdateJobStatusSchema.safeParse({ status: 'ARCHIVED' }).success).toBe(false);
+  });
+
+  it('validates job search queries with pagination', () => {
+    const parsed = JobQuerySchema.safeParse({
+      query: 'engineer',
+      remoteType: 'REMOTE',
+      page: '2',
+      pageSize: '10',
+    });
+    expect(parsed.success).toBe(true);
+    if (parsed.success) {
+      expect(parsed.data.page).toBe(2);
+      expect(parsed.data.pageSize).toBe(10);
+      expect(parsed.data.remoteType).toBe('REMOTE');
+    }
+  });
+});
+
 
 

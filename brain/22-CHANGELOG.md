@@ -1,5 +1,27 @@
 # Changelog
- 
+
+## 2026-10-04 — Phase 4: Company profile, job requisition management & public discovery board
+
+- Expanded `packages/database/prisma/schema.prisma` with `JobRemoteType`, `JobEmploymentType`, `JobExperienceLevel` enums, `JobSkill` relation model (`[jobId, name]` unique index), and expanded `Company` (website, industry, size, location, bannerKey) and `Job` (department, location, remoteType, employmentType, experienceLevel, salary range, currency, publishedAt, closedAt, and skills relation). Regenerated Prisma Client v6.19.3.
+- Expanded `packages/validation` with `UpdateCompanySchema`, `JobSlugSchema`, `CreateJobSchema`, `UpdateJobSchema`, `UpdateJobStatusSchema`, and `JobQuerySchema` with 5 unit tests (21 tests total in validation suite).
+- Built `JobsModule` (`apps/api/src/modules/jobs.module.ts`) featuring `JobsService`, `WorkspaceJobsController`, `PublicJobsController`, and `PublicCompaniesController`:
+  - `GET /workspaces/:slug/company` and `PATCH /workspaces/:slug/company` for tenant-scoped company profile and branding management.
+  - `POST /workspaces/:slug/jobs` for job creation with slug generation and required/optional skills attachments.
+  - `GET /workspaces/:slug/jobs` and `GET /workspaces/:slug/jobs/:jobSlug` for tenant-scoped job requisition discovery.
+  - `PATCH /workspaces/:slug/jobs/:jobSlug` for updating specifications, salary bands, and skills tags.
+  - `PATCH /workspaces/:slug/jobs/:jobSlug/status` for status lifecycle management (`DRAFT`, `PUBLISHED`, `CLOSED`, `ARCHIVED`) setting transition timestamps (`publishedAt`, `closedAt`).
+  - `DELETE /workspaces/:slug/jobs/:jobSlug` for cascading requisition cleanup.
+  - Public discovery endpoints: `GET /public/jobs` (with keyword, department, location, remoteType, employmentType, experienceLevel, page, and pageSize filtering), `GET /public/jobs/:slug` (with company details and requirements), and `GET /public/companies/:slug` (with public profile and active job openings).
+  - Comprehensive unit test suite in `apps/api/src/modules/jobs.service.test.ts` (7 tests passing).
+- Built frontend experiences in `apps/web`:
+  - `WorkspaceJobs` (`workspace-jobs.tsx`): Employer requisition manager supporting job creation modal with remote policy, compensation bounds, skills tags, status toggle actions, and requisition cards.
+  - Wired into `/workspace/[workspaceSlug]/jobs`.
+  - Public Requisition View (`/jobs/[slug]`): Comprehensive job detail view showing company summary, compensation, employment terms, department, required/preferred skills badges, and application CTA.
+  - Public Company View (`/companies/[slug]`): Company profile display with industry, headquarters, size, and open positions grid.
+  - Updated `/jobs` public discovery directory with real-time API search and filters.
+- Recorded ADR-017 in `brain/21-DECISIONS.md`.
+- Verified quality gates across all 14 packages: 59 tests passing, zero ESLint errors, clean typecheck, and full Next.js/NestJS production builds.
+
 ## 2026-10-04 — Phase 3: Candidate profiles & signed object storage resume pipeline
 
 - Expanded `packages/database/prisma/schema.prisma` with `ResumeParsingStatus` enum and models: `CandidateExperience`, `CandidateEducation`, `CandidateSkill`, and `CandidateResume` with indexing and cascade constraints. Updated `CandidateProfile` with headline, bio, location, years of experience, contact URLs, and search visibility. Regenerated Prisma Client v6.19.3.

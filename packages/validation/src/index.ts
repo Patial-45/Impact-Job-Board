@@ -114,6 +114,64 @@ export const ConfirmResumeUploadSchema = z.object({
   setAsPrimary: z.boolean().default(true),
 });
 
+export const UpdateCompanySchema = z.object({
+  name: z.string().trim().min(2).max(160).optional(),
+  description: z.string().trim().max(5000).optional().nullable(),
+  website: z.string().trim().url().max(256).optional().nullable().or(z.literal('')),
+  industry: z.string().trim().max(100).optional().nullable(),
+  size: z.string().trim().max(50).optional().nullable(),
+  location: z.string().trim().max(160).optional().nullable(),
+  logoKey: z.string().trim().max(512).optional().nullable(),
+  bannerKey: z.string().trim().max(512).optional().nullable(),
+});
+
+export const JobSlugSchema = z
+  .string()
+  .trim()
+  .toLowerCase()
+  .min(3)
+  .max(100)
+  .regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/, 'Slug must consist of lowercase alphanumeric words separated by single hyphens');
+
+export const CreateJobSchema = z.object({
+  title: z.string().trim().min(3).max(180),
+  slug: JobSlugSchema.optional(),
+  description: z.string().trim().min(10).max(50000),
+  department: z.string().trim().max(100).optional().nullable(),
+  location: z.string().trim().max(160).optional().nullable(),
+  remoteType: z.enum(['ONSITE', 'HYBRID', 'REMOTE']).default('REMOTE'),
+  employmentType: z.enum(['FULL_TIME', 'PART_TIME', 'CONTRACT', 'INTERNSHIP']).default('FULL_TIME'),
+  experienceLevel: z.enum(['ENTRY', 'MID', 'SENIOR', 'LEAD', 'EXECUTIVE']).default('MID'),
+  minSalary: z.number().int().nonnegative().optional().nullable(),
+  maxSalary: z.number().int().nonnegative().optional().nullable(),
+  currency: z.string().trim().max(10).default('USD'),
+  skills: z
+    .array(
+      z.object({
+        name: z.string().trim().min(1).max(80),
+        isRequired: z.boolean().default(true),
+      }),
+    )
+    .optional(),
+});
+
+export const UpdateJobSchema = CreateJobSchema.partial();
+
+export const UpdateJobStatusSchema = z.object({
+  status: z.enum(['DRAFT', 'PUBLISHED', 'CLOSED']),
+});
+
+export const JobQuerySchema = z.object({
+  query: z.string().trim().optional(),
+  department: z.string().trim().optional(),
+  remoteType: z.enum(['ONSITE', 'HYBRID', 'REMOTE']).optional(),
+  employmentType: z.enum(['FULL_TIME', 'PART_TIME', 'CONTRACT', 'INTERNSHIP']).optional(),
+  experienceLevel: z.enum(['ENTRY', 'MID', 'SENIOR', 'LEAD', 'EXECUTIVE']).optional(),
+  location: z.string().trim().optional(),
+  page: z.coerce.number().int().positive().default(1),
+  pageSize: z.coerce.number().int().positive().max(100).default(20),
+});
+
 export type RegisterInput = z.infer<typeof RegisterSchema>;
 export type LoginInput = z.infer<typeof LoginSchema>;
 export type VerifyEmailConfirmInput = z.infer<typeof VerifyEmailConfirmSchema>;
@@ -131,5 +189,11 @@ export type UpdateCandidateEducationInput = z.infer<typeof UpdateCandidateEducat
 export type AddCandidateSkillInput = z.infer<typeof AddCandidateSkillSchema>;
 export type RequestResumeUploadInput = z.infer<typeof RequestResumeUploadSchema>;
 export type ConfirmResumeUploadInput = z.infer<typeof ConfirmResumeUploadSchema>;
+export type UpdateCompanyInput = z.infer<typeof UpdateCompanySchema>;
+export type CreateJobInput = z.infer<typeof CreateJobSchema>;
+export type UpdateJobInput = z.infer<typeof UpdateJobSchema>;
+export type UpdateJobStatusInput = z.infer<typeof UpdateJobStatusSchema>;
+export type JobQueryInput = z.infer<typeof JobQuerySchema>;
+
 
 

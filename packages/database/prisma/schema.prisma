@@ -114,7 +114,12 @@ model Company {
   name        String    @db.VarChar(160)
   slug        String    @unique @db.VarChar(80)
   description String?   @db.Text
+  website     String?   @db.VarChar(256)
+  industry    String?   @db.VarChar(100)
+  size        String?   @db.VarChar(50)
+  location    String?   @db.VarChar(160)
   logoKey     String?   @map("logo_key") @db.VarChar(512)
+  bannerKey   String?   @map("banner_key") @db.VarChar(512)
   createdAt   DateTime  @default(now()) @map("created_at")
   updatedAt   DateTime  @updatedAt @map("updated_at")
   deletedAt   DateTime? @map("deleted_at")
@@ -223,27 +228,72 @@ model CandidateResume {
   @@map("candidate_resumes")
 }
 
-model Job {
-  id          String    @id @default(uuid()) @db.Uuid
-  workspaceId String    @map("workspace_id") @db.Uuid
-  slug        String    @db.VarChar(100)
-  title       String    @db.VarChar(180)
-  description String    @db.Text
-  status      JobStatus @default(DRAFT)
-  createdAt   DateTime  @default(now()) @map("created_at")
-  updatedAt   DateTime  @updatedAt @map("updated_at")
-  deletedAt   DateTime? @map("deleted_at")
-  workspace   Workspace @relation(fields: [workspaceId], references: [id], onDelete: Restrict)
+enum JobRemoteType {
+  ONSITE
+  HYBRID
+  REMOTE
+}
 
-  @@unique([workspaceId, slug])
-  @@index([workspaceId, status, createdAt])
-  @@map("jobs")
+enum JobEmploymentType {
+  FULL_TIME
+  PART_TIME
+  CONTRACT
+  INTERNSHIP
+}
+
+enum JobExperienceLevel {
+  ENTRY
+  MID
+  SENIOR
+  LEAD
+  EXECUTIVE
 }
 
 enum JobStatus {
   DRAFT
   PUBLISHED
   CLOSED
+}
+
+model Job {
+  id              String             @id @default(uuid()) @db.Uuid
+  workspaceId     String             @map("workspace_id") @db.Uuid
+  slug            String             @db.VarChar(100)
+  title           String             @db.VarChar(180)
+  description     String             @db.Text
+  department      String?            @db.VarChar(100)
+  location        String?            @db.VarChar(160)
+  remoteType      JobRemoteType      @default(REMOTE) @map("remote_type")
+  employmentType  JobEmploymentType  @default(FULL_TIME) @map("employment_type")
+  experienceLevel JobExperienceLevel @default(MID) @map("experience_level")
+  minSalary       Int?               @map("min_salary")
+  maxSalary       Int?               @map("max_salary")
+  currency        String?            @default("USD") @db.VarChar(10)
+  status          JobStatus          @default(DRAFT)
+  publishedAt     DateTime?          @map("published_at")
+  closedAt        DateTime?          @map("closed_at")
+  createdAt       DateTime           @default(now()) @map("created_at")
+  updatedAt       DateTime           @updatedAt @map("updated_at")
+  deletedAt       DateTime?          @map("deleted_at")
+  workspace       Workspace          @relation(fields: [workspaceId], references: [id], onDelete: Restrict)
+  skills          JobSkill[]
+
+  @@unique([workspaceId, slug])
+  @@index([workspaceId, status, createdAt])
+  @@index([status, publishedAt])
+  @@map("jobs")
+}
+
+model JobSkill {
+  id         String   @id @default(uuid()) @db.Uuid
+  jobId      String   @map("job_id") @db.Uuid
+  name       String   @db.VarChar(80)
+  isRequired Boolean  @default(true) @map("is_required")
+  createdAt  DateTime @default(now()) @map("created_at")
+  job        Job      @relation(fields: [jobId], references: [id], onDelete: Cascade)
+
+  @@unique([jobId, name])
+  @@map("job_skills")
 }
 
 model EmailVerificationToken {

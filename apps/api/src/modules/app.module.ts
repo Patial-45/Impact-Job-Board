@@ -7,6 +7,7 @@ import { StorageModule } from '../platform/storage.module';
 import { AuthModule } from './auth.module';
 import { CandidatesModule } from './candidates.module';
 import { HealthModule } from './health.module';
+import { JobsModule } from './jobs.module';
 import { WorkspacesModule } from './workspaces.module';
 
 @Module({
@@ -18,6 +19,7 @@ import { WorkspacesModule } from './workspaces.module';
     AuthModule,
     CandidatesModule,
     HealthModule,
+    JobsModule,
     WorkspacesModule,
   ],
   providers: [{ provide: APP_GUARD, useClass: ThrottlerGuard }],

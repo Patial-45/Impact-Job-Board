@@ -2,7 +2,7 @@
 
 Last Updated: 2026-10-04
 
-Current Phase: Phase 3 Completed; Beginning Phase 4 — Company and Jobs (Roadmap item 4)
+Current Phase: Phase 4 Completed; Beginning Phase 5 — Applications & ATS Pipeline (Roadmap item 5)
 
 Current Branch: `main` (tracking `origin/main` at `https://github.com/Patial-45/Impact-Job-Board.git`)
 
@@ -11,21 +11,27 @@ Current Branch: `main` (tracking `origin/main` at `https://github.com/Patial-45/
 - All 24 Brain architecture and product documents.
 - pnpm monorepo, Next.js public/protected route structure, NestJS API structure.
 - Toolchain verification passed: `pnpm install`, `pnpm db:generate`, `pnpm lint`, `pnpm typecheck`, `pnpm test`, and `pnpm build`.
-- Prisma schema for identity, workspace tenancy, company, candidate profiles, and jobs.
+- Prisma schema for identity, workspace tenancy, company, candidate profiles, jobs, applications, and pipeline stages.
 - Phase 1 Design System & Public Shells (completed & verified).
 - Phase 2 Authentication, RBAC, Workspace Tenancy & Invitations (completed & verified).
-- Phase 3 Candidate Profiles & Resume Pipeline:
-  - Database Models: `ResumeParsingStatus` enum, `CandidateProfile` expansion (headline, bio, location, years of experience, contact URLs, remote/search flags), `CandidateExperience`, `CandidateEducation`, `CandidateSkill`, and `CandidateResume` with indexing and cascade foreign keys. Prisma Client v6.19.3 regenerated.
-  - Validation: Comprehensive schemas in `@executive-match/validation` for candidate profiles, work experience, education, skills, and resume upload flows (with 16 unit tests).
-  - Object Storage: `@executive-match/storage` with `MemoryStorageProvider` and `LocalStorageProvider` supporting HMAC-signed upload/download URLs, TTL verification, and delete operations (with 4 unit tests).
-  - NestJS API Platform: `StorageModule` providing injectable `OBJECT_STORAGE`, and `CandidatesModule` (`CandidatesController`, `CandidatesService`) with full CRUD for profile, experience, education, skills, two-phase signed resume upload, and resume management (with 9 unit tests).
-  - Frontend Candidate Experiences:
-    - `/candidate` overview dashboard with profile strength calculation, key stat cards, and primary resume preview.
-    - `/candidate/profile` rich interactive form for personal bio, career history, education, and skills tags.
-    - `/candidate/resume` drag-and-drop resume manager with upload progress, signed download, and primary selection.
-  - Quality verification: 52 tests passing, zero ESLint errors across all 14 packages, clean TypeScript compilation, and production Next.js / NestJS builds.
+- Phase 3 Candidate Profiles & Resume Pipeline (completed & verified).
+- Phase 4 Company Profile, Job Requisition Management & Public Discovery:
+  - Database Models: `JobRemoteType`, `JobEmploymentType`, `JobExperienceLevel` enums, `JobSkill` relation model (`[jobId, name]` unique index), expanded `Company` (website, industry, size, location, bannerKey) and `Job` (department, location, remoteType, employmentType, experienceLevel, salary range, currency, publishedAt, closedAt, and skills relation). Prisma Client v6.19.3 regenerated.
+  - Validation: Comprehensive schemas in `@executive-match/validation` for `UpdateCompanySchema`, `JobSlugSchema`, `CreateJobSchema`, `UpdateJobSchema`, `UpdateJobStatusSchema`, and `JobQuerySchema` with 5 unit tests (21 tests total in validation suite).
+  - NestJS API Platform: `JobsModule` (`JobsService`, `WorkspaceJobsController`, `PublicJobsController`, and `PublicCompaniesController`):
+    - Tenant-scoped company profile and branding management (`GET /workspaces/:slug/company`, `PATCH /workspaces/:slug/company`).
+    - Full requisition lifecycle (`POST /workspaces/:slug/jobs`, `GET /workspaces/:slug/jobs`, `GET /workspaces/:slug/jobs/:jobSlug`, `PATCH /workspaces/:slug/jobs/:jobSlug`, `DELETE /workspaces/:slug/jobs/:jobSlug`).
+    - Status transitions (`PATCH /workspaces/:slug/jobs/:jobSlug/status`) supporting `DRAFT`, `PUBLISHED`, `CLOSED`, `ARCHIVED` with timestamps.
+    - Public discovery API (`GET /public/jobs` with filters, `GET /public/jobs/:slug`, `GET /public/companies/:slug`).
+    - Full unit test coverage in `apps/api/src/modules/jobs.service.test.ts` (7 tests passing; 30 API tests total).
+  - Frontend Experiences:
+    - `/workspace/[slug]/jobs` requisition dashboard with job creation modal, remote policy, compensation bounds, skill tag management, and status actions.
+    - `/jobs/[slug]` public requisition details page with company overview, compensation, skills requirements, and apply CTA.
+    - `/companies/[slug]` public employer profile with company meta and active positions list.
+    - Real-time live job queries on `/jobs` directory.
+  - Quality verification: 59 tests passing, zero ESLint errors across all 14 packages, clean TypeScript compilation, and production Next.js / NestJS builds.
 - Initial PostgreSQL migration (`packages/database/prisma/migrations/20260929_init`).
-- Published foundation, Phase 1, and Phase 2 to GitHub: `https://github.com/Patial-45/Impact-Job-Board`.
+- Published foundation, Phase 1, Phase 2, and Phase 3 to GitHub: `https://github.com/Patial-45/Impact-Job-Board`.
 
 ## Partially completed
 
@@ -34,15 +40,16 @@ Current Branch: `main` (tracking `origin/main` at `https://github.com/Patial-45/
 
 ## Not started
 
-Company profile management & branding, job posting CRUD (draft/published/closed), public job boards, applications/ATS, search/matching, interviews, assessments, billing, analytics and integrations.
+Applications & ATS pipeline stage movements, search/matching, interviews, assessments, billing, analytics and integrations.
 
 ## Immediate next tasks
 
-1. Phase 4 (Company and Jobs):
-   - Review `brain/09-EMPLOYER-ATS.md`, `brain/04-DATABASE-SCHEMA.md`, and `brain/05-API-CONTRACTS.md`.
-   - Implement Company Profile CRUD & Branding API (company details, website, size, culture, logo upload via object storage).
-   - Implement Job Management API (`POST /workspaces/:slug/jobs`, `GET /workspaces/:slug/jobs`, `GET /workspaces/:slug/jobs/:jobSlug`, `PATCH /workspaces/:slug/jobs/:jobSlug`, `DELETE /workspaces/:slug/jobs/:jobSlug`) with lifecycle states (`DRAFT`, `PUBLISHED`, `CLOSED`), salary ranges, locations, and required skills.
-   - Implement Public Job Discovery Endpoints (`GET /jobs`, `GET /jobs/:slug`, `GET /companies/:slug`).
-   - Implement Employer Job Dashboard UI (`/workspace/[slug]/jobs`) and public job view (`/jobs/[slug]`).
+1. Phase 5 (Applications & ATS Pipeline):
+   - Review `brain/09-EMPLOYER-ATS.md`, `brain/08-CANDIDATE-PORTAL.md`, `brain/04-DATABASE-SCHEMA.md`, and `brain/05-API-CONTRACTS.md`.
+   - Candidate job application flow: `POST /jobs/:slug/apply` (with resume selection/upload, cover letter, candidate profile link, duplicate application prevention).
+   - Candidate application tracker: `GET /candidates/me/applications` (status, job details, timeline).
+   - Recruiter ATS pipeline: `GET /workspaces/:slug/jobs/:jobSlug/applications`, `GET /workspaces/:slug/applications/:applicationId`, `PATCH /workspaces/:slug/applications/:applicationId/stage` (with audit history `ApplicationStageHistory`), `PATCH /workspaces/:slug/applications/:applicationId/status` (`REJECTED`, `WITHDRAWN`, `HIRED`).
+   - ATS notes and feedback: `POST /workspaces/:slug/applications/:applicationId/notes` and `GET .../notes`.
+   - Build Kanban/Pipeline board UI in `/workspace/[slug]/jobs/[jobSlug]` and candidate applications tracker in `/candidate/applications`.
 
 

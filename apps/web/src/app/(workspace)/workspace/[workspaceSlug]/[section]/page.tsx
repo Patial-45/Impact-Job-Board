@@ -1,6 +1,8 @@
 import { notFound } from 'next/navigation';
 import { ShellPage } from '@/components/shell-page';
 import { WorkspaceTeam } from '@/components/workspace-team';
+import { WorkspaceJobs } from '@/components/workspace-jobs';
+import { getWorkspaceJobs } from '@/lib/api';
 
 const pages: Record<string, { title: string; description: string }> = {
   jobs: { title: 'Jobs', description: 'Create and manage roles for your team.' },
@@ -23,6 +25,20 @@ export default async function WorkspaceSection({
   const { workspaceSlug, section } = await params;
   const page = pages[section];
   if (!page) notFound();
+
+  if (section === 'jobs') {
+    const jobs = await getWorkspaceJobs(workspaceSlug);
+    return (
+      <main className="shell-page">
+        <header className="shell-header" style={{ marginBottom: '32px' }}>
+          <span className="ui-eyebrow">EMPLOYER</span>
+          <h1>Jobs & Postings</h1>
+          <p>Create and manage open positions, requirements, and hiring status.</p>
+        </header>
+        <WorkspaceJobs workspaceSlug={workspaceSlug} initialJobs={jobs} />
+      </main>
+    );
+  }
 
   if (section === 'team') {
     return (

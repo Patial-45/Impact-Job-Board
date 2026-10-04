@@ -1,4 +1,15 @@
-export { PrismaClient, Prisma, GlobalRole, WorkspaceRole, Session, ResumeParsingStatus } from '@prisma/client';
+export {
+  PrismaClient,
+  Prisma,
+  GlobalRole,
+  WorkspaceRole,
+  Session,
+  ResumeParsingStatus,
+  JobStatus,
+  JobRemoteType,
+  JobEmploymentType,
+  JobExperienceLevel,
+} from '@prisma/client';
 export type {
   User,
   UserProfile,
@@ -13,6 +24,9 @@ export type {
   CandidateEducation,
   CandidateSkill,
   CandidateResume,
+  Job,
+  JobSkill,
 } from '@prisma/client';
+
 
 

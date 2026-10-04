@@ -116,4 +116,114 @@ export async function getCandidateProfile(): Promise<CandidateProfileData | null
   }
 }
 
+export type JobData = {
+  id: string;
+  slug: string;
+  title: string;
+  description: string;
+  department: string | null;
+  location: string | null;
+  remoteType: 'ONSITE' | 'HYBRID' | 'REMOTE';
+  employmentType: 'FULL_TIME' | 'PART_TIME' | 'CONTRACT' | 'INTERNSHIP';
+  experienceLevel: 'ENTRY' | 'MID' | 'SENIOR' | 'LEAD' | 'EXECUTIVE';
+  minSalary: number | null;
+  maxSalary: number | null;
+  currency: string | null;
+  status?: 'DRAFT' | 'PUBLISHED' | 'CLOSED';
+  publishedAt?: string | null;
+  createdAt?: string;
+  skills: Array<{ id: string; name: string; isRequired: boolean }>;
+  company?: {
+    name: string;
+    slug: string;
+    logoKey: string | null;
+    industry: string | null;
+    location: string | null;
+    description?: string | null;
+    website?: string | null;
+    size?: string | null;
+  };
+};
+
+export type CompanyData = {
+  id: string;
+  name: string;
+  slug: string;
+  description: string | null;
+  website: string | null;
+  industry: string | null;
+  size: string | null;
+  location: string | null;
+  logoKey: string | null;
+  bannerKey: string | null;
+  jobs?: JobData[];
+};
+
+export async function getPublicJobs(params?: Record<string, string>): Promise<{
+  items: JobData[];
+  page: number;
+  pageSize: number;
+  total: number;
+}> {
+  try {
+    const query = new URLSearchParams(params).toString();
+    const response = await fetch(`${apiUrl}/jobs${query ? `?${query}` : ''}`, {
+      next: { revalidate: 10 },
+    });
+    if (!response.ok) return { items: [], page: 1, pageSize: 20, total: 0 };
+    return await response.json();
+  } catch {
+    return { items: [], page: 1, pageSize: 20, total: 0 };
+  }
+}
+
+export async function getPublicJob(slug: string): Promise<JobData | null> {
+  try {
+    const response = await fetch(`${apiUrl}/jobs/${encodeURIComponent(slug)}`, {
+      next: { revalidate: 10 },
+    });
+    return response.ok ? await response.json() : null;
+  } catch {
+    return null;
+  }
+}
+
+export async function getPublicCompany(slug: string): Promise<CompanyData | null> {
+  try {
+    const response = await fetch(`${apiUrl}/companies/${encodeURIComponent(slug)}`, {
+      next: { revalidate: 10 },
+    });
+    return response.ok ? await response.json() : null;
+  } catch {
+    return null;
+  }
+}
+
+export async function getWorkspaceCompany(workspaceSlug: string): Promise<CompanyData | null> {
+  const cookie = (await cookies()).toString();
+  try {
+    const response = await fetch(`${apiUrl}/workspaces/${encodeURIComponent(workspaceSlug)}/company`, {
+      headers: { cookie },
+      cache: 'no-store',
+    });
+    return response.ok ? await response.json() : null;
+  } catch {
+    return null;
+  }
+}
+
+export async function getWorkspaceJobs(workspaceSlug: string): Promise<JobData[]> {
+  const cookie = (await cookies()).toString();
+  try {
+    const response = await fetch(`${apiUrl}/workspaces/${encodeURIComponent(workspaceSlug)}/jobs`, {
+      headers: { cookie },
+      cache: 'no-store',
+    });
+    return response.ok ? await response.json() : [];
+  } catch {
+    return [];
+  }
+}
+
+
 

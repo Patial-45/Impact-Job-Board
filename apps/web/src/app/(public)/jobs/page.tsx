@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import { getPublicJobs } from '@/lib/api';
 import {
   Button,
   FilterBar,
@@ -7,10 +8,13 @@ import {
   SearchInput,
 } from '@executive-match/ui';
 
-export default function JobsPage() {
+export default async function JobsPage() {
+  const { items: liveJobs, total } = await getPublicJobs();
+
   const sampleRoles = [
     {
       id: '1',
+      slug: 'principal-systems-architect',
       title: 'Principal Systems Architect',
       companyName: 'Vertex Infrastructure',
       location: 'Remote · US',
@@ -21,6 +25,7 @@ export default function JobsPage() {
     },
     {
       id: '2',
+      slug: 'staff-full-stack-engineer',
       title: 'Staff Full Stack Engineer',
       companyName: 'Helios Data Platforms',
       location: 'New York, NY (Hybrid)',
@@ -31,6 +36,7 @@ export default function JobsPage() {
     },
     {
       id: '3',
+      slug: 'head-of-engineering-operations',
       title: 'Head of Engineering Operations',
       companyName: 'AeroScale Technologies',
       location: 'San Francisco, CA',
@@ -40,6 +46,8 @@ export default function JobsPage() {
       skills: ['Technical Leadership', 'SOC 2', 'DevOps', 'Scaling'],
     },
   ];
+
+  const hasLiveJobs = liveJobs.length > 0;
 
   return (
     <main className="container simple-page">
@@ -57,30 +65,64 @@ export default function JobsPage() {
       <FilterBar
         searchSlot={<SearchInput placeholder="Search roles, tech stack, or companies…" />}
         actionSlot={
-          <span className="text-caption">Showing {sampleRoles.length} curated opportunities</span>
+          <span className="text-caption">
+            Showing {hasLiveJobs ? total : sampleRoles.length} curated opportunities
+          </span>
         }
       />
 
       <div style={{ display: 'grid', gap: '20px', marginTop: '24px' }}>
-        {sampleRoles.map((role) => (
-          <JobCard
-            key={role.id}
-            title={role.title}
-            companyName={role.companyName}
-            location={role.location}
-            type={role.type}
-            salary={role.salary}
-            postedAt={role.postedAt}
-            skills={role.skills}
-            actionSlot={
-              <Link href="/register">
-                <Button variant="secondary" size="sm">
-                  View Alignment ↗
-                </Button>
-              </Link>
-            }
-          />
-        ))}
+        {hasLiveJobs ? (
+          liveJobs.map((job) => (
+            <JobCard
+              key={job.id}
+              title={job.title}
+              companyName={job.company?.name || 'Confidential'}
+              location={job.location || 'Remote'}
+              type={
+                job.remoteType === 'ONSITE'
+                  ? 'On-site'
+                  : job.remoteType === 'HYBRID'
+                  ? 'Hybrid'
+                  : 'Remote'
+              }
+              salary={
+                job.minSalary && job.maxSalary
+                  ? `$${job.minSalary.toLocaleString()} - $${job.maxSalary.toLocaleString()}`
+                  : undefined
+              }
+              postedAt={job.publishedAt ? new Date(job.publishedAt).toLocaleDateString() : 'Recent'}
+              skills={job.skills.map((s) => s.name)}
+              actionSlot={
+                <Link href={`/jobs/${job.slug}`}>
+                  <Button variant="secondary" size="sm">
+                    View Requisition ↗
+                  </Button>
+                </Link>
+              }
+            />
+          ))
+        ) : (
+          sampleRoles.map((role) => (
+            <JobCard
+              key={role.id}
+              title={role.title}
+              companyName={role.companyName}
+              location={role.location}
+              type={role.type}
+              salary={role.salary}
+              postedAt={role.postedAt}
+              skills={role.skills}
+              actionSlot={
+                <Link href="/register">
+                  <Button variant="secondary" size="sm">
+                    View Alignment ↗
+                  </Button>
+                </Link>
+              }
+            />
+          ))
+        )}
       </div>
     </main>
   );
