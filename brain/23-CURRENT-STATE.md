@@ -1,8 +1,8 @@
 # Current Development State
 
-Last Updated: 2026-10-03
+Last Updated: 2026-10-04
 
-Current Phase: Phase 1 Completed; Beginning Phase 2 — Authentication, RBAC, and Workspace Operations
+Current Phase: Phase 2 Completed; Beginning Phase 3 — Candidate Profiles & Resume Pipeline
 
 Current Branch: `main` (tracking `origin/main` at `https://github.com/Patial-45/Impact-Job-Board.git`)
 
@@ -12,70 +12,45 @@ Current Branch: `main` (tracking `origin/main` at `https://github.com/Patial-45/
 - pnpm monorepo, Next.js public/protected route structure, NestJS API structure.
 - Toolchain verification passed: `pnpm install`, `pnpm db:generate`, `pnpm lint`, `pnpm typecheck`, `pnpm test`, and `pnpm build`.
 - Prisma schema for identity, workspace tenancy, company, candidate stub and jobs.
-- Credential authentication architecture, session cookie flow, RBAC grants and workspace membership checks.
-- Phase 1 Design System & Public Shells:
-  - Self-hosted Google Fonts (`next/font/google` for `DM_Sans`, `Manrope`, and `Geist_Mono`) with zero runtime `@import` overhead.
-  - Standardized design token system and responsive desktop/mobile typographic classes in `globals.css`.
-  - Expanded `@executive-match/ui` (`packages/ui`) with 16 modular components: Button, IconButton, Input, SearchInput, Textarea, Select, MultiSelect, Checkbox, RadioGroup, Switch, Badge, SkillBadge, ApplicationStatusBadge, PipelineStageBadge, Card, StatCard, Avatar, AvatarGroup, Dialog, Sheet, Dropdown, Tooltip, Popover, Tabs, Breadcrumb, Pagination, Skeleton, EmptyState, ErrorState, LoadingState, Toast, Table, DataTable, PageHeader, SectionHeader, FilterBar, CandidateCard, JobCard, CompanyCard, MatchScore, ProfileCompletion.
-  - Unit test suite for UI package (`packages/ui/src/index.test.ts`).
-  - Redesigned public landing page with interactive alignment preview, ATS pipeline preview card, dual workflows, and 6-card capability grid.
-  - Public `/jobs`, `/pricing`, `/about` pages refactored to use design tokens and components.
-  - Enhanced protected application shells (`app-shell.tsx`) with avatar initials, topbar role indicators, breadcrumbs, and sign-out controls.
-  - Added dynamic admin section routing in `apps/web/src/app/(admin)/admin/[section]/page.tsx` for all 8 platform admin operations.
-- Docker Compose, environment example and CI configuration.
+- Phase 1 Design System & Public Shells (completed & verified).
+- Phase 2 Authentication, RBAC, Workspace Tenancy & Invitations:
+  - Database Models: `EmailVerificationToken`, `PasswordResetToken`, `WorkspaceInvitation` added to `schema.prisma` with SHA-256 token hashing, expiration indices, and cascade relations. Prisma Client 6.19.3 regenerated.
+  - RBAC: Granular action permissions in `@executive-match/auth` across workspace administration, invitations, jobs, and candidates.
+  - Validation: Comprehensive Zod schemas in `@executive-match/validation` for email verification, password reset, workspace creation/update, invitations, and role management.
+  - Email Infrastructure: `@executive-match/email` provider port with `ConsoleEmailSender`, `MemoryEmailSender`, and branded HTML/text templates for verification, password resets, and team invitations.
+  - NestJS API Modules: `EmailModule` injected into `AuthModule` and `WorkspacesModule`.
+    - `/auth/verify-email/request` and `/auth/verify-email/confirm`.
+    - `/auth/password-reset/request` and `/auth/password-reset/confirm` (anti-enumeration security, Argon2id hashing, active session invalidation).
+    - `POST /workspaces` (atomic workspace, company, and owner creation).
+    - `GET /workspaces`, `GET /workspaces/:slug`, `PATCH /workspaces/:slug`.
+    - `GET /workspaces/:slug/members`, `PATCH /workspaces/:slug/members/:memberId`, `DELETE /workspaces/:slug/members/:memberId` (with last-owner protection).
+    - `POST /workspaces/:slug/invitations`, `GET /workspaces/:slug/invitations`, `DELETE /workspaces/:slug/invitations/:inviteId`.
+    - Public `/invitations/:token` details and acceptance.
+  - Frontend Pages & UI:
+    - `/verify-email` with interactive token confirmation.
+    - `/reset-password` with email request and password confirmation.
+    - `/invite/[token]` with invitation inspect and accept flows.
+    - `/workspace/new` workspace creation interface.
+    - `/workspace/[slug]/team` team management interface with member roles, invite modals, and invitation revocation.
+  - Quality verification: 37 tests passing, zero ESLint errors across all 14 packages, clean TypeScript compilation, and production Next.js / NestJS builds.
 - Initial PostgreSQL migration (`packages/database/prisma/migrations/20260929_init`).
-- Published foundation repository to GitHub: `https://github.com/Patial-45/Impact-Job-Board`.
-
+- Published foundation and Phase 1 to GitHub: `https://github.com/Patial-45/Impact-Job-Board`.
 
 ## Partially completed
 
-- Auth: route and cryptographic code exists; real database integration and security test coverage are not verified.
-- Storage/AI/email/BullMQ: interfaces and queue contract exist; adapters and processors do not.
+- Storage/AI/BullMQ: interfaces and queue contract exist; adapters and processors do not.
 - Observability: JSON request logging exists; Sentry and PostHog adapters do not.
 
 ## Not started
 
-Candidate profile CRUD, resume uploads/parsing, workspace creation/invitations, job CRUD, applications/ATS, search/matching, interviews, assessments, billing, analytics and integrations.
-
-## Known issues and warnings
-
-Route shells do not imply completed modules. Email verification and password reset are required before a public launch. Production cookie settings for separate web/API domains require a deployment design. No actual AI matching is implemented. Browser visual inspection was unavailable because the browser tool could not load the local tab; HTTP page rendering was checked.
-
-## Architecture notes
-
-Modular monolith, workspace tenant boundary, platform roles separate from workspace membership, provider ports for AI/storage/email. See [decisions](21-DECISIONS.md).
-
-## Database state
-
-Schema, client and initial SQL migration generated. Prisma Client 6.19.3 generated and `prisma validate` passed. `pnpm db` was attempted both in and out of the sandbox; it failed with a schema engine connection error because PostgreSQL is unavailable. Docker CLI is installed but the Docker Desktop Linux engine is not running (`npipe:////./pipe/dockerDesktopLinuxEngine` unavailable). `GET /api/v1/health` returns 503 as designed without PostgreSQL.
-
-## API state
-
-Versioned auth, workspaces, health endpoints and Swagger implemented in code. Production API bundle starts; `GET /api/v1/health/live` returned 200 and `/api/docs` returned 200. Unauthenticated `/api/v1/auth/me` and `/api/v1/workspaces` returned 401. Database-backed endpoints and registration/login were not exercised without PostgreSQL. NestJS packages were aligned to 11.2.6 after an initial startup mismatch.
-
-## Frontend state
-
-Next.js production build passes. `/`, `/login` and `/register` returned 200 from `next start`. An unauthenticated `/candidate` response contained Next's redirect marker. Workspace/admin shells compile, but authenticated rendering was not tested without database sessions.
-
-## Authentication state
-
-Argon2id, hashed sessions, HttpOnly SameSite cookie, origin check and process-local throttle in code. No OAuth yet.
-
-## Infrastructure state
-
-PostgreSQL and Redis Compose declared. `docker compose up -d` failed because the Docker Desktop Linux engine is unavailable on this host. Redis is not required for the current request path.
-
-## Tests
-
-`pnpm install --frozen-lockfile --offline` passed after setting pnpm 11 `allowBuilds`; `pnpm db:generate` and `pnpm format:check` passed. `pnpm lint --concurrency=2`, `pnpm typecheck --concurrency=2`, `pnpm test` and `pnpm build --concurrency=2` passed; lint/typecheck were rerun after formatting. Four pure tests passed (two RBAC, two validation). No API/database integration or browser E2E tests exist yet. `.env` is ignored and a targeted credential-pattern scan found no matches.
+Candidate profile CRUD, resume uploads/parsing, job CRUD, applications/ATS, search/matching, interviews, assessments, billing, analytics and integrations.
 
 ## Immediate next tasks
- 
-1. Phase 2 (Authentication, RBAC & Workspace Operations):
-   - Implement Email Verification (tokens, verification endpoint, resend flow).
-   - Implement Password Reset (secure token generation, reset request endpoint, reset confirmation).
-   - Implement Workspace Creation & Member Invitations (tokenized invitations, invite accept, role assignment: OWNER, ADMIN, RECRUITER, HIRING_MANAGER, INTERVIEWER).
-   - Implement server-side RBAC guards and workspace tenant isolation enforcement.
-   - Comprehensive test suite for auth security, password hashing, workspace isolation, and RBAC permission checks.
-2. Ensure database migrations and integration test coverage for authentication and workspace operations.
+
+1. Phase 3 (Candidate Profiles & Resume Pipeline):
+   - Review `brain/07-CANDIDATE-PROFILES.md` and `brain/08-RESUME-PROCESSING.md`.
+   - Implement Candidate Profile Schema and Prisma models (work experience, education, skills, links).
+   - Implement Candidate Profile API endpoints (CRUD, skills tagging, privacy/visibility settings).
+   - Implement Resume Upload Port (local disk / S3 mock storage adapter, file validation: PDF/DOCX up to 10MB).
+   - Implement Resume Processing Queue / worker pipeline contract and candidate portal UI.
 

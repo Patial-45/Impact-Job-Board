@@ -84,7 +84,14 @@ export function AuthForm({ mode }: { mode: 'login' | 'register' }) {
       <p className="auth-switch">
         {mode === 'login' ? (
           <>
-            New here? <Link href="/register">Create an account</Link>
+            <span>
+              New here? <Link href="/register">Create an account</Link>
+            </span>
+            <span style={{ display: 'block', marginTop: '8px' }}>
+              <Link href="/reset-password" style={{ color: 'var(--muted)', fontSize: '13px' }}>
+                Forgot your password?
+              </Link>
+            </span>
           </>
         ) : (
           <>

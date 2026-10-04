@@ -30,10 +30,13 @@ model User {
   updatedAt     DateTime          @updatedAt @map("updated_at")
   deletedAt     DateTime?         @map("deleted_at")
   profile       UserProfile?
-  accounts      Account[]
-  sessions      Session[]
-  memberships   WorkspaceMember[]
-  candidate     CandidateProfile?
+  accounts                 Account[]
+  sessions                 Session[]
+  memberships              WorkspaceMember[]
+  candidate                CandidateProfile?
+  emailVerificationTokens  EmailVerificationToken[]
+  passwordResetTokens      PasswordResetToken[]
+  sentWorkspaceInvitations WorkspaceInvitation[]    @relation("InvitedByUser")
 
   @@map("users")
 }
@@ -76,15 +79,16 @@ model Session {
 }
 
 model Workspace {
-  id          String            @id @default(uuid()) @db.Uuid
-  slug        String            @unique @db.VarChar(80)
-  name        String            @db.VarChar(160)
-  createdAt   DateTime          @default(now()) @map("created_at")
-  updatedAt   DateTime          @updatedAt @map("updated_at")
-  deletedAt   DateTime?         @map("deleted_at")
+  id          String                @id @default(uuid()) @db.Uuid
+  slug        String                @unique @db.VarChar(80)
+  name        String                @db.VarChar(160)
+  createdAt   DateTime              @default(now()) @map("created_at")
+  updatedAt   DateTime              @updatedAt @map("updated_at")
+  deletedAt   DateTime?             @map("deleted_at")
   company     Company?
   memberships WorkspaceMember[]
   jobs        Job[]
+  invitations WorkspaceInvitation[]
 
   @@map("workspaces")
 }
@@ -152,3 +156,47 @@ enum JobStatus {
   PUBLISHED
   CLOSED
 }
+
+model EmailVerificationToken {
+  id        String   @id @default(uuid()) @db.Uuid
+  userId    String   @map("user_id") @db.Uuid
+  tokenHash String   @unique @map("token_hash") @db.Char(64)
+  expiresAt DateTime @map("expires_at")
+  createdAt DateTime @default(now()) @map("created_at")
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, expiresAt])
+  @@map("email_verification_tokens")
+}
+
+model PasswordResetToken {
+  id        String    @id @default(uuid()) @db.Uuid
+  userId    String    @map("user_id") @db.Uuid
+  tokenHash String    @unique @map("token_hash") @db.Char(64)
+  expiresAt DateTime  @map("expires_at")
+  createdAt DateTime  @default(now()) @map("created_at")
+  usedAt    DateTime? @map("used_at")
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, expiresAt])
+  @@map("password_reset_tokens")
+}
+
+model WorkspaceInvitation {
+  id              String        @id @default(uuid()) @db.Uuid
+  workspaceId     String        @map("workspace_id") @db.Uuid
+  email           String        @db.VarChar(320)
+  role            WorkspaceRole @default(VIEWER)
+  tokenHash       String        @unique @map("token_hash") @db.Char(64)
+  invitedByUserId String        @map("invited_by_user_id") @db.Uuid
+  expiresAt       DateTime      @map("expires_at")
+  createdAt       DateTime      @default(now()) @map("created_at")
+  acceptedAt      DateTime?     @map("accepted_at")
+  revokedAt       DateTime?     @map("revoked_at")
+  workspace       Workspace     @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  invitedBy       User          @relation("InvitedByUser", fields: [invitedByUserId], references: [id], onDelete: Cascade)
+
+  @@index([workspaceId, email])
+  @@map("workspace_invitations")
+}
+

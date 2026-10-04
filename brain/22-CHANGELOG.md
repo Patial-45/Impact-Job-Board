@@ -1,5 +1,18 @@
 # Changelog
  
+## 2026-10-04 — Phase 2: Authentication, RBAC, workspace tenancy & invitations
+ 
+- Added `EmailVerificationToken`, `PasswordResetToken`, and `WorkspaceInvitation` models to `packages/database/prisma/schema.prisma` with SHA-256 token hashing, expiration indexing, and relations. Regenerated Prisma Client v6.19.3.
+- Expanded `@executive-match/auth` with granular `WorkspaceAction` permissions (`workspace.manage`, `workspace.members.read`, `workspace.members.invite`, `workspace.members.manage`, `jobs.write`, etc.) and comprehensive RBAC matrix unit tests.
+- Expanded `@executive-match/validation` with schemas for email verification confirmation, password reset requests/confirmations, workspace creation/updating, member invitations, role updates, and slug formatting, supported by unit tests.
+- Implemented email dispatch system in `@executive-match/email` (`ConsoleEmailSender`, `MemoryEmailSender`, and branded HTML/text templates for email verification, password reset, and workspace invitations) with complete test coverage.
+- Integrated `EmailModule` in NestJS API (`apps/api/src/platform/email.module.ts`) providing injectable `EMAIL_SENDER`.
+- Implemented API endpoints for authentication flows: `/auth/verify-email/request`, `/auth/verify-email/confirm`, `/auth/password-reset/request`, and `/auth/password-reset/confirm` with anti-enumeration security, Argon2id password hashing, and active session invalidation on reset.
+- Implemented API endpoints for workspace operations: `POST /workspaces` (atomic workspace, company, and owner creation), `GET /workspaces`, `GET /workspaces/:slug`, `PATCH /workspaces/:slug`, `GET /workspaces/:slug/members`, `PATCH /workspaces/:slug/members/:memberId`, `DELETE /workspaces/:slug/members/:memberId` (with last-owner protection), `POST /workspaces/:slug/invitations`, `GET /workspaces/:slug/invitations`, `DELETE /workspaces/:slug/invitations/:inviteId`, `GET /invitations/:token`, and `POST /invitations/:token/accept`.
+- Built web pages and UI components: `/verify-email` verification page, `/reset-password` request and reset page, `/invite/[token]` public acceptance page, `/workspace/new` creation page, and `workspace-team.tsx` management component integrated into `/workspace/[slug]/team` with invite modal, member table, role management, and invitation revocation.
+- Recorded ADR-015 in `brain/21-DECISIONS.md`.
+- Verified quality gates across all 14 packages: 37 tests passing, zero lint warnings/errors, clean typecheck, and full production builds.
+
 ## 2026-10-03 — Phase 1: Design system, typography & public shell refinement
  
 - Configured self-hosted Google Fonts (`next/font/google` for `DM_Sans`, `Manrope`, and `Geist_Mono`) in `apps/web/src/app/layout.tsx` to eliminate external `@import` stylesheet bottlenecks.

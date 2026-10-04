@@ -26,3 +26,23 @@ export async function getWorkspace(
     return null;
   }
 }
+
+export async function getMyWorkspaces(): Promise<
+  Array<{ id: string; slug: string; name: string; role: string; joinedAt?: string }>
+> {
+  const cookie = (await cookies()).toString();
+  try {
+    const response = await fetch(`${apiUrl}/workspaces`, {
+      headers: { cookie },
+      cache: 'no-store',
+    });
+    if (!response.ok) return [];
+    const body = (await response.json()) as {
+      items: Array<{ id: string; slug: string; name: string; role: string; joinedAt?: string }>;
+    };
+    return body.items || [];
+  } catch {
+    return [];
+  }
+}
+

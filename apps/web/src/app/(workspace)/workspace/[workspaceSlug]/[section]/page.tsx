@@ -1,5 +1,7 @@
 import { notFound } from 'next/navigation';
 import { ShellPage } from '@/components/shell-page';
+import { WorkspaceTeam } from '@/components/workspace-team';
+
 const pages: Record<string, { title: string; description: string }> = {
   jobs: { title: 'Jobs', description: 'Create and manage roles for your team.' },
   candidates: { title: 'Candidates', description: 'Review candidates within this workspace.' },
@@ -12,13 +14,29 @@ const pages: Record<string, { title: string; description: string }> = {
     description: 'Manage your team and workspace preferences.',
   },
 };
+
 export default async function WorkspaceSection({
   params,
 }: {
-  params: Promise<{ section: string }>;
+  params: Promise<{ workspaceSlug: string; section: string }>;
 }) {
-  const { section } = await params;
+  const { workspaceSlug, section } = await params;
   const page = pages[section];
   if (!page) notFound();
+
+  if (section === 'team') {
+    return (
+      <main className="shell-page">
+        <header className="shell-header" style={{ marginBottom: '32px' }}>
+          <span className="ui-eyebrow">EMPLOYER</span>
+          <h1>Team & Collaboration</h1>
+          <p>Manage workspace members, role permissions, and pending invitations.</p>
+        </header>
+        <WorkspaceTeam workspaceSlug={workspaceSlug} />
+      </main>
+    );
+  }
+
   return <ShellPage eyebrow="EMPLOYER" title={page.title} description={page.description} />;
 }
+

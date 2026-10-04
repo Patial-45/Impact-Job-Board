@@ -6,7 +6,11 @@
     "experimentalDecorators": true,
     "emitDecoratorMetadata": true,
     "noEmit": true,
-    "types": ["node"]
+    "types": ["node"],
+    "baseUrl": ".",
+    "paths": {
+      "@executive-match/email": ["../../packages/email/src/index.ts"]
+    }
   },
   "include": ["src"]
 }
