@@ -9,6 +9,7 @@ export {
   JobRemoteType,
   JobEmploymentType,
   JobExperienceLevel,
+  ApplicationStatus,
 } from '@prisma/client';
 export type {
   User,
@@ -26,6 +27,9 @@ export type {
   CandidateResume,
   Job,
   JobSkill,
+  Application,
+  ApplicationStageHistory,
+  ApplicationNote,
 } from '@prisma/client';
 
 

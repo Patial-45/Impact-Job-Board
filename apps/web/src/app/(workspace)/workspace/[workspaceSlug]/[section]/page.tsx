@@ -1,8 +1,10 @@
+import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { ShellPage } from '@/components/shell-page';
 import { WorkspaceTeam } from '@/components/workspace-team';
 import { WorkspaceJobs } from '@/components/workspace-jobs';
 import { getWorkspaceJobs } from '@/lib/api';
+import { Button, Card, Badge } from '@executive-match/ui';
 
 const pages: Record<string, { title: string; description: string }> = {
   jobs: { title: 'Jobs', description: 'Create and manage roles for your team.' },
@@ -36,6 +38,57 @@ export default async function WorkspaceSection({
           <p>Create and manage open positions, requirements, and hiring status.</p>
         </header>
         <WorkspaceJobs workspaceSlug={workspaceSlug} initialJobs={jobs} />
+      </main>
+    );
+  }
+
+  if (section === 'applications') {
+    const jobs = await getWorkspaceJobs(workspaceSlug);
+    return (
+      <main className="shell-page space-y-6">
+        <header className="shell-header" style={{ marginBottom: '32px' }}>
+          <span className="ui-eyebrow">EMPLOYER ATS</span>
+          <h1>Candidate Pipelines</h1>
+          <p>Select a job requisition to manage stages, review applicant dossiers, and collaborate.</p>
+        </header>
+
+        {jobs.length === 0 ? (
+          <Card className="p-12 text-center border-dashed space-y-3">
+            <h3 className="font-bold text-foreground">No jobs created yet</h3>
+            <p className="text-sm text-muted-foreground">
+              Post a job requisition to begin receiving and tracking candidate applications.
+            </p>
+            <div className="pt-2">
+              <Link href={`/workspace/${workspaceSlug}/jobs`}>
+                <Button variant="primary">Create Job Requisition</Button>
+              </Link>
+            </div>
+          </Card>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {jobs.map((job) => (
+              <Card key={job.id} variant="outline" className="p-5 space-y-4 flex flex-col justify-between">
+                <div className="space-y-1.5">
+                  <div className="flex items-center justify-between">
+                    <Badge variant={job.status === 'PUBLISHED' ? 'success' : 'neutral'}>
+                      {job.status}
+                    </Badge>
+                    <span className="text-xs text-muted-foreground">{job.remoteType}</span>
+                  </div>
+                  <h3 className="text-base font-bold text-foreground">{job.title}</h3>
+                  <p className="text-xs text-muted-foreground">{job.department || 'General'}</p>
+                </div>
+                <div className="pt-2">
+                  <Link href={`/workspace/${workspaceSlug}/jobs/${job.slug}`} className="block">
+                    <Button variant="primary" className="w-full text-xs">
+                      Open ATS Pipeline →
+                    </Button>
+                  </Link>
+                </div>
+              </Card>
+            ))}
+          </div>
+        )}
       </main>
     );
   }

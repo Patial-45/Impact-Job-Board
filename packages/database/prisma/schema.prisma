@@ -37,6 +37,8 @@ model User {
   emailVerificationTokens  EmailVerificationToken[]
   passwordResetTokens      PasswordResetToken[]
   sentWorkspaceInvitations WorkspaceInvitation[]    @relation("InvitedByUser")
+  stageChanges             ApplicationStageHistory[]
+  applicationNotes         ApplicationNote[]
 
   @@map("users")
 }
@@ -89,6 +91,7 @@ model Workspace {
   memberships WorkspaceMember[]
   jobs        Job[]
   invitations WorkspaceInvitation[]
+  applicationNotes ApplicationNote[]
 
   @@map("workspaces")
 }
@@ -148,6 +151,7 @@ model CandidateProfile {
   educations        CandidateEducation[]
   skills            CandidateSkill[]
   resumes           CandidateResume[]
+  applications      Application[]
 
   @@map("candidate_profiles")
 }
@@ -223,6 +227,7 @@ model CandidateResume {
   createdAt          DateTime            @default(now()) @map("created_at")
   updatedAt          DateTime            @updatedAt @map("updated_at")
   candidateProfile   CandidateProfile    @relation(fields: [candidateProfileId], references: [id], onDelete: Cascade)
+  applications       Application[]
 
   @@index([candidateProfileId, isPrimary])
   @@map("candidate_resumes")
@@ -277,6 +282,7 @@ model Job {
   deletedAt       DateTime?          @map("deleted_at")
   workspace       Workspace          @relation(fields: [workspaceId], references: [id], onDelete: Restrict)
   skills          JobSkill[]
+  applications    Application[]
 
   @@unique([workspaceId, slug])
   @@index([workspaceId, status, createdAt])
@@ -294,6 +300,71 @@ model JobSkill {
 
   @@unique([jobId, name])
   @@map("job_skills")
+}
+
+enum ApplicationStatus {
+  SUBMITTED
+  IN_REVIEW
+  INTERVIEWING
+  OFFERED
+  HIRED
+  REJECTED
+  WITHDRAWN
+}
+
+model Application {
+  id                 String                   @id @default(uuid()) @db.Uuid
+  jobId              String                   @map("job_id") @db.Uuid
+  candidateProfileId String                   @map("candidate_profile_id") @db.Uuid
+  resumeId           String?                  @map("resume_id") @db.Uuid
+  status             ApplicationStatus        @default(SUBMITTED)
+  currentStage       String                   @default("APPLIED") @map("current_stage") @db.VarChar(60)
+  coverLetter        String?                  @map("cover_letter") @db.Text
+  rejectedReason     String?                  @map("rejected_reason") @db.VarChar(255)
+  withdrawnReason    String?                  @map("withdrawn_reason") @db.VarChar(255)
+  createdAt          DateTime                 @default(now()) @map("created_at")
+  updatedAt          DateTime                 @updatedAt @map("updated_at")
+  job                Job                      @relation(fields: [jobId], references: [id], onDelete: Cascade)
+  candidateProfile   CandidateProfile         @relation(fields: [candidateProfileId], references: [id], onDelete: Cascade)
+  resume             CandidateResume?         @relation(fields: [resumeId], references: [id], onDelete: SetNull)
+  stageHistory       ApplicationStageHistory[]
+  notes              ApplicationNote[]
+
+  @@unique([jobId, candidateProfileId])
+  @@index([jobId, status, createdAt])
+  @@index([candidateProfileId, createdAt])
+  @@map("applications")
+}
+
+model ApplicationStageHistory {
+  id              String      @id @default(uuid()) @db.Uuid
+  applicationId   String      @map("application_id") @db.Uuid
+  stage           String      @db.VarChar(60)
+  changedByUserId String?     @map("changed_by_user_id") @db.Uuid
+  notes           String?     @db.Text
+  createdAt       DateTime    @default(now()) @map("created_at")
+  application     Application @relation(fields: [applicationId], references: [id], onDelete: Cascade)
+  changedByUser   User?       @relation(fields: [changedByUserId], references: [id], onDelete: SetNull)
+
+  @@index([applicationId, createdAt])
+  @@map("application_stage_histories")
+}
+
+model ApplicationNote {
+  id            String      @id @default(uuid()) @db.Uuid
+  applicationId String      @map("application_id") @db.Uuid
+  workspaceId   String      @map("workspace_id") @db.Uuid
+  authorUserId  String      @map("author_user_id") @db.Uuid
+  content       String      @db.Text
+  createdAt     DateTime    @default(now()) @map("created_at")
+  updatedAt     DateTime    @updatedAt @map("updated_at")
+  application   Application @relation(fields: [applicationId], references: [id], onDelete: Cascade)
+  workspace     Workspace   @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  author        User        @relation(fields: [authorUserId], references: [id], onDelete: Cascade)
+
+  @@index([applicationId, createdAt])
+  @@index([workspaceId, createdAt])
+  @@map("application_notes")
 }
 
 model EmailVerificationToken {

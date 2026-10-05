@@ -74,4 +74,13 @@ Reasoning: Decouples tenant ATS operations from public candidate browsing. Enfor
 Alternatives: Serving public listings directly through authenticated workspace endpoints with public flags; storing skills as raw unindexed JSON arrays.
 Consequence: Public queries use optimized projections; employer updates are strictly validated through tenant scope checks.
 
+## ADR-018 — Application Idempotency, ATS Kanban Pipeline, and Private Recruiter Notes
+
+Decision: Enforce duplicate application prevention via `[jobId, candidateProfileId]` unique database constraint. Application submissions transactionally create the `Application` and initial `ApplicationStageHistory` audit log (`APPLIED`). Candidates can select an existing uploaded resume or profile snapshot, track real-time stage progress (`/candidate/applications`), and withdraw applications (`WITHDRAWN`). Recruiter ATS pipeline operations (`applications.read`, `applications.write`) are scoped to the owning workspace via `WorkspaceAccessService`. Advancing stages appends immutable `ApplicationStageHistory` entries recording the actor and transition notes. Internal collaboration notes (`ApplicationNote`) are strictly workspace-owned and private to tenant members.
+Context: Streamlines high-volume executive recruitment, guarantees audit compliance for stage movements and disqualifications, and provides recruiters with a unified pipeline board without leaking private evaluation notes to candidate surfaces.
+Reasoning: Ensures clean separation of candidate-facing transparency and internal hiring decisions. Prevents stale writes and duplicate applicant records.
+Alternatives: Using a single mutable stage column without historical audit tracking; storing recruiter notes in candidate-accessible payload bodies.
+Consequence: Pipeline stage adjustments require transactional audit appends; applicant dossiers expose presigned resume download URLs on demand.
+
+
 

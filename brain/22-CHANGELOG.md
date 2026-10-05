@@ -1,5 +1,27 @@
 # Changelog
 
+## 2026-10-05 — Phase 5: Applications, candidate tracking & recruiter ATS Kanban pipeline
+
+- Expanded `packages/database/prisma/schema.prisma` with `ApplicationStatus` enum (`SUBMITTED`, `IN_REVIEW`, `INTERVIEWING`, `OFFERED`, `HIRED`, `REJECTED`, `WITHDRAWN`), `Application` model (`[jobId, candidateProfileId]` uniqueness, cascade relationships, and status indexing), `ApplicationStageHistory` model (immutable stage transition audit log with actor ID and notes), and `ApplicationNote` model (private workspace recruiter notes). Regenerated Prisma Client v6.19.3.
+- Expanded `packages/validation` with `ApplyJobSchema`, `UpdateApplicationStageSchema`, `UpdateApplicationStatusSchema`, `WithdrawApplicationSchema`, `CreateApplicationNoteSchema`, and `ApplicationQuerySchema` with 6 unit tests (27 unit tests total in validation suite).
+- Implemented `ApplicationsModule` (`apps/api/src/modules/applications.module.ts`) featuring `ApplicationsService`, `CandidateJobApplicationController`, `CandidateApplicationsController`, and `WorkspaceApplicationsController`:
+  - `POST /jobs/:jobSlug/apply`: Candidate job submission with profile linking, primary resume auto-selection, duplicate submission prevention (409 Conflict), and atomic creation of `Application` and initial `ApplicationStageHistory` (`APPLIED`).
+  - `GET /candidates/me/applications`: Candidate application history list with job details, company branding, and stage progress.
+  - `PATCH /candidates/me/applications/:applicationId/withdraw`: Candidate application withdrawal with optional reason.
+  - `GET /workspaces/:slug/jobs/:jobSlug/applications`: Tenant-isolated ATS pipeline applicant list filterable by stage/status with candidate profiles and resume metadata.
+  - `GET /workspaces/:slug/applications/:applicationId`: Detailed candidate dossier with complete employment/education history, stage transition log, notes, and HMAC-signed resume download URL (15m TTL).
+  - `PATCH /workspaces/:slug/applications/:applicationId/stage`: Advancing candidate stages with automatic status alignment and audit history.
+  - `PATCH /workspaces/:slug/applications/:applicationId/status`: Status changes (`OFFERED`, `HIRED`, `REJECTED`) with rejection reasoning.
+  - `POST /workspaces/:slug/applications/:applicationId/notes` and `GET .../notes`: Private recruiter collaboration notes.
+  - Comprehensive unit test suite in `apps/api/src/modules/applications.service.test.ts` (8 tests passing; 38 API tests total).
+- Built frontend experiences in `apps/web`:
+  - `JobApplyModal` (`job-apply-modal.tsx`): Interactive candidate application modal on `/jobs/[slug]` with resume version selector, cover note pitch, authentication redirection, and duplicate submission handling.
+  - `CandidateApplicationsList` (`candidate-applications-list.tsx`): Candidate application tracker at `/candidate/applications` with progress indicators, overview metric cards, cover letter excerpts, and withdrawal modal.
+  - `AtsPipelineBoard` (`ats-pipeline-board.tsx`): Recruiter Kanban board at `/workspace/[workspaceSlug]/jobs/[jobSlug]` featuring stage columns (`Applied`, `Screening`, `Interview`, `Offer`, `Hired`), search filter, quick stage advancement, rejection modal, candidate dossier drawer, and private team notes.
+  - Requisition selector at `/workspace/[workspaceSlug]/applications`.
+- Recorded ADR-018 in `brain/21-DECISIONS.md`.
+- Verified quality gates across all 14 packages: 67 tests passing, zero ESLint errors, clean typecheck, and full Next.js/NestJS production builds.
+
 ## 2026-10-04 — Phase 4: Company profile, job requisition management & public discovery board
 
 - Expanded `packages/database/prisma/schema.prisma` with `JobRemoteType`, `JobEmploymentType`, `JobExperienceLevel` enums, `JobSkill` relation model (`[jobId, name]` unique index), and expanded `Company` (website, industry, size, location, bannerKey) and `Job` (department, location, remoteType, employmentType, experienceLevel, salary range, currency, publishedAt, closedAt, and skills relation). Regenerated Prisma Client v6.19.3.

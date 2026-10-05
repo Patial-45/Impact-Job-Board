@@ -172,6 +172,36 @@ export const JobQuerySchema = z.object({
   pageSize: z.coerce.number().int().positive().max(100).default(20),
 });
 
+export const ApplyJobSchema = z.object({
+  resumeId: z.string().uuid().optional().nullable(),
+  coverLetter: z.string().trim().max(5000).optional().nullable(),
+});
+
+export const UpdateApplicationStageSchema = z.object({
+  stage: z.string().trim().min(1).max(60),
+  notes: z.string().trim().max(2000).optional().nullable(),
+});
+
+export const UpdateApplicationStatusSchema = z.object({
+  status: z.enum(['SUBMITTED', 'IN_REVIEW', 'INTERVIEWING', 'OFFERED', 'HIRED', 'REJECTED', 'WITHDRAWN']),
+  reason: z.string().trim().max(255).optional().nullable(),
+});
+
+export const WithdrawApplicationSchema = z.object({
+  reason: z.string().trim().max(255).optional().nullable(),
+});
+
+export const CreateApplicationNoteSchema = z.object({
+  content: z.string().trim().min(1, 'Note content cannot be empty').max(5000),
+});
+
+export const ApplicationQuerySchema = z.object({
+  stage: z.string().trim().optional(),
+  status: z.enum(['SUBMITTED', 'IN_REVIEW', 'INTERVIEWING', 'OFFERED', 'HIRED', 'REJECTED', 'WITHDRAWN']).optional(),
+  page: z.coerce.number().int().positive().default(1),
+  pageSize: z.coerce.number().int().positive().max(100).default(20),
+});
+
 export type RegisterInput = z.infer<typeof RegisterSchema>;
 export type LoginInput = z.infer<typeof LoginSchema>;
 export type VerifyEmailConfirmInput = z.infer<typeof VerifyEmailConfirmSchema>;
@@ -194,6 +224,12 @@ export type CreateJobInput = z.infer<typeof CreateJobSchema>;
 export type UpdateJobInput = z.infer<typeof UpdateJobSchema>;
 export type UpdateJobStatusInput = z.infer<typeof UpdateJobStatusSchema>;
 export type JobQueryInput = z.infer<typeof JobQuerySchema>;
+export type ApplyJobInput = z.infer<typeof ApplyJobSchema>;
+export type UpdateApplicationStageInput = z.infer<typeof UpdateApplicationStageSchema>;
+export type UpdateApplicationStatusInput = z.infer<typeof UpdateApplicationStatusSchema>;
+export type WithdrawApplicationInput = z.infer<typeof WithdrawApplicationSchema>;
+export type CreateApplicationNoteInput = z.infer<typeof CreateApplicationNoteSchema>;
+export type ApplicationQueryInput = z.infer<typeof ApplicationQuerySchema>;
 
 
 

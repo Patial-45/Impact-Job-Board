@@ -225,5 +225,153 @@ export async function getWorkspaceJobs(workspaceSlug: string): Promise<JobData[]
   }
 }
 
+export type ApplicationData = {
+  id: string;
+  jobId: string;
+  candidateProfileId: string;
+  resumeId: string | null;
+  status: 'SUBMITTED' | 'IN_REVIEW' | 'INTERVIEWING' | 'OFFERED' | 'HIRED' | 'REJECTED' | 'WITHDRAWN';
+  currentStage: string;
+  coverLetter?: string | null;
+  rejectedReason?: string | null;
+  withdrawnReason?: string | null;
+  createdAt: string;
+  updatedAt: string;
+  job?: {
+    id: string;
+    slug: string;
+    title: string;
+    department?: string | null;
+    location?: string | null;
+    remoteType?: 'ONSITE' | 'HYBRID' | 'REMOTE';
+    employmentType?: string;
+    status?: string;
+    workspace?: {
+      slug: string;
+      company?: {
+        name: string;
+        slug: string;
+        logoKey: string | null;
+      } | null;
+    };
+  };
+  candidateProfile?: {
+    id: string;
+    headline?: string | null;
+    bio?: string | null;
+    location?: string | null;
+    yearsOfExperience?: number | null;
+    openToRemote?: boolean;
+    user?: {
+      email: string;
+      profile?: {
+        displayName?: string | null;
+        avatarKey?: string | null;
+      } | null;
+    };
+    skills?: Array<{ name: string; yearsOfExperience?: number | null; isPrimary: boolean }>;
+    experiences?: Array<{
+      id: string;
+      companyName: string;
+      title: string;
+      startDate: string;
+      endDate?: string | null;
+      isCurrent: boolean;
+      description?: string | null;
+    }>;
+    educations?: Array<{
+      id: string;
+      institution: string;
+      degree: string;
+      fieldOfStudy?: string | null;
+      startDate: string;
+      endDate?: string | null;
+    }>;
+  };
+  resume?: {
+    id: string;
+    fileName: string;
+    fileSize: number;
+    mimeType?: string;
+    parsingStatus?: string;
+  } | null;
+  resumeDownloadUrl?: string | null;
+  _count?: { notes: number };
+  stageHistory?: Array<{
+    id: string;
+    stage: string;
+    notes?: string | null;
+    createdAt: string;
+    changedByUser?: {
+      email: string;
+      profile?: { displayName: string | null } | null;
+    } | null;
+  }>;
+  notes?: Array<{
+    id: string;
+    content: string;
+    createdAt: string;
+    author?: {
+      email: string;
+      profile?: { displayName: string | null } | null;
+    };
+  }>;
+};
+
+export async function getCandidateApplications(): Promise<ApplicationData[]> {
+  const cookie = (await cookies()).toString();
+  try {
+    const response = await fetch(`${apiUrl}/candidates/me/applications`, {
+      headers: { cookie },
+      cache: 'no-store',
+    });
+    if (!response.ok) return [];
+    const data = await response.json();
+    return data.items || [];
+  } catch {
+    return [];
+  }
+}
+
+export async function getJobApplications(
+  workspaceSlug: string,
+  jobSlug: string,
+): Promise<{ items: ApplicationData[]; total: number }> {
+  const cookie = (await cookies()).toString();
+  try {
+    const response = await fetch(
+      `${apiUrl}/workspaces/${encodeURIComponent(workspaceSlug)}/jobs/${encodeURIComponent(jobSlug)}/applications`,
+      {
+        headers: { cookie },
+        cache: 'no-store',
+      },
+    );
+    if (!response.ok) return { items: [], total: 0 };
+    return await response.json();
+  } catch {
+    return { items: [], total: 0 };
+  }
+}
+
+export async function getApplicationDetail(
+  workspaceSlug: string,
+  applicationId: string,
+): Promise<ApplicationData | null> {
+  const cookie = (await cookies()).toString();
+  try {
+    const response = await fetch(
+      `${apiUrl}/workspaces/${encodeURIComponent(workspaceSlug)}/applications/${encodeURIComponent(applicationId)}`,
+      {
+        headers: { cookie },
+        cache: 'no-store',
+      },
+    );
+    return response.ok ? await response.json() : null;
+  } catch {
+    return null;
+  }
+}
+
+
 
 

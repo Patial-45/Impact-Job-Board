@@ -1,8 +1,9 @@
 import { notFound } from 'next/navigation';
 import { ShellPage } from '@/components/shell-page';
-import { getCandidateProfile } from '@/lib/api';
+import { getCandidateProfile, getCandidateApplications } from '@/lib/api';
 import { CandidateProfileForm } from '@/components/candidate-profile-form';
 import { CandidateResumeManager } from '@/components/candidate-resume-manager';
+import { CandidateApplicationsList } from '@/components/candidate-applications-list';
 
 const pages: Record<string, { title: string; description: string }> = {
   profile: {
@@ -78,6 +79,22 @@ export default async function CandidateSection({
           <p className="text-sm text-muted-foreground">{page.description}</p>
         </div>
         <CandidateResumeManager initialResumes={profile.resumes || []} />
+      </div>
+    );
+  }
+
+  if (section === 'applications') {
+    const applications = await getCandidateApplications();
+    return (
+      <div className="space-y-6">
+        <div>
+          <p className="text-xs font-semibold tracking-wider uppercase text-primary mb-1">
+            APPLICATION TRACKER
+          </p>
+          <h1 className="text-2xl font-bold tracking-tight text-foreground">{page.title}</h1>
+          <p className="text-sm text-muted-foreground">{page.description}</p>
+        </div>
+        <CandidateApplicationsList initialApplications={applications} />
       </div>
     );
   }

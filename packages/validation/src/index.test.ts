@@ -20,6 +20,12 @@ import {
   CreateJobSchema,
   UpdateJobStatusSchema,
   JobQuerySchema,
+  ApplyJobSchema,
+  UpdateApplicationStageSchema,
+  UpdateApplicationStatusSchema,
+  WithdrawApplicationSchema,
+  CreateApplicationNoteSchema,
+  ApplicationQuerySchema,
 } from './index';
 
 describe('validation - Authentication schemas', () => {
@@ -274,6 +280,104 @@ describe('validation - Company and Job schemas', () => {
       expect(parsed.data.page).toBe(2);
       expect(parsed.data.pageSize).toBe(10);
       expect(parsed.data.remoteType).toBe('REMOTE');
+    }
+  });
+});
+
+describe('validation - Applications and ATS schemas', () => {
+  it('validates job application submission with optional resume and cover letter', () => {
+    expect(
+      ApplyJobSchema.safeParse({
+        resumeId: '123e4567-e89b-12d3-a456-426614174000',
+        coverLetter: 'I am excited to apply for this position.',
+      }).success,
+    ).toBe(true);
+
+    expect(
+      ApplyJobSchema.safeParse({
+        resumeId: 'not-a-uuid',
+      }).success,
+    ).toBe(false);
+
+    expect(
+      ApplyJobSchema.safeParse({}).success,
+    ).toBe(true);
+  });
+
+  it('validates stage movement in ATS pipeline', () => {
+    expect(
+      UpdateApplicationStageSchema.safeParse({
+        stage: 'INTERVIEW',
+        notes: 'Passed screening assessment successfully.',
+      }).success,
+    ).toBe(true);
+
+    expect(
+      UpdateApplicationStageSchema.safeParse({
+        stage: '',
+      }).success,
+    ).toBe(false);
+  });
+
+  it('validates application status transitions', () => {
+    expect(
+      UpdateApplicationStatusSchema.safeParse({
+        status: 'OFFERED',
+      }).success,
+    ).toBe(true);
+
+    expect(
+      UpdateApplicationStatusSchema.safeParse({
+        status: 'REJECTED',
+        reason: 'Candidate accepted another offer.',
+      }).success,
+    ).toBe(true);
+
+    expect(
+      UpdateApplicationStatusSchema.safeParse({
+        status: 'INVALID_STATUS',
+      }).success,
+    ).toBe(false);
+  });
+
+  it('validates candidate withdrawal', () => {
+    expect(
+      WithdrawApplicationSchema.safeParse({
+        reason: 'Accepted another role.',
+      }).success,
+    ).toBe(true);
+
+    expect(
+      WithdrawApplicationSchema.safeParse({}).success,
+    ).toBe(true);
+  });
+
+  it('validates recruiter application notes', () => {
+    expect(
+      CreateApplicationNoteSchema.safeParse({
+        content: 'Strong executive presence during preliminary call.',
+      }).success,
+    ).toBe(true);
+
+    expect(
+      CreateApplicationNoteSchema.safeParse({
+        content: '',
+      }).success,
+    ).toBe(false);
+  });
+
+  it('validates ATS application queries', () => {
+    const parsed = ApplicationQuerySchema.safeParse({
+      stage: 'INTERVIEW',
+      status: 'IN_REVIEW',
+      page: '1',
+      pageSize: '25',
+    });
+    expect(parsed.success).toBe(true);
+    if (parsed.success) {
+      expect(parsed.data.stage).toBe('INTERVIEW');
+      expect(parsed.data.status).toBe('IN_REVIEW');
+      expect(parsed.data.pageSize).toBe(25);
     }
   });
 });

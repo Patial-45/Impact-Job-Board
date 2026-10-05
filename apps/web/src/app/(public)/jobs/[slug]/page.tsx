@@ -2,6 +2,7 @@ import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { getPublicJob } from '@/lib/api';
 import { Badge, Button, Card } from '@executive-match/ui';
+import { JobApplyModal } from '@/components/job-apply-modal';
 
 export default async function JobDetailPage({
   params,
@@ -63,11 +64,11 @@ export default async function JobDetailPage({
         </div>
 
         <div className="flex items-center gap-3">
-          <Link href={`/login?redirect=/jobs/${encodeURIComponent(job.slug)}`}>
-            <Button variant="primary" size="lg">
-              Apply Now ↗
-            </Button>
-          </Link>
+          <JobApplyModal
+            jobSlug={job.slug}
+            jobTitle={job.title}
+            companyName={company?.name}
+          />
         </div>
       </div>
 

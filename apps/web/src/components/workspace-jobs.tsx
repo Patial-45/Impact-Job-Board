@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 import { Button, Input, Textarea, Card, Badge } from '@executive-match/ui';
 import type { JobData } from '@/lib/api';
 
@@ -360,7 +361,12 @@ export function WorkspaceJobs({
                 )}
               </div>
 
-              <div className="flex items-center gap-2 self-end md:self-auto">
+              <div className="flex items-center gap-2 self-end md:self-auto flex-wrap">
+                <Link href={`/workspace/${workspaceSlug}/jobs/${job.slug}`}>
+                  <Button variant="outline" size="sm">
+                    ATS Pipeline ↗
+                  </Button>
+                </Link>
                 {job.status === 'DRAFT' && (
                   <Button
                     variant="primary"
