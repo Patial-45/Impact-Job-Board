@@ -30,6 +30,8 @@ export type {
   Application,
   ApplicationStageHistory,
   ApplicationNote,
+  SavedJob,
+  SavedCandidate,
 } from '@prisma/client';
 
 

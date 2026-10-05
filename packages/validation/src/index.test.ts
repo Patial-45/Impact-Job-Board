@@ -26,6 +26,8 @@ import {
   WithdrawApplicationSchema,
   CreateApplicationNoteSchema,
   ApplicationQuerySchema,
+  CandidateSearchQuerySchema,
+  SaveCandidateSchema,
 } from './index';
 
 describe('validation - Authentication schemas', () => {
@@ -379,6 +381,40 @@ describe('validation - Applications and ATS schemas', () => {
       expect(parsed.data.status).toBe('IN_REVIEW');
       expect(parsed.data.pageSize).toBe(25);
     }
+  });
+});
+
+describe('validation - Candidate Search & Matching schemas', () => {
+  it('validates recruiter candidate search query params', () => {
+    const parsed = CandidateSearchQuerySchema.safeParse({
+      query: 'kubernetes engineer',
+      skills: 'Go, Terraform',
+      minExperience: '5',
+      maxExperience: '12',
+      location: 'New York',
+      openToRemote: 'true',
+      page: '1',
+      pageSize: '20',
+    });
+
+    expect(parsed.success).toBe(true);
+    if (parsed.success) {
+      expect(parsed.data.minExperience).toBe(5);
+      expect(parsed.data.maxExperience).toBe(12);
+      expect(parsed.data.openToRemote).toBe(true);
+    }
+  });
+
+  it('validates recruiter save candidate notes', () => {
+    expect(
+      SaveCandidateSchema.safeParse({
+        notes: 'Top candidate for VP Infrastructure role.',
+      }).success,
+    ).toBe(true);
+
+    expect(
+      SaveCandidateSchema.safeParse({}).success,
+    ).toBe(true);
   });
 });
 

@@ -372,6 +372,147 @@ export async function getApplicationDetail(
   }
 }
 
+export type CandidateSearchResult = {
+  id: string;
+  headline: string | null;
+  bio: string | null;
+  location: string | null;
+  yearsOfExperience: number | null;
+  openToRemote: boolean;
+  searchVisible: boolean;
+  user?: {
+    id: string;
+    email: string;
+    profile?: {
+      displayName: string | null;
+      avatarKey?: string | null;
+    } | null;
+  };
+  skills: Array<{ id?: string; name: string; yearsOfExperience?: number | null; isPrimary: boolean }>;
+  experiences: Array<{
+    id: string;
+    companyName: string;
+    title: string;
+    startDate: string;
+    endDate: string | null;
+    isCurrent: boolean;
+    description: string | null;
+  }>;
+  educations: Array<{
+    id: string;
+    institution: string;
+    degree: string;
+    fieldOfStudy: string | null;
+    startDate: string;
+    endDate: string | null;
+  }>;
+  isSaved?: boolean;
+  savedCandidateId?: string | null;
+  match?: {
+    overallScore: number;
+    skillsScore: number;
+    experienceScore: number;
+    locationScore: number;
+    matchedSkills: string[];
+    missingSkills: string[];
+    locationCompatible: boolean;
+    summary: string;
+  };
+};
+
+export type CandidateSearchResponse = {
+  items: CandidateSearchResult[];
+  total: number;
+  page: number;
+  pageSize: number;
+};
+
+export type JobMatchItem = {
+  candidate: CandidateSearchResult;
+  match: {
+    overallScore: number;
+    skillsScore: number;
+    experienceScore: number;
+    locationScore: number;
+    matchedSkills: string[];
+    missingSkills: string[];
+    locationCompatible: boolean;
+    summary: string;
+  };
+};
+
+export type SavedJobItem = {
+  id: string;
+  jobId: string;
+  createdAt: string;
+  job: JobData;
+};
+
+export async function searchWorkspaceCandidates(
+  workspaceSlug: string,
+  params?: Record<string, string | number | boolean | undefined>,
+): Promise<CandidateSearchResponse> {
+  const cookie = (await cookies()).toString();
+  try {
+    const cleanParams: Record<string, string> = {};
+    if (params) {
+      Object.entries(params).forEach(([key, val]) => {
+        if (val !== undefined && val !== '') {
+          cleanParams[key] = String(val);
+        }
+      });
+    }
+    const query = new URLSearchParams(cleanParams).toString();
+    const response = await fetch(
+      `${apiUrl}/workspaces/${encodeURIComponent(workspaceSlug)}/candidates/search${query ? `?${query}` : ''}`,
+      {
+        headers: { cookie },
+        cache: 'no-store',
+      },
+    );
+    if (!response.ok) return { items: [], total: 0, page: 1, pageSize: 20 };
+    return await response.json();
+  } catch {
+    return { items: [], total: 0, page: 1, pageSize: 20 };
+  }
+}
+
+export async function getWorkspaceJobMatches(
+  workspaceSlug: string,
+  jobSlug: string,
+): Promise<{ items: JobMatchItem[]; total: number; jobTitle: string }> {
+  const cookie = (await cookies()).toString();
+  try {
+    const response = await fetch(
+      `${apiUrl}/workspaces/${encodeURIComponent(workspaceSlug)}/jobs/${encodeURIComponent(jobSlug)}/matches`,
+      {
+        headers: { cookie },
+        cache: 'no-store',
+      },
+    );
+    if (!response.ok) return { items: [], total: 0, jobTitle: '' };
+    return await response.json();
+  } catch {
+    return { items: [], total: 0, jobTitle: '' };
+  }
+}
+
+export async function getCandidateSavedJobs(): Promise<SavedJobItem[]> {
+  const cookie = (await cookies()).toString();
+  try {
+    const response = await fetch(`${apiUrl}/candidates/me/saved-jobs`, {
+      headers: { cookie },
+      cache: 'no-store',
+    });
+    if (!response.ok) return [];
+    const data = await response.json();
+    return data.items || [];
+  } catch {
+    return [];
+  }
+}
+
+
 
 
 

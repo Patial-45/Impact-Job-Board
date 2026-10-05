@@ -92,6 +92,7 @@ model Workspace {
   jobs        Job[]
   invitations WorkspaceInvitation[]
   applicationNotes ApplicationNote[]
+  savedCandidates  SavedCandidate[]
 
   @@map("workspaces")
 }
@@ -152,6 +153,8 @@ model CandidateProfile {
   skills            CandidateSkill[]
   resumes           CandidateResume[]
   applications      Application[]
+  savedJobs         SavedJob[]
+  savedByWorkspaces SavedCandidate[]
 
   @@map("candidate_profiles")
 }
@@ -283,6 +286,7 @@ model Job {
   workspace       Workspace          @relation(fields: [workspaceId], references: [id], onDelete: Restrict)
   skills          JobSkill[]
   applications    Application[]
+  savedByCandidates SavedJob[]
 
   @@unique([workspaceId, slug])
   @@index([workspaceId, status, createdAt])
@@ -409,4 +413,32 @@ model WorkspaceInvitation {
   @@index([workspaceId, email])
   @@map("workspace_invitations")
 }
+
+model SavedJob {
+  id                 String           @id @default(uuid()) @db.Uuid
+  candidateProfileId String           @map("candidate_profile_id") @db.Uuid
+  jobId              String           @map("job_id") @db.Uuid
+  createdAt          DateTime         @default(now()) @map("created_at")
+  candidateProfile   CandidateProfile @relation(fields: [candidateProfileId], references: [id], onDelete: Cascade)
+  job                Job              @relation(fields: [jobId], references: [id], onDelete: Cascade)
+
+  @@unique([candidateProfileId, jobId])
+  @@index([candidateProfileId, createdAt])
+  @@map("saved_jobs")
+}
+
+model SavedCandidate {
+  id                 String           @id @default(uuid()) @db.Uuid
+  workspaceId        String           @map("workspace_id") @db.Uuid
+  candidateProfileId String           @map("candidate_profile_id") @db.Uuid
+  notes              String?          @db.Text
+  createdAt          DateTime         @default(now()) @map("created_at")
+  workspace          Workspace        @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  candidateProfile   CandidateProfile @relation(fields: [candidateProfileId], references: [id], onDelete: Cascade)
+
+  @@unique([workspaceId, candidateProfileId])
+  @@index([workspaceId, createdAt])
+  @@map("saved_candidates")
+}
+
 

@@ -1,9 +1,10 @@
 import { notFound } from 'next/navigation';
 import { ShellPage } from '@/components/shell-page';
-import { getCandidateProfile, getCandidateApplications } from '@/lib/api';
+import { getCandidateProfile, getCandidateApplications, getCandidateSavedJobs } from '@/lib/api';
 import { CandidateProfileForm } from '@/components/candidate-profile-form';
 import { CandidateResumeManager } from '@/components/candidate-resume-manager';
 import { CandidateApplicationsList } from '@/components/candidate-applications-list';
+import { CandidateSavedJobs } from '@/components/candidate-saved-jobs';
 
 const pages: Record<string, { title: string; description: string }> = {
   profile: {
@@ -95,6 +96,22 @@ export default async function CandidateSection({
           <p className="text-sm text-muted-foreground">{page.description}</p>
         </div>
         <CandidateApplicationsList initialApplications={applications} />
+      </div>
+    );
+  }
+
+  if (section === 'saved') {
+    const savedJobs = await getCandidateSavedJobs();
+    return (
+      <div className="space-y-6">
+        <div>
+          <p className="text-xs font-semibold tracking-wider uppercase text-primary mb-1">
+            SAVED ROLES
+          </p>
+          <h1 className="text-2xl font-bold tracking-tight text-foreground">{page.title}</h1>
+          <p className="text-sm text-muted-foreground">{page.description}</p>
+        </div>
+        <CandidateSavedJobs initialSavedJobs={savedJobs} />
       </div>
     );
   }

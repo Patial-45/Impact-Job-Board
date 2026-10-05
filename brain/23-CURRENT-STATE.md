@@ -2,7 +2,7 @@
 
 Last Updated: 2026-10-04
 
-Current Phase: Phase 5 Completed; Beginning Phase 6 — Search and Matching Foundation (Roadmap item 6)
+Current Phase: Phase 6 Completed; Beginning Phase 7 — AI Matching & Semantic Embeddings (Roadmap item 7)
 
 Current Branch: `main` (tracking `origin/main` at `https://github.com/Patial-45/Impact-Job-Board.git`)
 
@@ -11,31 +11,29 @@ Current Branch: `main` (tracking `origin/main` at `https://github.com/Patial-45/
 - All 24 Brain architecture and product documents.
 - pnpm monorepo, Next.js public/protected route structure, NestJS API structure.
 - Toolchain verification passed: `pnpm install`, `pnpm db:generate`, `pnpm lint`, `pnpm typecheck`, `pnpm test`, and `pnpm build`.
-- Prisma schema for identity, workspace tenancy, company, candidate profiles, jobs, applications, pipeline stage history, and recruiter notes.
+- Prisma schema for identity, workspace tenancy, company, candidate profiles, jobs, applications, pipeline stage history, recruiter notes, and saved candidate/job relations.
 - Phase 1 Design System & Public Shells (completed & verified).
 - Phase 2 Authentication, RBAC, Workspace Tenancy & Invitations (completed & verified).
 - Phase 3 Candidate Profiles & Resume Pipeline (completed & verified).
 - Phase 4 Company Profile, Job Requisition Management & Public Discovery (completed & verified).
-- Phase 5 Applications, Candidate Tracking & Recruiter ATS Kanban Pipeline:
-  - Database Models: `ApplicationStatus` enum, `Application` model (`[jobId, candidateProfileId]` unique index, resume snapshot reference, cascade relations), `ApplicationStageHistory` model (immutable stage audit trail), and `ApplicationNote` model (private workspace recruiter notes). Prisma Client v6.19.3 regenerated.
-  - Validation: Comprehensive schemas in `@executive-match/validation` for `ApplyJobSchema`, `UpdateApplicationStageSchema`, `UpdateApplicationStatusSchema`, `WithdrawApplicationSchema`, `CreateApplicationNoteSchema`, and `ApplicationQuerySchema` with 6 unit tests (27 unit tests total in validation suite).
-  - NestJS API Platform: `ApplicationsModule` (`ApplicationsService`, `CandidateJobApplicationController`, `CandidateApplicationsController`, `WorkspaceApplicationsController`):
-    - Candidate application submission (`POST /jobs/:jobSlug/apply`) with profile linking, primary resume attachment, duplicate application prevention (409 Conflict), and atomic creation of `Application` and initial `ApplicationStageHistory` (`APPLIED`).
-    - Candidate application history list (`GET /candidates/me/applications`) and application withdrawal (`PATCH /candidates/me/applications/:applicationId/withdraw`).
-    - Recruiter ATS pipeline query (`GET /workspaces/:slug/jobs/:jobSlug/applications`) with stage/status filters and pagination.
-    - Candidate dossier retrieval (`GET /workspaces/:slug/applications/:applicationId`) with complete work experience, education, skills, stage audit timeline, internal notes, and HMAC-signed resume download URL (15m TTL).
-    - Stage advancement (`PATCH /workspaces/:slug/applications/:applicationId/stage`) with automated status alignment and audit history appends.
-    - Status changes (`PATCH /workspaces/:slug/applications/:applicationId/status`) with rejection reasoning.
-    - Internal workspace collaboration notes (`POST /workspaces/:slug/applications/:applicationId/notes`, `GET .../notes`).
-    - Full unit test coverage in `apps/api/src/modules/applications.service.test.ts` (8 tests passing; 38 API tests total).
+- Phase 5 Applications, Candidate Tracking & Recruiter ATS Kanban Pipeline (completed & verified).
+- Phase 6 Search and Matching Foundation & Candidate Discovery:
+  - Database Models: `SavedJob` model (`[candidateProfileId, jobId]` unique index, cascade relations) and `SavedCandidate` model (`[workspaceId, candidateProfileId]` unique index, recruiter notes). Prisma Client v6.19.3 regenerated.
+  - Validation: Comprehensive schemas in `@executive-match/validation` for `CandidateSearchQuerySchema` and `SaveCandidateSchema` with 29 unit tests passing in validation suite.
+  - NestJS API Platform: `MatchingModule` (`MatchingService`, `WorkspaceCandidateSearchController`, `WorkspaceJobMatchesController`, `CandidateSavedJobsController`):
+    - Pure deterministic scoring function `calculateJobMatch` weighting required skills (50%), preferred skills (20%), seniority alignment (20%), and location/remote policy (10%). Zero ungrounded or hallucinated scores. Returns full audit breakdown and calibrated summary.
+    - Recruiter candidate discovery API (`GET /workspaces/:slug/candidates/search`) with keyword, skill tags, minimum experience, and remote filters, strictly enforcing candidate privacy via `searchVisible: true`.
+    - Requisition-specific candidate matching (`GET /workspaces/:slug/jobs/:jobSlug/matches`).
+    - Recruiter candidate bookmarking (`POST/DELETE /workspaces/:slug/candidates/:candidateProfileId/save`).
+    - Candidate saved jobs management (`GET/POST/DELETE /candidates/me/saved-jobs`).
+    - Full unit test coverage in `apps/api/src/modules/matching.service.test.ts` (6 tests passing; 44 API tests total).
   - Frontend Experiences:
-    - `/jobs/[slug]` interactive application modal with resume picker, cover note input, login redirect, and success state.
-    - `/candidate/applications` candidate portal tracker with metrics overview, visual pipeline progress bar, and withdrawal modal.
-    - `/workspace/[workspaceSlug]/jobs/[jobSlug]` ATS Kanban board featuring 5 stage columns (`Applied`, `Screening`, `Interview`, `Offer`, `Hired`), search filter, quick stage advancement, rejection modal, candidate dossier drawer, and private team notes.
-    - `/workspace/[workspaceSlug]/applications` pipeline launcher.
-  - Quality verification: 67 tests passing, zero ESLint errors across all 14 packages, clean TypeScript compilation, and production Next.js / NestJS builds.
+    - `/workspace/[workspaceSlug]/candidates`: Recruiter candidate discovery dashboard featuring search inputs, multi-skill tag filters, seniority ranges, remote filters, active requisition match selector, fit score pills, match diagnostic breakdowns, bookmark toggles, and rich talent dossier modals with privacy safeguards.
+    - `/candidate/saved`: Candidate saved roles dashboard with company info, remote badges, salary ranges, direct links, and removal controls.
+    - Extended web API client (`api.ts`) with search, matching, and bookmarking functions and types.
+  - Quality verification: 73 tests passing across all packages, clean TypeScript compilation, zero ESLint errors, and production Next.js / NestJS builds.
 - Initial PostgreSQL migration (`packages/database/prisma/migrations/20260929_init`).
-- Published foundation, Phase 1, Phase 2, Phase 3, and Phase 4 to GitHub: `https://github.com/Patial-45/Impact-Job-Board`.
+- Published foundation, Phase 1, Phase 2, Phase 3, Phase 4, and Phase 5 to GitHub: `https://github.com/Patial-45/Impact-Job-Board`.
 
 ## Partially completed
 
@@ -44,15 +42,15 @@ Current Branch: `main` (tracking `origin/main` at `https://github.com/Patial-45/
 
 ## Not started
 
-Candidate search and matching foundation (Phase 6), AI matching and semantic embeddings (Phase 7), interviews and assessments (Phase 8), billing, analytics and integrations.
+AI matching and semantic embeddings (Phase 7), interviews and assessments (Phase 8), billing, analytics and integrations.
 
 ## Immediate next tasks
 
-1. Phase 6 (Search and Matching Foundation):
-   - Review `brain/07-AI-MATCHING-ENGINE.md`, `brain/08-CANDIDATE-MODULE.md`, `brain/09-EMPLOYER-ATS.md`, `brain/04-DATABASE-SCHEMA.md`, and `brain/05-API-CONTRACTS.md`.
-   - Structured Candidate Search API for recruiters (`GET /workspaces/:slug/candidates/search` with keyword, skills, experience range, location, and remote filters).
-   - Candidate Search Visibility controls (`searchVisible`, `openToRemote`) respecting candidate privacy.
-   - Deterministic skill overlap and match scoring foundation (calculating percentage overlap of required and preferred skills).
-   - Recruiter candidate discovery UI (`/workspace/[workspaceSlug]/candidates`) and candidate profile drawer.
+1. Phase 7 (AI Matching & Semantic Embeddings):
+   - Review `brain/07-AI-MATCHING-ENGINE.md`, `brain/02-SYSTEM-ARCHITECTURE.md`, `brain/03-TECH-STACK.md`, `brain/04-DATABASE-SCHEMA.md`.
+   - Setup pgvector extension or vector embedding contracts in database and `@executive-match/ai`.
+   - Resume and Job requirement structured normalization worker via BullMQ.
+   - Hybrid retrieval combining deterministic keyword filters with semantic vector similarity.
+
 
 

@@ -1,5 +1,23 @@
 # Changelog
 
+## 2026-10-05 — Phase 6: Search and matching foundation & candidate discovery
+
+- Expanded `packages/database/prisma/schema.prisma` with `SavedJob` (`[candidateProfileId, jobId]` uniqueness) and `SavedCandidate` (`[workspaceId, candidateProfileId]` uniqueness) models, and updated `CandidateProfile`, `Job`, and `Workspace` relations. Regenerated Prisma Client v6.19.3.
+- Expanded `packages/validation` with `CandidateSearchQuerySchema` and `SaveCandidateSchema` with unit tests (29 tests passing in validation suite).
+- Built `MatchingModule` (`apps/api/src/modules/matching.module.ts`) featuring `MatchingService`, `WorkspaceCandidateSearchController`, `WorkspaceJobMatchesController`, and `CandidateSavedJobsController`:
+  - Pure deterministic match scoring engine (`calculateJobMatch`) weighting required skills (50%), preferred skills (20%), seniority/experience level alignment (20%), and location/remote compatibility (10%), returning exact audit metrics (`matchedSkills`, `missingSkills`, `experienceScore`, `locationCompatible`) and an explainable summary. Zero uncalibrated or hallucinated LLM scores.
+  - Recruiter candidate discovery API (`GET /workspaces/:slug/candidates/search`) with keyword, skill tags, minimum experience, and remote filters, with privacy boundary enforcing `searchVisible: true`.
+  - Requisition-specific match evaluation (`GET /workspaces/:slug/jobs/:jobSlug/matches`).
+  - Recruiter candidate bookmarking (`POST/DELETE /workspaces/:slug/candidates/:candidateProfileId/save`).
+  - Candidate saved jobs management (`GET/POST/DELETE /candidates/me/saved-jobs`).
+  - Comprehensive unit test coverage in `apps/api/src/modules/matching.service.test.ts` (6 tests passing; 44 API unit tests passing).
+- Built frontend experiences in `apps/web`:
+  - `CandidateSearch` (`candidate-search.tsx`): Recruiter candidate discovery dashboard at `/workspace/[workspaceSlug]/candidates` featuring search inputs, multi-skill tag filters, seniority ranges, remote filters, active requisition match selector, fit score pills, match diagnostic breakdowns, bookmark toggles, and rich talent dossier modals with privacy safeguards.
+  - `CandidateSavedJobs` (`candidate-saved-jobs.tsx`): Candidate bookmark management dashboard at `/candidate/saved` displaying saved roles with company info, remote badges, salary ranges, direct links, and removal controls.
+  - Extended web API client (`api.ts`) with search, matching, and bookmarking functions and types.
+- Recorded ADR-019 in `brain/21-DECISIONS.md`.
+- Verified quality gates across monorepo: 73 unit tests passing, clean typechecks, zero ESLint errors, and full production builds.
+
 ## 2026-10-05 — Phase 5: Applications, candidate tracking & recruiter ATS Kanban pipeline
 
 - Expanded `packages/database/prisma/schema.prisma` with `ApplicationStatus` enum (`SUBMITTED`, `IN_REVIEW`, `INTERVIEWING`, `OFFERED`, `HIRED`, `REJECTED`, `WITHDRAWN`), `Application` model (`[jobId, candidateProfileId]` uniqueness, cascade relationships, and status indexing), `ApplicationStageHistory` model (immutable stage transition audit log with actor ID and notes), and `ApplicationNote` model (private workspace recruiter notes). Regenerated Prisma Client v6.19.3.

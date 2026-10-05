@@ -82,5 +82,15 @@ Reasoning: Ensures clean separation of candidate-facing transparency and interna
 Alternatives: Using a single mutable stage column without historical audit tracking; storing recruiter notes in candidate-accessible payload bodies.
 Consequence: Pipeline stage adjustments require transactional audit appends; applicant dossiers expose presigned resume download URLs on demand.
 
+## ADR-019 — Deterministic Match Scoring Engine, Candidate Search Privacy, and Talent Bookmarking
+
+Decision: Implement an explainable, deterministic match scoring algorithm (`calculateJobMatch`) weighting required skills (50%), preferred skills (20%), seniority/experience level alignment (20%), and location/remote compatibility (10%). Forbid opaque or ungrounded LLM-only match scores. Every match evaluation yields an audit breakdown (`matchedSkills`, `missingSkills`, `experienceScore`, `locationCompatible`) and a human-readable explanation summary.
+Enforce candidate privacy boundaries: Public talent search queries strictly filter by `searchVisible: true`. While recruiters can search headlines, skills, and experience history, raw resume binary downloads remain restricted to candidates who explicitly apply to workspace jobs. Recruiter talent saves (`SavedCandidate` with `[workspaceId, candidateProfileId]` unique index) and candidate job bookmarks (`SavedJob` with `[candidateProfileId, jobId]` unique index) are enforced idempotently via database constraints. All workspace searches and matching operations verify tenant membership and permissions via `WorkspaceAccessService`.
+Context: Phase 6 requires foundational candidate discovery and job matching without premature LLM costs, hallucinations, or non-deterministic rankings.
+Reasoning: Ensures calibrated, auditable hiring evaluations compliant with non-discrimination and explainability guidelines, while respecting candidate privacy.
+Alternatives: Uncalibrated prompt-based LLM rankings; storing saved candidates and jobs as raw JSON columns without referential integrity.
+Consequence: Transparent score explanations are rendered inline in recruiter views; future AI embeddings (Phase 7) can seamlessly augment retrieval while preserving deterministic feature scoring.
+
+
 
 

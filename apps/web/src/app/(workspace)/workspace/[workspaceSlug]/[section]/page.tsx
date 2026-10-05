@@ -3,7 +3,8 @@ import { notFound } from 'next/navigation';
 import { ShellPage } from '@/components/shell-page';
 import { WorkspaceTeam } from '@/components/workspace-team';
 import { WorkspaceJobs } from '@/components/workspace-jobs';
-import { getWorkspaceJobs } from '@/lib/api';
+import { CandidateSearch } from '@/components/candidate-search';
+import { getWorkspaceJobs, searchWorkspaceCandidates } from '@/lib/api';
 import { Button, Card, Badge } from '@executive-match/ui';
 
 const pages: Record<string, { title: string; description: string }> = {
@@ -38,6 +39,32 @@ export default async function WorkspaceSection({
           <p>Create and manage open positions, requirements, and hiring status.</p>
         </header>
         <WorkspaceJobs workspaceSlug={workspaceSlug} initialJobs={jobs} />
+      </main>
+    );
+  }
+
+  if (section === 'candidates') {
+    const [jobs, searchRes] = await Promise.all([
+      getWorkspaceJobs(workspaceSlug),
+      searchWorkspaceCandidates(workspaceSlug),
+    ]);
+
+    return (
+      <main className="shell-page space-y-6">
+        <header className="shell-header" style={{ marginBottom: '32px' }}>
+          <span className="ui-eyebrow">TALENT DISCOVERY</span>
+          <h1>Candidate Search & Matching</h1>
+          <p>
+            Explore verified talent profiles, filter by seniority and skills, and evaluate deterministic match scores
+            against your open requisitions.
+          </p>
+        </header>
+        <CandidateSearch
+          workspaceSlug={workspaceSlug}
+          jobs={jobs}
+          initialCandidates={searchRes.items}
+          initialTotal={searchRes.total}
+        />
       </main>
     );
   }

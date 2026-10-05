@@ -202,6 +202,26 @@ export const ApplicationQuerySchema = z.object({
   pageSize: z.coerce.number().int().positive().max(100).default(20),
 });
 
+export const CandidateSearchQuerySchema = z.object({
+  query: z.string().trim().optional(),
+  skills: z.string().trim().optional(),
+  minExperience: z.coerce.number().int().nonnegative().optional(),
+  maxExperience: z.coerce.number().int().nonnegative().optional(),
+  location: z.string().trim().optional(),
+  openToRemote: z.preprocess((val) => {
+    if (val === 'true' || val === true) return true;
+    if (val === 'false' || val === false) return false;
+    return undefined;
+  }, z.boolean().optional()),
+  jobId: z.string().uuid().optional(),
+  page: z.coerce.number().int().positive().default(1),
+  pageSize: z.coerce.number().int().positive().max(100).default(20),
+});
+
+export const SaveCandidateSchema = z.object({
+  notes: z.string().trim().max(2000).optional().nullable(),
+});
+
 export type RegisterInput = z.infer<typeof RegisterSchema>;
 export type LoginInput = z.infer<typeof LoginSchema>;
 export type VerifyEmailConfirmInput = z.infer<typeof VerifyEmailConfirmSchema>;
@@ -230,6 +250,8 @@ export type UpdateApplicationStatusInput = z.infer<typeof UpdateApplicationStatu
 export type WithdrawApplicationInput = z.infer<typeof WithdrawApplicationSchema>;
 export type CreateApplicationNoteInput = z.infer<typeof CreateApplicationNoteSchema>;
 export type ApplicationQueryInput = z.infer<typeof ApplicationQuerySchema>;
+export type CandidateSearchQueryInput = z.infer<typeof CandidateSearchQuerySchema>;
+export type SaveCandidateInput = z.infer<typeof SaveCandidateSchema>;
 
 
 
