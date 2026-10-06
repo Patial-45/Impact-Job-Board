@@ -91,6 +91,19 @@ Reasoning: Ensures calibrated, auditable hiring evaluations compliant with non-d
 Alternatives: Uncalibrated prompt-based LLM rankings; storing saved candidates and jobs as raw JSON columns without referential integrity.
 Consequence: Transparent score explanations are rendered inline in recruiter views; future AI embeddings (Phase 7) can seamlessly augment retrieval while preserving deterministic feature scoring.
 
+## ADR-020 — Semantic Vector Embeddings, Hybrid Match Scoring, and Source Hash Caching
+
+Decision: Implement semantic vector embeddings and calibrated hybrid matching that blends deterministic feature evaluation (70%) with dense vector cosine similarity (30%). Vector generation is encapsulated in `@executive-match/ai` with zero-overhead deterministic fallbacks (`DeterministicEmbeddingProvider` producing 384-dimensional dense hashing vectors) and standard OpenAI providers (`text-embedding-3-small`). Text documents are serialized reproducibly via `buildCandidateEmbeddingDocument` and `buildJobEmbeddingDocument`. Embeddings are stored in relational tables (`CandidateProfileEmbedding` and `JobEmbedding`) and cached using SHA-256 source content hashing to prevent redundant external API calls and token waste. Hybrid match outcomes are recorded in `MatchResult` with an audit breakdown of overall, skills, semantic, experience, and location scores, accompanied by transparent, audit-ready explanations.
+
+Context: Phase 7 introduces AI semantic matching to complement keyword and Boolean filters with contextual understanding, while strictly avoiding unexplainable "black-box" LLM judgments and ensuring deterministic offline/CI operability.
+
+Reasoning: Grounding 70% of candidate evaluation in verifiable deterministic criteria (skills requirements, seniority alignment, location) ensures defensibility, compliance, and zero hallucinations. Allocating 30% to semantic vector similarity rewards contextual nuance and adjacent experience without allowing vector artifacts to override hard job requirements. Source hashing ensures idempotency and minimizes external API costs.
+
+Alternatives: Relying exclusively on pure LLM prompts to judge fit; using non-explainable embeddings without hybrid weighting; calling external AI APIs synchronously on every search query.
+
+Consequence: Recruiter interfaces provide clear visibility into both deterministic skills matches and semantic similarity scores with instant on-demand recalculation; CI and testing environments run zero-cost deterministic embeddings offline.
+
+
 
 
 

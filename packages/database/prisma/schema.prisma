@@ -155,6 +155,8 @@ model CandidateProfile {
   applications      Application[]
   savedJobs         SavedJob[]
   savedByWorkspaces SavedCandidate[]
+  embedding         CandidateProfileEmbedding?
+  matchResults      MatchResult[]
 
   @@map("candidate_profiles")
 }
@@ -287,6 +289,8 @@ model Job {
   skills          JobSkill[]
   applications    Application[]
   savedByCandidates SavedJob[]
+  embedding       JobEmbedding?
+  matchResults    MatchResult[]
 
   @@unique([workspaceId, slug])
   @@index([workspaceId, status, createdAt])
@@ -440,5 +444,55 @@ model SavedCandidate {
   @@index([workspaceId, createdAt])
   @@map("saved_candidates")
 }
+
+model CandidateProfileEmbedding {
+  id                 String           @id @default(uuid()) @db.Uuid
+  candidateProfileId String           @unique @map("candidate_profile_id") @db.Uuid
+  embeddingVersion   String           @map("embedding_version") @db.VarChar(64)
+  embedding          Float[]          @map("embedding")
+  sourceHash         String           @map("source_hash") @db.VarChar(64)
+  createdAt          DateTime         @default(now()) @map("created_at")
+  updatedAt          DateTime         @updatedAt @map("updated_at")
+  candidateProfile   CandidateProfile @relation(fields: [candidateProfileId], references: [id], onDelete: Cascade)
+
+  @@map("candidate_profile_embeddings")
+}
+
+model JobEmbedding {
+  id               String   @id @default(uuid()) @db.Uuid
+  jobId            String   @unique @map("job_id") @db.Uuid
+  embeddingVersion String   @map("embedding_version") @db.VarChar(64)
+  embedding        Float[]  @map("embedding")
+  sourceHash       String   @map("source_hash") @db.VarChar(64)
+  createdAt        DateTime @default(now()) @map("created_at")
+  updatedAt        DateTime @updatedAt @map("updated_at")
+  job              Job      @relation(fields: [jobId], references: [id], onDelete: Cascade)
+
+  @@map("job_embeddings")
+}
+
+model MatchResult {
+  id                 String           @id @default(uuid()) @db.Uuid
+  jobId              String           @map("job_id") @db.Uuid
+  candidateProfileId String           @map("candidate_profile_id") @db.Uuid
+  overallScore       Float            @map("overall_score")
+  skillsScore        Float            @map("skills_score")
+  semanticScore      Float            @map("semantic_score")
+  experienceScore    Float            @map("experience_score")
+  locationScore      Float            @map("location_score")
+  matchedSkills      String[]         @map("matched_skills")
+  missingSkills      String[]         @map("missing_skills")
+  explanation        String?          @map("explanation") @db.Text
+  modelVersion       String           @default("hybrid-v1") @map("model_version") @db.VarChar(64)
+  calculatedAt       DateTime         @default(now()) @map("calculated_at")
+  job                Job              @relation(fields: [jobId], references: [id], onDelete: Cascade)
+  candidateProfile   CandidateProfile @relation(fields: [candidateProfileId], references: [id], onDelete: Cascade)
+
+  @@unique([jobId, candidateProfileId])
+  @@index([jobId, overallScore])
+  @@index([candidateProfileId, overallScore])
+  @@map("match_results")
+}
+
 
 

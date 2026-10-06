@@ -418,6 +418,18 @@ export type CandidateSearchResult = {
     locationCompatible: boolean;
     summary: string;
   };
+  aiMatch?: {
+    overallScore: number;
+    skillsScore: number;
+    semanticScore: number;
+    experienceScore: number;
+    locationScore: number;
+    matchedSkills: string[];
+    missingSkills: string[];
+    explanation: string;
+    cosineSimilarity: number;
+    calculatedAt?: string;
+  };
 };
 
 export type CandidateSearchResponse = {
@@ -511,6 +523,84 @@ export async function getCandidateSavedJobs(): Promise<SavedJobItem[]> {
     return [];
   }
 }
+
+export type AiJobMatchItem = {
+  candidate: CandidateSearchResult;
+  overallScore: number;
+  skillsScore: number;
+  semanticScore: number;
+  experienceScore: number;
+  locationScore: number;
+  matchedSkills: string[];
+  missingSkills: string[];
+  explanation: string;
+  cosineSimilarity: number;
+  calculatedAt: string;
+};
+
+export type AiMatchesResponse = {
+  job: { id: string; title: string; slug: string };
+  items: AiJobMatchItem[];
+  total: number;
+  weights: {
+    deterministic: number;
+    semantic: number;
+  };
+};
+
+export async function getWorkspaceJobAiMatches(
+  workspaceSlug: string,
+  jobSlug: string,
+  params?: { minScore?: number; semanticWeight?: number; limit?: number },
+): Promise<AiMatchesResponse | null> {
+  const cookie = (await cookies()).toString();
+  try {
+    const cleanParams: Record<string, string> = {};
+    if (params) {
+      if (params.minScore !== undefined) cleanParams.minScore = String(params.minScore);
+      if (params.semanticWeight !== undefined) cleanParams.semanticWeight = String(params.semanticWeight);
+      if (params.limit !== undefined) cleanParams.limit = String(params.limit);
+    }
+    const query = new URLSearchParams(cleanParams).toString();
+    const response = await fetch(
+      `${apiUrl}/workspaces/${encodeURIComponent(workspaceSlug)}/jobs/${encodeURIComponent(jobSlug)}/ai-matches${query ? `?${query}` : ''}`,
+      {
+        headers: { cookie },
+        cache: 'no-store',
+      },
+    );
+    if (!response.ok) return null;
+    return await response.json();
+  } catch {
+    return null;
+  }
+}
+
+export async function recomputeWorkspaceJobAiMatches(
+  workspaceSlug: string,
+  jobSlug: string,
+  data?: { candidateProfileId?: string; force?: boolean },
+): Promise<{ recomputedCount: number; status?: string } | null> {
+  const cookie = (await cookies()).toString();
+  try {
+    const response = await fetch(
+      `${apiUrl}/workspaces/${encodeURIComponent(workspaceSlug)}/jobs/${encodeURIComponent(jobSlug)}/ai-matches/recompute`,
+      {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          cookie,
+        },
+        body: JSON.stringify(data || {}),
+      },
+    );
+    if (!response.ok) return null;
+    return await response.json();
+  } catch {
+    return null;
+  }
+}
+
 
 
 

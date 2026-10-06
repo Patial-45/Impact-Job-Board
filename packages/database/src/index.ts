@@ -32,6 +32,9 @@ export type {
   ApplicationNote,
   SavedJob,
   SavedCandidate,
+  CandidateProfileEmbedding,
+  JobEmbedding,
+  MatchResult,
 } from '@prisma/client';
 
 

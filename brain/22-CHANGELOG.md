@@ -1,5 +1,39 @@
 # Changelog
 
+## 2026-10-06 — Phase 7: AI Matching & Semantic Embeddings
+
+- Built `@executive-match/ai` package:
+  - Vector mathematics core with `cosineSimilarity` and `cosineToPercentage` conversion.
+  - Zero-cost, reproducible `DeterministicEmbeddingProvider` generating 384-dimensional dense hashing vectors for offline, testing, and CI execution.
+  - Production `OpenAiEmbeddingProvider` (`text-embedding-3-small`) and `OpenAiLlmProvider` (`gpt-4o-mini`) with configurable timeout, retry, and token usage reporting.
+  - Provider registry (`DefaultAiProviderRegistry`) supporting automatic deterministic fallback when API keys are absent.
+  - Candidate and job document text serializers (`buildCandidateEmbeddingDocument`, `buildJobEmbeddingDocument`).
+  - Calibrated hybrid scoring formula (`calculateHybridScore` blending 70% deterministic feature scoring with 30% semantic dense vector cosine similarity).
+  - 12 unit tests passing in `packages/ai/src/index.test.ts`.
+- Database schema expansion (`packages/database/prisma/schema.prisma`):
+  - Added `CandidateProfileEmbedding` (UUID, `candidateProfileId` unique index, `Float[]` vector, and `sourceHash` SHA-256 caching token).
+  - Added `JobEmbedding` (UUID, `jobId` unique index, `Float[]` vector, and `sourceHash` SHA-256 caching token).
+  - Added `MatchResult` (UUID, `[jobId, candidateProfileId]` unique constraint, `overallScore`, `skillsScore`, `semanticScore`, `experienceScore`, `locationScore`, `matchedSkills`, `missingSkills`, `explanation`, `modelVersion`, and `calculatedAt`).
+  - Regenerated Prisma Client v6.19.3.
+- Validation contracts (`packages/validation`):
+  - Added `AiMatchQuerySchema` (`minScore`, `semanticWeight`, `limit`) and `RecomputeAiMatchSchema` (`candidateProfileId`, `force`).
+  - 31 unit tests passing in `packages/validation`.
+- Processing worker contracts (`workers/processing`):
+  - Added `CandidateEmbedPayload`, `JobEmbedPayload`, `MatchCalculatePayload` interfaces, Redis connection parser, and BullMQ worker harness in `workers/processing/src/index.ts`.
+  - 2 unit tests passing in `workers/processing`.
+- NestJS API implementation (`apps/api/src/modules/ai.module.ts`):
+  - Implemented `AiService` providing candidate profile embedding, job embedding with SHA-256 source content caching, hybrid match calculation, and candidate ranking.
+  - Added `WorkspaceJobAiMatchesController` (`GET /workspaces/:slug/jobs/:jobSlug/ai-matches`, `POST .../ai-matches/recompute`).
+  - Added `WorkspaceCandidateAiMatchController` (`GET /workspaces/:slug/candidates/:candidateProfileId/ai-match/:jobSlug`).
+  - Enforced tenant isolation and RBAC checks (`candidates.read`, `jobs.write`) via `WorkspaceAccessService`.
+  - Registered `AiModule` into `AppModule`.
+  - Added 8 unit tests in `apps/api/src/modules/ai.service.test.ts` (52 API tests passing).
+- Next.js 16 Recruiter Frontend updates (`apps/web`):
+  - Added `AiJobMatchItem` and `AiMatchesResponse` types, plus `getWorkspaceJobAiMatches` and `recomputeWorkspaceJobAiMatches` client functions in `apps/web/src/lib/api.ts`.
+  - Enhanced `CandidateSearch` component with toggle between Deterministic and Semantic AI matching modes, on-demand requisition-level vector recomputation button (`⚡ Recalculate Vectors`), individual candidate re-embedding trigger, hybrid fit badges (`✨ XX% AI Fit`), and a rich Hybrid AI Match Diagnostic modal with 4-pillar breakdown, vector cosine metrics, and explainable narratives.
+- Recorded ADR-020 in `brain/21-DECISIONS.md`.
+- Full quality gates verified: 104 unit tests passing, zero ESLint errors, clean typecheck, and successful production Next.js/NestJS builds.
+
 ## 2026-10-05 — Phase 6: Search and matching foundation & candidate discovery
 
 - Expanded `packages/database/prisma/schema.prisma` with `SavedJob` (`[candidateProfileId, jobId]` uniqueness) and `SavedCandidate` (`[workspaceId, candidateProfileId]` uniqueness) models, and updated `CandidateProfile`, `Job`, and `Workspace` relations. Regenerated Prisma Client v6.19.3.

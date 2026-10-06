@@ -28,6 +28,8 @@ import {
   ApplicationQuerySchema,
   CandidateSearchQuerySchema,
   SaveCandidateSchema,
+  AiMatchQuerySchema,
+  RecomputeAiMatchSchema,
 } from './index';
 
 describe('validation - Authentication schemas', () => {
@@ -416,7 +418,48 @@ describe('validation - Candidate Search & Matching schemas', () => {
       SaveCandidateSchema.safeParse({}).success,
     ).toBe(true);
   });
+
+  it('validates AI match query parameters and defaults', () => {
+    const parsed = AiMatchQuerySchema.safeParse({
+      minScore: '75',
+      semanticWeight: '0.4',
+      limit: '30',
+    });
+    expect(parsed.success).toBe(true);
+    if (parsed.success) {
+      expect(parsed.data.minScore).toBe(75);
+      expect(parsed.data.semanticWeight).toBe(0.4);
+      expect(parsed.data.limit).toBe(30);
+    }
+
+    const defaultParsed = AiMatchQuerySchema.safeParse({});
+    expect(defaultParsed.success).toBe(true);
+    if (defaultParsed.success) {
+      expect(defaultParsed.data.semanticWeight).toBe(0.3);
+      expect(defaultParsed.data.limit).toBe(20);
+    }
+  });
+
+  it('validates recompute AI match input', () => {
+    expect(
+      RecomputeAiMatchSchema.safeParse({
+        candidateProfileId: 'a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11',
+        force: true,
+      }).success,
+    ).toBe(true);
+
+    expect(
+      RecomputeAiMatchSchema.safeParse({}).success,
+    ).toBe(true);
+
+    expect(
+      RecomputeAiMatchSchema.safeParse({
+        candidateProfileId: 'not-a-uuid',
+      }).success,
+    ).toBe(false);
+  });
 });
+
 
 
 

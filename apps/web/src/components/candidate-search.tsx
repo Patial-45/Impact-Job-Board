@@ -29,6 +29,11 @@ export function CandidateSearch({
   const [openToRemote, setOpenToRemote] = useState<boolean | undefined>(undefined);
   const [selectedJobSlug, setSelectedJobSlug] = useState<string>('');
 
+  // AI Matching states
+  const [useAiMatching, setUseAiMatching] = useState(false);
+  const [recomputingAi, setRecomputingAi] = useState(false);
+  const [aiRecomputedMsg, setAiRecomputedMsg] = useState<string | null>(null);
+
   // Selected candidate for talent dossier modal
   const [selectedCandidate, setSelectedCandidate] = useState<CandidateSearchResult | null>(null);
 
@@ -36,10 +41,54 @@ export function CandidateSearch({
   const [bookmarkingId, setBookmarkingId] = useState<string | null>(null);
   const [bookmarkNotes, setBookmarkNotes] = useState<string>('');
 
-  async function performSearch(overrideJobSlug?: string) {
+  async function performSearch(overrideJobSlug?: string, forceAi?: boolean) {
     setLoading(true);
+    setAiRecomputedMsg(null);
     try {
       const activeJob = overrideJobSlug !== undefined ? overrideJobSlug : selectedJobSlug;
+      const isAi = forceAi !== undefined ? forceAi : useAiMatching;
+
+      if (isAi && activeJob) {
+        // Fetch AI Hybrid Matches
+        const res = await fetch(
+          `${apiUrl}/workspaces/${encodeURIComponent(workspaceSlug)}/jobs/${encodeURIComponent(activeJob)}/ai-matches?limit=40`,
+          { credentials: 'include' },
+        );
+        if (res.ok) {
+          const data = await res.json();
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          const mapped: CandidateSearchResult[] = (data.items || []).map((item: any) => ({
+            ...item.candidate,
+            aiMatch: {
+              overallScore: item.overallScore,
+              skillsScore: item.skillsScore,
+              semanticScore: item.semanticScore,
+              experienceScore: item.experienceScore,
+              locationScore: item.locationScore,
+              matchedSkills: item.matchedSkills,
+              missingSkills: item.missingSkills,
+              explanation: item.explanation,
+              cosineSimilarity: item.cosineSimilarity,
+              calculatedAt: item.calculatedAt,
+            },
+            match: {
+              overallScore: item.overallScore,
+              skillsScore: item.skillsScore,
+              experienceScore: item.experienceScore,
+              locationScore: item.locationScore,
+              matchedSkills: item.matchedSkills,
+              missingSkills: item.missingSkills,
+              locationCompatible: item.locationScore > 0,
+              summary: item.explanation,
+            },
+          }));
+          setCandidates(mapped);
+          setTotal(data.total || mapped.length);
+          return;
+        }
+      }
+
+      // Default deterministic search
       const params = new URLSearchParams();
       if (query.trim()) params.set('q', query.trim());
       if (skills.length > 0) params.set('skills', skills.join(','));
@@ -63,6 +112,78 @@ export function CandidateSearch({
       // Keep previous candidates on error
     } finally {
       setLoading(false);
+    }
+  }
+
+  async function handleRecomputeJobAi() {
+    if (!selectedJobSlug) return;
+    setRecomputingAi(true);
+    setAiRecomputedMsg(null);
+    try {
+      const res = await fetch(
+        `${apiUrl}/workspaces/${encodeURIComponent(workspaceSlug)}/jobs/${encodeURIComponent(selectedJobSlug)}/ai-matches/recompute`,
+        {
+          method: 'POST',
+          credentials: 'include',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ force: true }),
+        },
+      );
+      if (res.ok) {
+        const data = await res.json();
+        setAiRecomputedMsg(
+          `Successfully recomputed vector embeddings for ${data.recomputedCount} candidate(s).`,
+        );
+        await performSearch(selectedJobSlug, true);
+      }
+    } finally {
+      setRecomputingAi(false);
+    }
+  }
+
+  async function handleRecomputeSingleCandidateAi(candId: string) {
+    if (!selectedJobSlug) return;
+    setRecomputingAi(true);
+    try {
+      const res = await fetch(
+        `${apiUrl}/workspaces/${encodeURIComponent(workspaceSlug)}/jobs/${encodeURIComponent(selectedJobSlug)}/ai-matches/recompute`,
+        {
+          method: 'POST',
+          credentials: 'include',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ candidateProfileId: candId, force: true }),
+        },
+      );
+      if (res.ok) {
+        await performSearch(selectedJobSlug, true);
+        const updated = await fetch(
+          `${apiUrl}/workspaces/${encodeURIComponent(workspaceSlug)}/candidates/${encodeURIComponent(candId)}/ai-match/${encodeURIComponent(selectedJobSlug)}`,
+          { credentials: 'include' },
+        );
+        if (updated.ok) {
+          const upData = await updated.json();
+          setSelectedCandidate((prev) =>
+            prev && prev.id === candId
+              ? {
+                  ...prev,
+                  aiMatch: {
+                    overallScore: upData.match.overallScore,
+                    skillsScore: upData.match.skillsScore,
+                    semanticScore: upData.match.semanticScore,
+                    experienceScore: upData.match.experienceScore,
+                    locationScore: upData.match.locationScore,
+                    matchedSkills: upData.match.matchedSkills,
+                    missingSkills: upData.match.missingSkills,
+                    explanation: upData.match.explanation,
+                    cosineSimilarity: upData.cosineSimilarity,
+                  },
+                }
+              : prev,
+          );
+        }
+      }
+    } finally {
+      setRecomputingAi(false);
     }
   }
 
@@ -94,10 +215,14 @@ export function CandidateSearch({
         );
         if (res.ok) {
           setCandidates((prev) =>
-            prev.map((c) => (c.id === cand.id ? { ...c, isSaved: false, savedCandidateId: null } : c)),
+            prev.map((c) =>
+              c.id === cand.id ? { ...c, isSaved: false, savedCandidateId: null } : c,
+            ),
           );
           if (selectedCandidate?.id === cand.id) {
-            setSelectedCandidate((prev) => (prev ? { ...prev, isSaved: false, savedCandidateId: null } : null));
+            setSelectedCandidate((prev) =>
+              prev ? { ...prev, isSaved: false, savedCandidateId: null } : null,
+            );
           }
         }
       } else {
@@ -115,7 +240,9 @@ export function CandidateSearch({
           const data = await res.json();
           setCandidates((prev) =>
             prev.map((c) =>
-              c.id === cand.id ? { ...c, isSaved: true, savedCandidateId: data.savedCandidate?.id } : c,
+              c.id === cand.id
+                ? { ...c, isSaved: true, savedCandidateId: data.savedCandidate?.id }
+                : c,
             ),
           );
           if (selectedCandidate?.id === cand.id) {
@@ -271,17 +398,64 @@ export function CandidateSearch({
       </Card>
 
       {/* Results Header */}
-      <div className="flex items-center justify-between text-xs text-muted-foreground px-1">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 text-xs text-muted-foreground px-1">
         <span>
           Showing <strong className="text-foreground">{candidates.length}</strong> of{' '}
           <strong className="text-foreground">{total}</strong> candidates
         </span>
         {selectedJobSlug && (
-          <span className="text-primary font-medium">
-            🎯 Deterministic AI Matching Active for Selected Requisition
-          </span>
+          <div className="flex flex-wrap items-center gap-2">
+            <div className="inline-flex rounded-md border border-border p-0.5 bg-muted/40">
+              <button
+                type="button"
+                onClick={() => {
+                  setUseAiMatching(false);
+                  performSearch(selectedJobSlug, false);
+                }}
+                className={`px-2.5 py-1 text-xs rounded font-medium transition-colors ${
+                  !useAiMatching
+                    ? 'bg-background text-foreground shadow-sm'
+                    : 'text-muted-foreground hover:text-foreground'
+                }`}
+              >
+                🎯 Deterministic
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setUseAiMatching(true);
+                  performSearch(selectedJobSlug, true);
+                }}
+                className={`px-2.5 py-1 text-xs rounded font-medium transition-colors flex items-center gap-1 ${
+                  useAiMatching
+                    ? 'bg-primary text-primary-foreground shadow-sm'
+                    : 'text-muted-foreground hover:text-foreground'
+                }`}
+              >
+                ✨ AI Semantic Match
+              </button>
+            </div>
+
+            {useAiMatching && (
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={handleRecomputeJobAi}
+                disabled={recomputingAi || loading}
+                className="text-xs h-7"
+              >
+                {recomputingAi ? '⚡ Embedding...' : '⚡ Recalculate Vectors'}
+              </Button>
+            )}
+          </div>
         )}
       </div>
+
+      {aiRecomputedMsg && (
+        <div className="p-3 rounded-md bg-emerald-500/10 border border-emerald-500/30 text-xs text-emerald-700 dark:text-emerald-400">
+          ✓ {aiRecomputedMsg}
+        </div>
+      )}
 
       {/* Candidate Cards Grid */}
       {candidates.length === 0 ? (
@@ -303,7 +477,8 @@ export function CandidateSearch({
                 setMinExp('');
                 setOpenToRemote(undefined);
                 setSelectedJobSlug('');
-                performSearch('');
+                setUseAiMatching(false);
+                performSearch('', false);
               }}
             >
               Reset All Filters
@@ -322,6 +497,7 @@ export function CandidateSearch({
               .slice(0, 2);
 
             const match = cand.match;
+            const aiMatch = cand.aiMatch;
             const isSaved = cand.isSaved;
             const isSaving = bookmarkingId === cand.id;
 
@@ -373,9 +549,11 @@ export function CandidateSearch({
                     {cand.skills && cand.skills.length > 0 && (
                       <div className="flex flex-wrap gap-1.5 pt-1">
                         {cand.skills.map((s) => {
-                          const isMatchedSkill = match?.matchedSkills.some(
-                            (ms) => ms.toLowerCase() === s.name.toLowerCase(),
-                          );
+                          const isMatchedSkill = (
+                            aiMatch?.matchedSkills ||
+                            match?.matchedSkills ||
+                            []
+                          ).some((ms) => ms.toLowerCase() === s.name.toLowerCase());
                           return (
                             <span
                               key={s.id || s.name}
@@ -392,42 +570,81 @@ export function CandidateSearch({
                       </div>
                     )}
 
-                    {/* Match Engine Evidence Summary (if active) */}
-                    {match && (
+                    {/* AI or Deterministic Match Evidence Summary (if active) */}
+                    {aiMatch ? (
                       <div className="mt-3 p-3 rounded-md bg-primary/5 border border-primary/15 text-xs space-y-1.5">
                         <div className="flex items-center justify-between">
-                          <span className="font-semibold text-foreground">Match Breakdown</span>
-                          <span className="font-bold text-primary">{match.overallScore}% Overall Score</span>
+                          <span className="font-semibold text-foreground">
+                            ✨ Hybrid AI Match (70% Skills • 30% Dense Vector)
+                          </span>
+                          <span className="font-bold text-primary">
+                            {aiMatch.overallScore}% Overall Score
+                          </span>
                         </div>
-                        <p className="text-muted-foreground leading-normal">{match.summary}</p>
-                        {match.missingSkills.length > 0 && (
+                        <p className="text-muted-foreground leading-normal">{aiMatch.explanation}</p>
+                        {aiMatch.missingSkills.length > 0 && (
                           <div className="text-amber-600 dark:text-amber-400 text-xs">
                             <span className="font-medium">Missing Requisition Skills:</span>{' '}
-                            {match.missingSkills.join(', ')}
+                            {aiMatch.missingSkills.join(', ')}
                           </div>
                         )}
                       </div>
+                    ) : (
+                      match && (
+                        <div className="mt-3 p-3 rounded-md bg-primary/5 border border-primary/15 text-xs space-y-1.5">
+                          <div className="flex items-center justify-between">
+                            <span className="font-semibold text-foreground">Deterministic Match Breakdown</span>
+                            <span className="font-bold text-primary">{match.overallScore}% Overall Score</span>
+                          </div>
+                          <p className="text-muted-foreground leading-normal">{match.summary}</p>
+                          {match.missingSkills.length > 0 && (
+                            <div className="text-amber-600 dark:text-amber-400 text-xs">
+                              <span className="font-medium">Missing Requisition Skills:</span>{' '}
+                              {match.missingSkills.join(', ')}
+                            </div>
+                          )}
+                        </div>
+                      )
                     )}
                   </div>
                 </div>
 
                 {/* Right side Actions */}
                 <div className="flex flex-row md:flex-col items-center md:items-end justify-between md:justify-start gap-2.5 pt-2 md:pt-0 shrink-0">
-                  {/* Match Pill (if matching job is selected) */}
-                  {match && (
-                    <div className="text-right">
+                  {/* Match Pill */}
+                  {aiMatch ? (
+                    <div className="text-right space-y-0.5">
                       <div
                         className={`inline-block px-3 py-1 rounded-full text-xs font-bold border ${
-                          match.overallScore >= 80
+                          aiMatch.overallScore >= 80
                             ? 'bg-emerald-500/15 text-emerald-700 dark:text-emerald-400 border-emerald-500/30'
-                            : match.overallScore >= 60
+                            : aiMatch.overallScore >= 60
                               ? 'bg-blue-500/15 text-blue-700 dark:text-blue-400 border-blue-500/30'
                               : 'bg-muted text-muted-foreground border-border'
                         }`}
                       >
-                        {match.overallScore}% Fit
+                        ✨ {aiMatch.overallScore}% AI Fit
+                      </div>
+                      <div className="text-[10px] text-muted-foreground">
+                        Vector: {aiMatch.semanticScore}% • Cosine: {aiMatch.cosineSimilarity}
                       </div>
                     </div>
+                  ) : (
+                    match && (
+                      <div className="text-right">
+                        <div
+                          className={`inline-block px-3 py-1 rounded-full text-xs font-bold border ${
+                            match.overallScore >= 80
+                              ? 'bg-emerald-500/15 text-emerald-700 dark:text-emerald-400 border-emerald-500/30'
+                              : match.overallScore >= 60
+                                ? 'bg-blue-500/15 text-blue-700 dark:text-blue-400 border-blue-500/30'
+                                : 'bg-muted text-muted-foreground border-border'
+                          }`}
+                        >
+                          {match.overallScore}% Fit
+                        </div>
+                      </div>
+                    )
                   )}
 
                   <div className="flex items-center gap-2">
@@ -493,47 +710,120 @@ export function CandidateSearch({
               </button>
             </div>
 
-            {/* Match Engine Breakdown Modal Section */}
-            {selectedCandidate.match && (
+            {/* AI Semantic & Hybrid Diagnostics Modal Section */}
+            {selectedCandidate.aiMatch ? (
               <div className="p-4 rounded-lg bg-primary/5 border border-primary/20 space-y-3">
                 <div className="flex items-center justify-between">
-                  <span className="text-xs font-bold uppercase tracking-wider text-primary">
-                    Deterministic Match Diagnostics
-                  </span>
-                  <span className="text-sm font-bold text-foreground">
-                    {selectedCandidate.match.overallScore}% Compatibility
-                  </span>
+                  <div>
+                    <span className="text-xs font-bold uppercase tracking-wider text-primary">
+                      ✨ Hybrid AI Semantic Diagnostics
+                    </span>
+                    <div className="text-[11px] text-muted-foreground">
+                      Calibrated 70% Deterministic Feature Fit + 30% Dense Vector Cosine Similarity
+                    </div>
+                  </div>
+                  <div className="text-right">
+                    <span className="text-lg font-black text-primary">
+                      {selectedCandidate.aiMatch.overallScore}%
+                    </span>
+                    <div className="text-[10px] text-muted-foreground">Hybrid Score</div>
+                  </div>
                 </div>
-                <div className="grid grid-cols-3 gap-2 text-center text-xs">
+
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-center text-xs">
                   <div className="p-2 rounded bg-background/60 border border-border">
                     <div className="font-bold text-foreground">
-                      {selectedCandidate.match.skillsScore}%
+                      {selectedCandidate.aiMatch.skillsScore}%
                     </div>
-                    <div className="text-[10px] text-muted-foreground uppercase">Skills Match</div>
+                    <div className="text-[10px] text-muted-foreground uppercase">Skills Fit (70%)</div>
+                  </div>
+                  <div className="p-2 rounded bg-background/60 border border-border">
+                    <div className="font-bold text-primary">
+                      {selectedCandidate.aiMatch.semanticScore}%
+                    </div>
+                    <div className="text-[10px] text-muted-foreground uppercase">Semantic Vector (30%)</div>
+                  </div>
+                  <div className="p-2 rounded bg-background/60 border border-border">
+                    <div className="font-mono font-bold text-foreground">
+                      {selectedCandidate.aiMatch.cosineSimilarity}
+                    </div>
+                    <div className="text-[10px] text-muted-foreground uppercase">Cosine Similarity</div>
                   </div>
                   <div className="p-2 rounded bg-background/60 border border-border">
                     <div className="font-bold text-foreground">
-                      {selectedCandidate.match.experienceScore}%
-                    </div>
-                    <div className="text-[10px] text-muted-foreground uppercase">Seniority Align</div>
-                  </div>
-                  <div className="p-2 rounded bg-background/60 border border-border">
-                    <div className="font-bold text-foreground">
-                      {selectedCandidate.match.locationScore}%
+                      {selectedCandidate.aiMatch.locationScore}%
                     </div>
                     <div className="text-[10px] text-muted-foreground uppercase">Location/Remote</div>
                   </div>
                 </div>
+
                 <p className="text-xs text-foreground/90 leading-relaxed">
-                  {selectedCandidate.match.summary}
+                  {selectedCandidate.aiMatch.explanation}
                 </p>
-                {selectedCandidate.match.missingSkills.length > 0 && (
+
+                {selectedCandidate.aiMatch.missingSkills.length > 0 && (
                   <div className="text-xs text-amber-600 dark:text-amber-400">
                     <strong>Gaps to Requisition:</strong>{' '}
-                    {selectedCandidate.match.missingSkills.join(', ')}
+                    {selectedCandidate.aiMatch.missingSkills.join(', ')}
+                  </div>
+                )}
+
+                {selectedJobSlug && (
+                  <div className="pt-2 flex justify-end">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => handleRecomputeSingleCandidateAi(selectedCandidate.id)}
+                      disabled={recomputingAi}
+                      className="text-xs"
+                    >
+                      {recomputingAi ? '⚡ Recalculating...' : '⚡ Re-embed & Score Candidate'}
+                    </Button>
                   </div>
                 )}
               </div>
+            ) : (
+              selectedCandidate.match && (
+                <div className="p-4 rounded-lg bg-primary/5 border border-primary/20 space-y-3">
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs font-bold uppercase tracking-wider text-primary">
+                      Deterministic Match Diagnostics
+                    </span>
+                    <span className="text-sm font-bold text-foreground">
+                      {selectedCandidate.match.overallScore}% Compatibility
+                    </span>
+                  </div>
+                  <div className="grid grid-cols-3 gap-2 text-center text-xs">
+                    <div className="p-2 rounded bg-background/60 border border-border">
+                      <div className="font-bold text-foreground">
+                        {selectedCandidate.match.skillsScore}%
+                      </div>
+                      <div className="text-[10px] text-muted-foreground uppercase">Skills Match</div>
+                    </div>
+                    <div className="p-2 rounded bg-background/60 border border-border">
+                      <div className="font-bold text-foreground">
+                        {selectedCandidate.match.experienceScore}%
+                      </div>
+                      <div className="text-[10px] text-muted-foreground uppercase">Seniority Align</div>
+                    </div>
+                    <div className="p-2 rounded bg-background/60 border border-border">
+                      <div className="font-bold text-foreground">
+                        {selectedCandidate.match.locationScore}%
+                      </div>
+                      <div className="text-[10px] text-muted-foreground uppercase">Location/Remote</div>
+                    </div>
+                  </div>
+                  <p className="text-xs text-foreground/90 leading-relaxed">
+                    {selectedCandidate.match.summary}
+                  </p>
+                  {selectedCandidate.match.missingSkills.length > 0 && (
+                    <div className="text-xs text-amber-600 dark:text-amber-400">
+                      <strong>Gaps to Requisition:</strong>{' '}
+                      {selectedCandidate.match.missingSkills.join(', ')}
+                    </div>
+                  )}
+                </div>
+              )
             )}
 
             {/* Candidate Bio */}
@@ -573,12 +863,19 @@ export function CandidateSearch({
               {selectedCandidate.experiences && selectedCandidate.experiences.length > 0 ? (
                 <div className="space-y-3">
                   {selectedCandidate.experiences.map((exp) => (
-                    <div key={exp.id} className="p-3 rounded-md bg-muted/30 border border-border/60 space-y-1">
+                    <div
+                      key={exp.id || `${exp.companyName}-${exp.title}`}
+                      className="p-3 rounded-md bg-muted/30 border border-border/60 space-y-1"
+                    >
                       <div className="flex items-center justify-between">
                         <span className="font-semibold text-sm text-foreground">{exp.title}</span>
                         <span className="text-xs text-muted-foreground">
                           {new Date(exp.startDate).getFullYear()} -{' '}
-                          {exp.isCurrent ? 'Present' : exp.endDate ? new Date(exp.endDate).getFullYear() : ''}
+                          {exp.isCurrent
+                            ? 'Present'
+                            : exp.endDate
+                              ? new Date(exp.endDate).getFullYear()
+                              : ''}
                         </span>
                       </div>
                       <div className="text-xs text-primary font-medium">{exp.companyName}</div>
@@ -603,7 +900,10 @@ export function CandidateSearch({
               {selectedCandidate.educations && selectedCandidate.educations.length > 0 ? (
                 <div className="space-y-2">
                   {selectedCandidate.educations.map((edu) => (
-                    <div key={edu.id} className="p-3 rounded-md bg-muted/30 border border-border/60">
+                    <div
+                      key={edu.id || `${edu.institution}-${edu.degree}`}
+                      className="p-3 rounded-md bg-muted/30 border border-border/60"
+                    >
                       <div className="font-semibold text-xs text-foreground">
                         {edu.degree} {edu.fieldOfStudy ? `in ${edu.fieldOfStudy}` : ''}
                       </div>
@@ -621,9 +921,9 @@ export function CandidateSearch({
               <div className="font-semibold text-foreground">Candidate Privacy Safeguard</div>
               <p>
                 Candidate profiles in the talent pool are visible with candidate consent (
-                <code>searchVisible: true</code>). Direct resume file binary downloads remain secured and
-                are exclusively released when the candidate formally submits an application to your workspace
-                requisitions.
+                <code>searchVisible: true</code>). Direct resume file binary downloads remain secured
+                and are exclusively released when the candidate formally submits an application to your
+                workspace requisitions.
               </p>
             </div>
 
@@ -648,7 +948,9 @@ export function CandidateSearch({
                 onClick={() => handleToggleSave(selectedCandidate)}
                 disabled={bookmarkingId === selectedCandidate.id}
               >
-                {selectedCandidate.isSaved ? '★ Bookmarked in Workspace' : '☆ Bookmark Candidate'}
+                {selectedCandidate.isSaved
+                  ? '★ Bookmarked in Workspace'
+                  : '☆ Bookmark Candidate'}
               </Button>
               <Button variant="outline" size="sm" onClick={() => setSelectedCandidate(null)}>
                 Close Dossier

@@ -9,6 +9,7 @@ import { CandidatesModule } from './candidates.module';
 import { HealthModule } from './health.module';
 import { JobsModule } from './jobs.module';
 import { ApplicationsModule } from './applications.module';
+import { AiModule } from './ai.module';
 import { MatchingModule } from './matching.module';
 import { WorkspacesModule } from './workspaces.module';
 
@@ -25,6 +26,7 @@ import { WorkspacesModule } from './workspaces.module';
     ApplicationsModule,
     MatchingModule,
     WorkspacesModule,
+    AiModule,
   ],
   providers: [{ provide: APP_GUARD, useClass: ThrottlerGuard }],
 })

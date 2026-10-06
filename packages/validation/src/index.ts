@@ -222,6 +222,17 @@ export const SaveCandidateSchema = z.object({
   notes: z.string().trim().max(2000).optional().nullable(),
 });
 
+export const AiMatchQuerySchema = z.object({
+  minScore: z.coerce.number().min(0).max(100).optional(),
+  semanticWeight: z.coerce.number().min(0).max(1).default(0.3),
+  limit: z.coerce.number().int().positive().max(100).default(20),
+});
+
+export const RecomputeAiMatchSchema = z.object({
+  candidateProfileId: z.string().uuid().optional(),
+  force: z.boolean().default(false).optional(),
+});
+
 export type RegisterInput = z.infer<typeof RegisterSchema>;
 export type LoginInput = z.infer<typeof LoginSchema>;
 export type VerifyEmailConfirmInput = z.infer<typeof VerifyEmailConfirmSchema>;
@@ -252,6 +263,9 @@ export type CreateApplicationNoteInput = z.infer<typeof CreateApplicationNoteSch
 export type ApplicationQueryInput = z.infer<typeof ApplicationQuerySchema>;
 export type CandidateSearchQueryInput = z.infer<typeof CandidateSearchQuerySchema>;
 export type SaveCandidateInput = z.infer<typeof SaveCandidateSchema>;
+export type AiMatchQueryInput = z.infer<typeof AiMatchQuerySchema>;
+export type RecomputeAiMatchInput = z.infer<typeof RecomputeAiMatchSchema>;
+
 
 
 
