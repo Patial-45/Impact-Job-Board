@@ -37,6 +37,13 @@ import {
   CreateAssessmentSchema,
   InviteAssessmentSchema,
   CompleteAssessmentSchema,
+  CreateOfferSchema,
+  UpdateOfferSchema,
+  RescindOfferSchema,
+  AcceptOfferSchema,
+  DeclineOfferSchema,
+  CreateOnboardingTaskSchema,
+  UpdateOnboardingTaskStatusSchema,
 } from './index';
 
 describe('validation - Authentication schemas', () => {
@@ -578,6 +585,112 @@ describe('validation - Interview and Assessment schemas', () => {
     ).toBe(false);
   });
 });
+
+describe('validation - Offers and Onboarding schemas', () => {
+  it('validates offer creation and rejects negative or zero base salary', () => {
+    const validOffer = {
+      applicationId: 'a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11',
+      jobTitle: 'Principal Staff Engineer',
+      baseSalary: 235000,
+      currency: 'USD',
+      bonus: '20% target performance bonus',
+      equity: '0.5% options vesting over 4 years',
+      signOnBonus: 25000,
+      startDate: new Date('2026-11-01T09:00:00Z').toISOString(),
+      expiresAt: new Date('2026-10-25T18:00:00Z').toISOString(),
+      workLocation: 'Hybrid - New York, NY',
+      offerLetter: 'We are thrilled to offer you the Principal Staff Engineer role.',
+      notes: 'Approved by compensation committee on Oct 8.',
+    };
+
+    expect(CreateOfferSchema.safeParse(validOffer).success).toBe(true);
+
+    // Rejects non-positive salary
+    expect(
+      CreateOfferSchema.safeParse({
+        ...validOffer,
+        baseSalary: 0,
+      }).success,
+    ).toBe(false);
+
+    expect(
+      CreateOfferSchema.safeParse({
+        ...validOffer,
+        baseSalary: -50000,
+      }).success,
+    ).toBe(false);
+  });
+
+  it('validates offer updating and rescinding', () => {
+    expect(
+      UpdateOfferSchema.safeParse({
+        baseSalary: 250000,
+        bonus: '25% target performance bonus',
+      }).success,
+    ).toBe(true);
+
+    expect(
+      RescindOfferSchema.safeParse({
+        reason: 'Requisition cancelled due to organizational restructuring.',
+      }).success,
+    ).toBe(true);
+
+    expect(
+      RescindOfferSchema.safeParse({
+        reason: '',
+      }).success,
+    ).toBe(false);
+  });
+
+  it('validates candidate offer acceptance with legal agreement', () => {
+    expect(
+      AcceptOfferSchema.safeParse({
+        signerName: 'Jane Doe',
+        signatureText: 'Jane Doe',
+        consentConfirmed: true,
+      }).success,
+    ).toBe(true);
+
+    // Rejects if consent is false
+    expect(
+      AcceptOfferSchema.safeParse({
+        signerName: 'Jane Doe',
+        signatureText: 'Jane Doe',
+        consentConfirmed: false,
+      }).success,
+    ).toBe(false);
+
+    expect(
+      DeclineOfferSchema.safeParse({
+        reason: 'Accepted a competing offer.',
+      }).success,
+    ).toBe(true);
+  });
+
+  it('validates onboarding task creation and status changes', () => {
+    expect(
+      CreateOnboardingTaskSchema.safeParse({
+        title: 'Sign Employee Confidentiality Agreement',
+        description: 'Review and sign the proprietary information and inventions agreement.',
+        category: 'COMPLIANCE',
+        required: true,
+      }).success,
+    ).toBe(true);
+
+    expect(
+      UpdateOnboardingTaskStatusSchema.safeParse({
+        status: 'COMPLETED',
+      }).success,
+    ).toBe(true);
+
+    expect(
+      UpdateOnboardingTaskStatusSchema.safeParse({
+        status: 'INVALID_STATUS',
+      }).success,
+    ).toBe(false);
+  });
+});
+
 
 
 

@@ -20,6 +20,7 @@ export default async function WorkspaceLayout({
     { href: `${base}/candidates`, label: 'Candidates' },
     { href: `${base}/applications`, label: 'Applications' },
     { href: `${base}/interviews`, label: 'Interviews' },
+    { href: `${base}/offers`, label: 'Offers' },
     { href: `${base}/analytics`, label: 'Analytics' },
     { href: `${base}/team`, label: 'Team' },
     { href: `${base}/settings`, label: 'Settings' },

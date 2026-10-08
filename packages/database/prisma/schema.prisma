@@ -41,6 +41,8 @@ model User {
   applicationNotes         ApplicationNote[]
   interviewParticipants    InterviewParticipant[]
   interviewScorecards      InterviewScorecard[]
+  createdOffers            JobOffer[]               @relation("CreatedByUser")
+  approvedOffers           JobOffer[]               @relation("ApprovedByUser")
 
   @@map("users")
 }
@@ -97,6 +99,8 @@ model Workspace {
   savedCandidates  SavedCandidate[]
   interviews       Interview[]
   assessments      Assessment[]
+  offers           JobOffer[]
+  onboardingTasks  OnboardingTask[]
 
   @@map("workspaces")
 }
@@ -343,6 +347,7 @@ model Application {
   notes              ApplicationNote[]
   interviews         Interview[]
   assessmentInvites  AssessmentInvite[]
+  offers             JobOffer[]
 
   @@unique([jobId, candidateProfileId])
   @@index([jobId, status, createdAt])
@@ -630,6 +635,98 @@ model AssessmentInvite {
   @@unique([assessmentId, applicationId])
   @@index([token])
   @@map("assessment_invites")
+}
+
+enum OfferStatus {
+  DRAFT
+  PENDING_APPROVAL
+  SENT
+  ACCEPTED
+  DECLINED
+  EXPIRED
+  RESCINDED
+}
+
+enum OnboardingTaskStatus {
+  PENDING
+  COMPLETED
+  WAIVED
+}
+
+model JobOffer {
+  id              String           @id @default(uuid()) @db.Uuid
+  workspaceId     String           @map("workspace_id") @db.Uuid
+  applicationId   String           @map("application_id") @db.Uuid
+  jobTitle        String           @map("job_title") @db.VarChar(160)
+  baseSalary      Int              @map("base_salary")
+  currency        String           @default("USD") @db.VarChar(3)
+  bonus           String?          @db.VarChar(160)
+  equity          String?          @db.VarChar(160)
+  signOnBonus     Int?             @map("sign_on_bonus")
+  startDate       DateTime         @map("start_date")
+  expiresAt       DateTime         @map("expires_at")
+  workLocation    String           @map("work_location") @db.VarChar(160)
+  offerLetter     String?          @map("offer_letter") @db.Text
+  notes           String?          @db.Text
+  status          OfferStatus      @default(DRAFT)
+  createdById     String           @map("created_by_id") @db.Uuid
+  approvedById    String?          @map("approved_by_id") @db.Uuid
+  approvedAt      DateTime?        @map("approved_at")
+  sentAt          DateTime?        @map("sent_at")
+  respondedAt     DateTime?        @map("responded_at")
+  rescindReason   String?          @map("rescind_reason") @db.Text
+  declineReason   String?          @map("decline_reason") @db.Text
+  createdAt       DateTime         @default(now()) @map("created_at")
+  updatedAt       DateTime         @updatedAt @map("updated_at")
+
+  workspace       Workspace        @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  application     Application      @relation(fields: [applicationId], references: [id], onDelete: Cascade)
+  createdBy       User             @relation("CreatedByUser", fields: [createdById], references: [id], onDelete: Cascade)
+  approvedBy      User?            @relation("ApprovedByUser", fields: [approvedById], references: [id], onDelete: SetNull)
+  signature       OfferSignature?
+  onboardingTasks OnboardingTask[]
+
+  @@index([workspaceId, status])
+  @@index([applicationId])
+  @@map("job_offers")
+}
+
+model OfferSignature {
+  id            String   @id @default(uuid()) @db.Uuid
+  offerId       String   @unique @map("offer_id") @db.Uuid
+  signerName    String   @map("signer_name") @db.VarChar(120)
+  signerEmail   String   @map("signer_email") @db.VarChar(320)
+  signatureText String   @map("signature_text") @db.VarChar(160)
+  ipAddress     String?  @map("ip_address") @db.VarChar(64)
+  userAgent     String?  @map("user_agent") @db.Text
+  signedAt      DateTime @default(now()) @map("signed_at")
+
+  offer         JobOffer @relation(fields: [offerId], references: [id], onDelete: Cascade)
+
+  @@map("offer_signatures")
+}
+
+model OnboardingTask {
+  id                 String               @id @default(uuid()) @db.Uuid
+  workspaceId        String               @map("workspace_id") @db.Uuid
+  offerId            String               @map("offer_id") @db.Uuid
+  title              String               @db.VarChar(160)
+  description        String?              @db.Text
+  category           String               @default("GENERAL") @db.VarChar(60)
+  required           Boolean              @default(true)
+  status             OnboardingTaskStatus @default(PENDING)
+  dueDate            DateTime?            @map("due_date")
+  completedAt        DateTime?            @map("completed_at")
+  completedByUserId  String?              @map("completed_by_user_id") @db.Uuid
+  createdAt          DateTime             @default(now()) @map("created_at")
+  updatedAt          DateTime             @updatedAt @map("updated_at")
+
+  workspace          Workspace            @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  offer              JobOffer             @relation(fields: [offerId], references: [id], onDelete: Cascade)
+
+  @@index([workspaceId])
+  @@index([offerId])
+  @@map("onboarding_tasks")
 }
 
 

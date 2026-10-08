@@ -6,6 +6,7 @@ const links = [
   { href: '/candidate/jobs', label: 'Discover jobs' },
   { href: '/candidate/applications', label: 'Applications' },
   { href: '/candidate/interviews', label: 'Interviews' },
+  { href: '/candidate/offers', label: 'Offers' },
   { href: '/candidate/saved', label: 'Saved jobs' },
   { href: '/candidate/profile', label: 'Profile' },
   { href: '/candidate/resume', label: 'Resume' },

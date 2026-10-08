@@ -13,6 +13,7 @@ import { AiModule } from './ai.module';
 import { MatchingModule } from './matching.module';
 import { WorkspacesModule } from './workspaces.module';
 import { InterviewsModule } from './interviews.module';
+import { OffersModule } from './offers.module';
 
 @Module({
   imports: [
@@ -29,6 +30,7 @@ import { InterviewsModule } from './interviews.module';
     WorkspacesModule,
     AiModule,
     InterviewsModule,
+    OffersModule,
   ],
   providers: [{ provide: APP_GUARD, useClass: ThrottlerGuard }],
 })

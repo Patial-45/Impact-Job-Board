@@ -5,7 +5,13 @@ import { WorkspaceTeam } from '@/components/workspace-team';
 import { WorkspaceJobs } from '@/components/workspace-jobs';
 import { CandidateSearch } from '@/components/candidate-search';
 import { WorkspaceInterviews } from '@/components/workspace-interviews';
-import { getWorkspaceJobs, searchWorkspaceCandidates, getWorkspaceInterviews } from '@/lib/api';
+import { WorkspaceOffers } from '@/components/workspace-offers';
+import {
+  getWorkspaceJobs,
+  searchWorkspaceCandidates,
+  getWorkspaceInterviews,
+  getWorkspaceOffers,
+} from '@/lib/api';
 import { Button, Card, Badge } from '@executive-match/ui';
 
 const pages: Record<string, { title: string; description: string }> = {
@@ -13,6 +19,10 @@ const pages: Record<string, { title: string; description: string }> = {
   candidates: { title: 'Candidates', description: 'Review candidates within this workspace.' },
   applications: { title: 'Applications', description: 'Keep your hiring pipeline organized.' },
   interviews: { title: 'Interviews', description: 'Coordinate conversations with candidates.' },
+  offers: {
+    title: 'Offers',
+    description: 'Extend job offers, track digital signatures, and manage onboarding checklists.',
+  },
   analytics: { title: 'Analytics', description: 'Understand the progress of your hiring process.' },
   team: { title: 'Team', description: 'Collaborate with workspace members.' },
   settings: {
@@ -136,6 +146,26 @@ export default async function WorkspaceSection({
         <WorkspaceInterviews
           workspaceSlug={workspaceSlug}
           initialInterviews={interviewData.items}
+        />
+      </main>
+    );
+  }
+
+  if (section === 'offers') {
+    const offerData = await getWorkspaceOffers(workspaceSlug);
+    return (
+      <main className="shell-page space-y-6">
+        <header className="shell-header" style={{ marginBottom: '32px' }}>
+          <span className="ui-eyebrow">OFFERS & ONBOARDING</span>
+          <h1>Job Offers & E-Signatures</h1>
+          <p>
+            Draft executive compensation packages, track candidate e-signature status, and coordinate
+            new hire onboarding checklists.
+          </p>
+        </header>
+        <WorkspaceOffers
+          workspaceSlug={workspaceSlug}
+          initialOffers={offerData.items}
         />
       </main>
     );

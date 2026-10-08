@@ -779,6 +779,226 @@ export async function getWorkspaceAssessments(
   }
 }
 
+export type OfferSignatureItem = {
+  id: string;
+  offerId: string;
+  signerName: string;
+  signerEmail: string;
+  signatureText: string;
+  signedAt: string;
+};
+
+export type OnboardingTaskItem = {
+  id: string;
+  workspaceId: string;
+  offerId: string;
+  title: string;
+  description?: string | null;
+  category: string;
+  required: boolean;
+  status: 'PENDING' | 'COMPLETED' | 'WAIVED';
+  dueDate?: string | null;
+  completedAt?: string | null;
+};
+
+export type OfferItem = {
+  id: string;
+  workspaceId: string;
+  applicationId: string;
+  jobTitle: string;
+  baseSalary: number;
+  currency: string;
+  bonus?: string | null;
+  equity?: string | null;
+  signOnBonus?: number | null;
+  startDate: string;
+  expiresAt: string;
+  workLocation: string;
+  offerLetter?: string | null;
+  notes?: string | null;
+  status: 'DRAFT' | 'PENDING_APPROVAL' | 'SENT' | 'ACCEPTED' | 'DECLINED' | 'EXPIRED' | 'RESCINDED';
+  createdById: string;
+  approvedById?: string | null;
+  approvedAt?: string | null;
+  sentAt?: string | null;
+  respondedAt?: string | null;
+  rescindReason?: string | null;
+  declineReason?: string | null;
+  createdAt: string;
+  application: {
+    id: string;
+    status: string;
+    currentStage: string;
+    candidateProfile: {
+      id: string;
+      headline?: string | null;
+      user: {
+        email: string;
+        profile?: { displayName?: string | null } | null;
+      };
+    };
+    job: {
+      id: string;
+      title: string;
+      slug: string;
+    };
+  };
+  createdBy: {
+    id: string;
+    email: string;
+    profile?: { displayName?: string | null } | null;
+  };
+  approvedBy?: {
+    id: string;
+    email: string;
+    profile?: { displayName?: string | null } | null;
+  } | null;
+  signature?: OfferSignatureItem | null;
+  onboardingTasks?: OnboardingTaskItem[];
+  _count?: {
+    onboardingTasks: number;
+  };
+};
+
+export type CandidateOfferItem = {
+  id: string;
+  jobTitle: string;
+  baseSalary: number;
+  currency: string;
+  bonus?: string | null;
+  equity?: string | null;
+  signOnBonus?: number | null;
+  startDate: string;
+  expiresAt: string;
+  workLocation: string;
+  offerLetter?: string | null;
+  status: 'SENT' | 'ACCEPTED' | 'DECLINED' | 'EXPIRED' | 'RESCINDED';
+  sentAt?: string | null;
+  respondedAt?: string | null;
+  declineReason?: string | null;
+  application: {
+    id: string;
+    job: {
+      id: string;
+      title: string;
+      slug: string;
+      workspace: {
+        name: string;
+        company?: {
+          name: string;
+          slug: string;
+          location?: string | null;
+        } | null;
+      };
+    };
+  };
+  signature?: OfferSignatureItem | null;
+  onboardingTasks?: OnboardingTaskItem[];
+};
+
+export type CandidateOnboardingResponse = {
+  tasks: Array<
+    OnboardingTaskItem & {
+      offer: {
+        id: string;
+        jobTitle: string;
+        startDate: string;
+        workspace: {
+          name: string;
+          company?: { name: string; slug: string } | null;
+        };
+      };
+    }
+  >;
+  completedCount: number;
+  totalCount: number;
+};
+
+export async function getWorkspaceOffers(
+  workspaceSlug: string,
+  status?: string,
+): Promise<{ items: OfferItem[]; total: number }> {
+  const cookie = (await cookies()).toString();
+  try {
+    const query = status && status !== 'ALL' ? `?status=${encodeURIComponent(status)}` : '';
+    const response = await fetch(
+      `${apiUrl}/workspaces/${encodeURIComponent(workspaceSlug)}/offers${query}`,
+      {
+        headers: { cookie },
+        cache: 'no-store',
+      },
+    );
+    if (!response.ok) return { items: [], total: 0 };
+    return await response.json();
+  } catch {
+    return { items: [], total: 0 };
+  }
+}
+
+export async function getWorkspaceOfferDetails(
+  workspaceSlug: string,
+  offerId: string,
+): Promise<{ offer: OfferItem } | null> {
+  const cookie = (await cookies()).toString();
+  try {
+    const response = await fetch(
+      `${apiUrl}/workspaces/${encodeURIComponent(workspaceSlug)}/offers/${encodeURIComponent(offerId)}`,
+      {
+        headers: { cookie },
+        cache: 'no-store',
+      },
+    );
+    if (!response.ok) return null;
+    return await response.json();
+  } catch {
+    return null;
+  }
+}
+
+export async function getCandidateOffers(): Promise<{ items: CandidateOfferItem[] }> {
+  const cookie = (await cookies()).toString();
+  try {
+    const response = await fetch(`${apiUrl}/candidates/me/offers`, {
+      headers: { cookie },
+      cache: 'no-store',
+    });
+    if (!response.ok) return { items: [] };
+    return await response.json();
+  } catch {
+    return { items: [] };
+  }
+}
+
+export async function getCandidateOfferDetails(
+  offerId: string,
+): Promise<{ offer: CandidateOfferItem } | null> {
+  const cookie = (await cookies()).toString();
+  try {
+    const response = await fetch(`${apiUrl}/candidates/me/offers/${encodeURIComponent(offerId)}`, {
+      headers: { cookie },
+      cache: 'no-store',
+    });
+    if (!response.ok) return null;
+    return await response.json();
+  } catch {
+    return null;
+  }
+}
+
+export async function getCandidateOnboarding(): Promise<CandidateOnboardingResponse> {
+  const cookie = (await cookies()).toString();
+  try {
+    const response = await fetch(`${apiUrl}/candidates/me/onboarding`, {
+      headers: { cookie },
+      cache: 'no-store',
+    });
+    if (!response.ok) return { tasks: [], completedCount: 0, totalCount: 0 };
+    return await response.json();
+  } catch {
+    return { tasks: [], completedCount: 0, totalCount: 0 };
+  }
+}
+
 
 
 

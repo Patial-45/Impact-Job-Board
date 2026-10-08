@@ -119,6 +119,23 @@ Alternatives: Storing interviews and notes as unstructured free-text comments on
 
 Consequence: Hiring teams have structured scorecard archives for every interviewed candidate; candidate dashboard provides clear calendar tracking for scheduled interview sessions.
 
+## ADR-022 — Multi-Tenant Job Offers, Digital E-Signatures, and Onboarding Checklist Engine
+
+Decision: Implement a multi-tenant job offer lifecycle, digital e-signature acceptance, and automated new-hire onboarding checklist engine.
+1. Multi-Tenancy & RBAC: Enforce granular workspace actions `offers.read`, `offers.write`, `onboarding.read`, and `onboarding.write` across employer operations via `WorkspaceAccessService`. Candidate access is restricted strictly to their own offers (`/candidates/me/offers`) and onboarding checklists (`/candidates/me/onboarding`).
+2. Offer Lifecycle: Maintain explicit states (`DRAFT`, `PENDING_APPROVAL`, `SENT`, `ACCEPTED`, `DECLINED`, `EXPIRED`, `RESCINDED`). Sending an offer automatically advances application stage to `OFFER` and status to `OFFERED` with an immutable stage history record.
+3. Digital E-Signatures: Digital acceptance captures signer legal full name, signature representation text, verified email, client IP address, user-agent, signed timestamp, and explicit legal consent confirmation checkbox compliant with electronic signature standards. Acceptance transactionally sets offer status to `ACCEPTED`, transitions application to `HIRED`, and auto-seeds standard new-hire onboarding tasks (compliance, tax/direct deposit, right-to-work verification, IT setup).
+4. Cancellation & Decline Auditing: Rescinding or declining an offer records explicit reasons for compliance and talent analytics.
+
+Context: Phase 9 formalizes the hiring conversion funnel, taking candidates from completed interviews into legally structured employment agreements and seamless day-one onboarding.
+
+Reasoning: Guarantees full auditability and legal defensibility for compensation proposals and digital signatures, preserves workspace isolation, and eliminates manual onboarding handoffs.
+
+Alternatives: Relying on third-party external e-signature embeds (DocuSign/HelloSign) without unified database models; tracking offers as plain text notes without lifecycle state machines.
+
+Consequence: Employers have centralized compensation and signature records; candidates have an end-to-end transparent offer acceptance and onboarding checklist experience.
+
+
 
 
 

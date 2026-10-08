@@ -14,6 +14,8 @@ export {
   InterviewStatus,
   ScorecardRecommendation,
   AssessmentInviteStatus,
+  OfferStatus,
+  OnboardingTaskStatus,
 } from '@prisma/client';
 export type {
   User,
@@ -44,6 +46,9 @@ export type {
   InterviewScorecard,
   Assessment,
   AssessmentInvite,
+  JobOffer,
+  OfferSignature,
+  OnboardingTask,
 } from '@prisma/client';
 
 

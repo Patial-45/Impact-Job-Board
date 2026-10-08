@@ -331,6 +331,72 @@ export type CreateAssessmentInput = z.infer<typeof CreateAssessmentSchema>;
 export type InviteAssessmentInput = z.infer<typeof InviteAssessmentSchema>;
 export type CompleteAssessmentInput = z.infer<typeof CompleteAssessmentSchema>;
 
+export const CreateOfferSchema = z.object({
+  applicationId: z.string().uuid(),
+  jobTitle: z.string().trim().min(2).max(160),
+  baseSalary: z.coerce.number().int().positive(),
+  currency: z.string().trim().length(3).default('USD'),
+  bonus: z.string().trim().max(160).optional().nullable(),
+  equity: z.string().trim().max(160).optional().nullable(),
+  signOnBonus: z.coerce.number().int().min(0).optional().nullable(),
+  startDate: z.string().datetime({ message: 'Must be a valid ISO 8601 date string' }),
+  expiresAt: z.string().datetime({ message: 'Must be a valid ISO 8601 date string' }),
+  workLocation: z.string().trim().min(2).max(160),
+  offerLetter: z.string().trim().max(20000).optional().nullable(),
+  notes: z.string().trim().max(5000).optional().nullable(),
+});
+
+export const UpdateOfferSchema = z.object({
+  jobTitle: z.string().trim().min(2).max(160).optional(),
+  baseSalary: z.coerce.number().int().positive().optional(),
+  currency: z.string().trim().length(3).optional(),
+  bonus: z.string().trim().max(160).optional().nullable(),
+  equity: z.string().trim().max(160).optional().nullable(),
+  signOnBonus: z.coerce.number().int().min(0).optional().nullable(),
+  startDate: z.string().datetime().optional(),
+  expiresAt: z.string().datetime().optional(),
+  workLocation: z.string().trim().min(2).max(160).optional(),
+  offerLetter: z.string().trim().max(20000).optional().nullable(),
+  notes: z.string().trim().max(5000).optional().nullable(),
+});
+
+export const RescindOfferSchema = z.object({
+  reason: z.string().trim().min(1).max(1000),
+});
+
+export const AcceptOfferSchema = z.object({
+  signerName: z.string().trim().min(2).max(120),
+  signatureText: z.string().trim().min(2).max(160),
+  consentConfirmed: z.boolean().refine((val) => val === true, {
+    message: 'You must confirm legal agreement to the offer terms',
+  }),
+});
+
+export const DeclineOfferSchema = z.object({
+  reason: z.string().trim().max(1000).optional().nullable(),
+});
+
+export const CreateOnboardingTaskSchema = z.object({
+  title: z.string().trim().min(2).max(160),
+  description: z.string().trim().max(2000).optional().nullable(),
+  category: z.string().trim().max(60).default('GENERAL'),
+  required: z.boolean().default(true),
+  dueDate: z.string().datetime().optional().nullable(),
+});
+
+export const UpdateOnboardingTaskStatusSchema = z.object({
+  status: z.enum(['PENDING', 'COMPLETED', 'WAIVED']),
+});
+
+export type CreateOfferInput = z.infer<typeof CreateOfferSchema>;
+export type UpdateOfferInput = z.infer<typeof UpdateOfferSchema>;
+export type RescindOfferInput = z.infer<typeof RescindOfferSchema>;
+export type AcceptOfferInput = z.infer<typeof AcceptOfferSchema>;
+export type DeclineOfferInput = z.infer<typeof DeclineOfferSchema>;
+export type CreateOnboardingTaskInput = z.infer<typeof CreateOnboardingTaskSchema>;
+export type UpdateOnboardingTaskStatusInput = z.infer<typeof UpdateOnboardingTaskStatusSchema>;
+
+
 
 
 

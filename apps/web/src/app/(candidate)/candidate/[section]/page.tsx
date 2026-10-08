@@ -1,11 +1,19 @@
 import { notFound } from 'next/navigation';
 import { ShellPage } from '@/components/shell-page';
-import { getCandidateProfile, getCandidateApplications, getCandidateSavedJobs, getCandidateInterviews } from '@/lib/api';
+import {
+  getCandidateProfile,
+  getCandidateApplications,
+  getCandidateSavedJobs,
+  getCandidateInterviews,
+  getCandidateOffers,
+  getCandidateOnboarding,
+} from '@/lib/api';
 import { CandidateProfileForm } from '@/components/candidate-profile-form';
 import { CandidateResumeManager } from '@/components/candidate-resume-manager';
 import { CandidateApplicationsList } from '@/components/candidate-applications-list';
 import { CandidateSavedJobs } from '@/components/candidate-saved-jobs';
 import { CandidateInterviews } from '@/components/candidate-interviews';
+import { CandidateOffers } from '@/components/candidate-offers';
 
 const pages: Record<string, { title: string; description: string }> = {
   profile: {
@@ -20,6 +28,10 @@ const pages: Record<string, { title: string; description: string }> = {
   interviews: {
     title: 'Your interviews',
     description: 'Scheduled video rounds and conversations with hiring teams.',
+  },
+  offers: {
+    title: 'Your offers & onboarding',
+    description: 'Review job offers, submit digital signatures, and track onboarding checklists.',
   },
   saved: { title: 'Saved jobs', description: 'Keep interesting opportunities close.' },
   resume: {
@@ -117,6 +129,28 @@ export default async function CandidateSection({
           <p className="text-sm text-muted-foreground">{page.description}</p>
         </div>
         <CandidateInterviews initialInterviews={interviewData.items} />
+      </div>
+    );
+  }
+
+  if (section === 'offers') {
+    const [offerData, onboardData] = await Promise.all([
+      getCandidateOffers(),
+      getCandidateOnboarding(),
+    ]);
+    return (
+      <div className="space-y-6">
+        <div>
+          <p className="text-xs font-semibold tracking-wider uppercase text-primary mb-1">
+            OFFERS & ONBOARDING
+          </p>
+          <h1 className="text-2xl font-bold tracking-tight text-foreground">{page.title}</h1>
+          <p className="text-sm text-muted-foreground">{page.description}</p>
+        </div>
+        <CandidateOffers
+          initialOffers={offerData.items}
+          initialOnboardingTasks={onboardData.tasks}
+        />
       </div>
     );
   }

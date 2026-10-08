@@ -18,6 +18,10 @@ describe('RBAC - Workspace permissions', () => {
       'interviews.write',
       'assessments.read',
       'assessments.write',
+      'offers.read',
+      'offers.write',
+      'onboarding.read',
+      'onboarding.write',
     ];
     for (const action of actions) {
       expect(canWorkspace('OWNER', action)).toBe(true);
@@ -30,6 +34,8 @@ describe('RBAC - Workspace permissions', () => {
     expect(canWorkspace('ADMIN', 'jobs.write')).toBe(true);
     expect(canWorkspace('ADMIN', 'interviews.write')).toBe(true);
     expect(canWorkspace('ADMIN', 'assessments.write')).toBe(true);
+    expect(canWorkspace('ADMIN', 'offers.write')).toBe(true);
+    expect(canWorkspace('ADMIN', 'onboarding.write')).toBe(true);
   });
 
   it('restricts RECRUITER to recruitment actions without workspace administration', () => {
@@ -39,6 +45,8 @@ describe('RBAC - Workspace permissions', () => {
     expect(canWorkspace('RECRUITER', 'applications.write')).toBe(true);
     expect(canWorkspace('RECRUITER', 'interviews.write')).toBe(true);
     expect(canWorkspace('RECRUITER', 'assessments.write')).toBe(true);
+    expect(canWorkspace('RECRUITER', 'offers.write')).toBe(true);
+    expect(canWorkspace('RECRUITER', 'onboarding.write')).toBe(true);
     expect(canWorkspace('RECRUITER', 'workspace.manage')).toBe(false);
     expect(canWorkspace('RECRUITER', 'workspace.members.invite')).toBe(false);
     expect(canWorkspace('RECRUITER', 'workspace.members.manage')).toBe(false);
@@ -52,11 +60,15 @@ describe('RBAC - Workspace permissions', () => {
     expect(canWorkspace('VIEWER', 'applications.read')).toBe(true);
     expect(canWorkspace('VIEWER', 'interviews.read')).toBe(true);
     expect(canWorkspace('VIEWER', 'assessments.read')).toBe(true);
+    expect(canWorkspace('VIEWER', 'offers.read')).toBe(true);
+    expect(canWorkspace('VIEWER', 'onboarding.read')).toBe(true);
 
     expect(canWorkspace('VIEWER', 'jobs.write')).toBe(false);
     expect(canWorkspace('VIEWER', 'applications.write')).toBe(false);
     expect(canWorkspace('VIEWER', 'interviews.write')).toBe(false);
     expect(canWorkspace('VIEWER', 'assessments.write')).toBe(false);
+    expect(canWorkspace('VIEWER', 'offers.write')).toBe(false);
+    expect(canWorkspace('VIEWER', 'onboarding.write')).toBe(false);
     expect(canWorkspace('VIEWER', 'workspace.manage')).toBe(false);
     expect(canWorkspace('VIEWER', 'workspace.members.invite')).toBe(false);
   });

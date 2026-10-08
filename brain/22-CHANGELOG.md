@@ -1,5 +1,45 @@
 # Changelog
 
+## 2026-10-08 — Phase 9: Offers, Digital E-Signatures & Onboarding Checklist
+
+- Expanded workspace RBAC permissions (`packages/auth`):
+  - Added `offers.read`, `offers.write`, `onboarding.read`, and `onboarding.write` to `WorkspaceAction`.
+  - Configured workspace grants for `OWNER`, `ADMIN`, `RECRUITER`, and `VIEWER`.
+  - 5 unit tests passing in `packages/auth/src/index.test.ts`.
+- Database schema expansion (`packages/database/prisma/schema.prisma`):
+  - Added enums: `OfferStatus` (`DRAFT`, `PENDING_APPROVAL`, `SENT`, `ACCEPTED`, `DECLINED`, `EXPIRED`, `RESCINDED`), `OnboardingTaskStatus` (`PENDING`, `COMPLETED`, `WAIVED`).
+  - Added models:
+    - `JobOffer` (`[workspaceId, status]` index, `applicationId` index, compensation bands, start dates, custom letter content, approval tracking, and cancellation reasons).
+    - `OfferSignature` (`offerId` unique constraint, legal signer name, email, typed signature text, IP address, user-agent, signed timestamp).
+    - `OnboardingTask` (`workspaceId` and `offerId` indices, category tags, required flags, status, due date, completion audit).
+  - Regenerated Prisma Client v6.19.3 via `pnpm db:generate`.
+- Validation contracts (`packages/validation`):
+  - Added schemas: `CreateOfferSchema`, `UpdateOfferSchema`, `RescindOfferSchema`, `AcceptOfferSchema`, `DeclineOfferSchema`, `CreateOnboardingTaskSchema`, `UpdateOnboardingTaskStatusSchema`.
+  - 39 unit tests passing in `packages/validation/src/index.test.ts`.
+- NestJS API implementation (`apps/api/src/modules/offers.module.ts`):
+  - Implemented `OffersService` providing offer drafting, approval workflows, candidate dispatching with application stage transition to `OFFER`, rescind audits, digital acceptance with e-signature certificate generation, automatic onboarding checklist seeding, and candidate task completion.
+  - Added `WorkspaceOffersController` (`GET/POST /workspaces/:slug/offers`, `GET/PATCH /workspaces/:slug/offers/:offerId`, `POST .../approve`, `POST .../send`, `POST .../rescind`, `POST .../tasks`, `PATCH .../tasks/:taskId`).
+  - Added `CandidateOffersController` (`GET /candidates/me/offers`, `GET .../:offerId`, `POST .../accept`, `POST .../decline`).
+  - Added `CandidateOnboardingController` (`GET /candidates/me/onboarding`, `PATCH /tasks/:taskId/complete`).
+  - Enforced multi-tenant isolation and granular RBAC checks on all employer operations via `WorkspaceAccessService`.
+  - Added 11 unit tests in `apps/api/src/modules/offers.service.test.ts` (72 API unit tests passing).
+- Next.js 16 Frontend experiences (`apps/web`):
+  - Added client helpers and TypeScript types in `apps/web/src/lib/api.ts`: `getWorkspaceOffers`, `getWorkspaceOfferDetails`, `getCandidateOffers`, `getCandidateOfferDetails`, `getCandidateOnboarding`.
+  - Built `WorkspaceOffers` (`apps/web/src/components/workspace-offers.tsx`):
+    - Draft job offer modal with compensation details (base, bonus, equity, sign-on), start/expiry dates, work location, and markdown letter.
+    - Status tabs (`ALL`, `DRAFT`, `SENT`, `ACCEPTED`, `DECLINED`, `RESCINDED`).
+    - Offer cards with compensation breakdown, e-signature badges, and onboarding task counters.
+    - Approval flow, send offer flow, and rescind modal requiring explicit reason.
+    - Onboarding checklist manager with task creation and status toggles.
+  - Built `CandidateOffers` (`apps/web/src/components/candidate-offers.tsx`):
+    - Received offers list with compensation overview and status badges.
+    - Review & Sign modal with complete letter preview, legal ESIGN consent checkbox, full legal name and typed signature inputs.
+    - Decline offer modal with reason input.
+    - Integrated new-hire onboarding checklist card with live progress bar and task completion checkboxes.
+  - Wired into `/workspace/[workspaceSlug]/[section]` (offers tab), `/candidate/[section]` (offers tab), and updated navigation shells in `workspace/[workspaceSlug]/layout.tsx` and `candidate/layout.tsx`.
+- Recorded ADR-022 in `brain/21-DECISIONS.md`.
+- Verified quality gates across all 14 packages: 143 unit tests passing, zero ESLint errors, clean typecheck, and full production Next.js/NestJS builds.
+
 ## 2026-10-07 — Phase 8: Interviews, Scorecards & Assessment Management
 
 - Expanded workspace RBAC permissions (`packages/auth`):
