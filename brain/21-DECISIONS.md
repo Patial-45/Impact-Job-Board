@@ -103,6 +103,23 @@ Alternatives: Relying exclusively on pure LLM prompts to judge fit; using non-ex
 
 Consequence: Recruiter interfaces provide clear visibility into both deterministic skills matches and semantic similarity scores with instant on-demand recalculation; CI and testing environments run zero-cost deterministic embeddings offline.
 
+## ADR-021 — Structured Interview Scheduling, Role-Based Scorecards, and Assessment Management
+
+Decision: Implement a multi-tenant interview scheduling, participant coordination, and structured scorecard evaluation engine alongside assessment tracking.
+1. Multi-Tenancy & RBAC: Enforce granular workspace actions `interviews.read`, `interviews.write`, `assessments.read`, and `assessments.write` across all employer interactions via `WorkspaceAccessService`. Candidate access is restricted strictly to their own interviews via `getCandidateInterviews`.
+2. Relational Schema: Store interviews in `Interview` (scoped to `workspaceId` and `applicationId`), participants in `InterviewParticipant` (with unique `[interviewId, userId]`), structured scorecards in `InterviewScorecard` (with unique `[interviewId, evaluatorId]`), and assessments in `Assessment` and `AssessmentInvite` (with unique secure verification tokens).
+3. Evaluator Accountability: Forbid ungrounded or anonymous ratings. Every scorecard records the specific evaluator's hiring recommendation (`STRONG_HIRE`, `HIRE`, `NO_HIRE`, `STRONG_NO_HIRE`), multi-dimensional ratings (1-5 across overall, technical, communication, leadership, and culture), strengths, weaknesses, and private evaluation notes. Scorecard submission automatically transitions scheduled interviews to `COMPLETED`.
+4. Cancellation Audit: Interview cancellations require an explicit cancellation reason and update status to `CANCELLED`.
+
+Context: Phase 8 establishes the interview coordination and evaluator assessment loop, ensuring hiring teams evaluate candidates using objective, structured rubrics before reaching offer stages.
+
+Reasoning: Guarantees objective, structured hiring criteria, eliminates interview bias through standardized rubrics, preserves tenant boundary isolation, and ensures candidates only receive relevant schedule details without leaking internal evaluator scorecards.
+
+Alternatives: Storing interviews and notes as unstructured free-text comments on the application; allowing anonymous or unassigned scorecards; coupling video conferencing tools tightly before defining core scheduling models.
+
+Consequence: Hiring teams have structured scorecard archives for every interviewed candidate; candidate dashboard provides clear calendar tracking for scheduled interview sessions.
+
+
 
 
 

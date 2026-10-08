@@ -10,6 +10,10 @@ export {
   JobEmploymentType,
   JobExperienceLevel,
   ApplicationStatus,
+  InterviewType,
+  InterviewStatus,
+  ScorecardRecommendation,
+  AssessmentInviteStatus,
 } from '@prisma/client';
 export type {
   User,
@@ -35,6 +39,11 @@ export type {
   CandidateProfileEmbedding,
   JobEmbedding,
   MatchResult,
+  Interview,
+  InterviewParticipant,
+  InterviewScorecard,
+  Assessment,
+  AssessmentInvite,
 } from '@prisma/client';
 
 

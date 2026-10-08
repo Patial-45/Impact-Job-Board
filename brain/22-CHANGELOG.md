@@ -1,5 +1,45 @@
 # Changelog
 
+## 2026-10-07 — Phase 8: Interviews, Scorecards & Assessment Management
+
+- Expanded workspace RBAC permissions (`packages/auth`):
+  - Added `interviews.read`, `interviews.write`, `assessments.read`, and `assessments.write` to `WorkspaceAction`.
+  - Configured workspace grants for `OWNER`, `ADMIN`, `RECRUITER`, and `VIEWER`.
+  - 5 unit tests passing in `packages/auth/src/index.test.ts`.
+- Database schema expansion (`packages/database/prisma/schema.prisma`):
+  - Added enums: `InterviewType` (`SCREENING`, `TECHNICAL`, `BEHAVIORAL`, `EXECUTIVE`, `FINAL`), `InterviewStatus` (`SCHEDULED`, `COMPLETED`, `CANCELLED`, `NO_SHOW`), `ScorecardRecommendation` (`STRONG_HIRE`, `HIRE`, `NO_HIRE`, `STRONG_NO_HIRE`), `AssessmentInviteStatus` (`PENDING`, `IN_PROGRESS`, `COMPLETED`, `EXPIRED`).
+  - Added models:
+    - `Interview` (`[workspaceId, scheduledAt]` index, scoped to `workspaceId` and `applicationId`).
+    - `InterviewParticipant` (`[interviewId, userId]` unique constraint, role tracking).
+    - `InterviewScorecard` (`[interviewId, evaluatorId]` unique constraint, recommendation, overall and dimensional ratings 1-5, strengths, weaknesses, evaluator notes).
+    - `Assessment` (workspace-scoped tests with passing scores and time limits).
+    - `AssessmentInvite` (`[assessmentId, applicationId]` unique constraint, secure invitation token, score, status tracking).
+  - Regenerated Prisma Client v6.19.3.
+- Validation contracts (`packages/validation`):
+  - Added schemas: `CreateInterviewSchema`, `UpdateInterviewSchema`, `CancelInterviewSchema`, `SubmitScorecardSchema`, `CreateAssessmentSchema`, `InviteAssessmentSchema`, `CompleteAssessmentSchema`.
+  - 35 unit tests passing in `packages/validation/src/index.test.ts`.
+- NestJS API implementation (`apps/api/src/modules/interviews.module.ts`):
+  - Implemented `InterviewsService` providing interview scheduling, participant coordination, cancellation audit trails, detailed interview fetching with scorecard aggregation, and candidate-scoped interview schedule listing.
+  - Implemented `AssessmentsService` providing assessment template creation, candidate assessment invitations, and assessment completion with score tracking.
+  - Added `WorkspaceInterviewsController` (`GET/POST /workspaces/:slug/interviews`, `GET/PATCH /workspaces/:slug/interviews/:interviewId`, `POST .../cancel`, `POST .../scorecard`).
+  - Added `WorkspaceAssessmentsController` (`GET/POST /workspaces/:slug/assessments`, `POST .../invite`).
+  - Added `CandidateInterviewsController` (`GET /candidates/me/interviews`).
+  - Enforced multi-tenant isolation and granular RBAC checks on all employer operations via `WorkspaceAccessService`.
+  - Added 9 unit tests in `apps/api/src/modules/interviews.service.test.ts` (61 API unit tests passing).
+- Next.js 16 Frontend experiences (`apps/web`):
+  - Added client helpers and TypeScript types in `apps/web/src/lib/api.ts`: `getWorkspaceInterviews`, `getWorkspaceInterviewDetails`, `getCandidateInterviews`, `getWorkspaceAssessments`.
+  - Built `WorkspaceInterviews` (`apps/web/src/components/workspace-interviews.tsx`) for employer interview management:
+    - Schedule interview modal with interview type, date/time, duration, timezone, and meeting location/link.
+    - Status filter tabs (`ALL`, `SCHEDULED`, `COMPLETED`, `CANCELLED`).
+    - Interview cards with candidate info, participants, scorecard counters, and status badges.
+    - Interactive 1-5 rating scorecard evaluation modal with recommendation dropdown, dimensional rubric (technical, communication, culture), strengths/weaknesses inputs, and evaluator notes.
+    - Cancellation flow requiring explicit reason.
+  - Built `CandidateInterviews` (`apps/web/src/components/candidate-interviews.tsx`) for candidate dashboard:
+    - Scheduled interview cards with company info, role title, formatted date/time, duration, meeting location, and status.
+  - Wired into `/workspace/[workspaceSlug]/[section]` (interviews tab) and `/candidate/[section]` (interviews tab), and updated candidate sidebar navigation.
+- Recorded ADR-021 in `brain/21-DECISIONS.md`.
+- Verified quality gates across all 14 packages: 113 unit tests passing, zero ESLint errors, clean typecheck, and full production Next.js/NestJS builds.
+
 ## 2026-10-06 — Phase 7: AI Matching & Semantic Embeddings
 
 - Built `@executive-match/ai` package:

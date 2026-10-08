@@ -4,7 +4,8 @@ import { ShellPage } from '@/components/shell-page';
 import { WorkspaceTeam } from '@/components/workspace-team';
 import { WorkspaceJobs } from '@/components/workspace-jobs';
 import { CandidateSearch } from '@/components/candidate-search';
-import { getWorkspaceJobs, searchWorkspaceCandidates } from '@/lib/api';
+import { WorkspaceInterviews } from '@/components/workspace-interviews';
+import { getWorkspaceJobs, searchWorkspaceCandidates, getWorkspaceInterviews } from '@/lib/api';
 import { Button, Card, Badge } from '@executive-match/ui';
 
 const pages: Record<string, { title: string; description: string }> = {
@@ -116,6 +117,26 @@ export default async function WorkspaceSection({
             ))}
           </div>
         )}
+      </main>
+    );
+  }
+
+  if (section === 'interviews') {
+    const interviewData = await getWorkspaceInterviews(workspaceSlug);
+    return (
+      <main className="shell-page space-y-6">
+        <header className="shell-header" style={{ marginBottom: '32px' }}>
+          <span className="ui-eyebrow">INTERVIEWS & ASSESSMENTS</span>
+          <h1>Interview Coordination & Scorecards</h1>
+          <p>
+            Schedule screening calls, technical evaluations, and leadership panels. Review evaluator
+            scorecards and consolidate structured candidate debriefs.
+          </p>
+        </header>
+        <WorkspaceInterviews
+          workspaceSlug={workspaceSlug}
+          initialInterviews={interviewData.items}
+        />
       </main>
     );
   }

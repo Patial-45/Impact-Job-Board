@@ -30,6 +30,13 @@ import {
   SaveCandidateSchema,
   AiMatchQuerySchema,
   RecomputeAiMatchSchema,
+  CreateInterviewSchema,
+  UpdateInterviewSchema,
+  CancelInterviewSchema,
+  SubmitScorecardSchema,
+  CreateAssessmentSchema,
+  InviteAssessmentSchema,
+  CompleteAssessmentSchema,
 } from './index';
 
 describe('validation - Authentication schemas', () => {
@@ -459,6 +466,119 @@ describe('validation - Candidate Search & Matching schemas', () => {
     ).toBe(false);
   });
 });
+
+describe('validation - Interview and Assessment schemas', () => {
+  it('validates interview creation payload', () => {
+    const valid = {
+      applicationId: 'a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11',
+      title: 'Technical Round 1',
+      type: 'TECHNICAL',
+      scheduledAt: '2026-10-15T14:00:00.000Z',
+      durationMinutes: 60,
+      location: 'https://meet.google.com/abc-defg-hij',
+      timezone: 'America/New_York',
+      notes: 'Focus on distributed caching and concurrency patterns.',
+      participantUserIds: ['b0eebc99-9c0b-4ef8-bb6d-6bb9bd380a22'],
+    };
+    expect(CreateInterviewSchema.safeParse(valid).success).toBe(true);
+
+    // Rejects invalid date
+    expect(
+      CreateInterviewSchema.safeParse({
+        ...valid,
+        scheduledAt: 'invalid-date',
+      }).success,
+    ).toBe(false);
+
+    // Rejects duration < 15 min
+    expect(
+      CreateInterviewSchema.safeParse({
+        ...valid,
+        durationMinutes: 10,
+      }).success,
+    ).toBe(false);
+  });
+
+  it('validates interview update and cancellation', () => {
+    expect(
+      UpdateInterviewSchema.safeParse({
+        title: 'Rescheduled Senior Engineering Panel',
+        status: 'RESCHEDULED',
+        durationMinutes: 45,
+      }).success,
+    ).toBe(true);
+
+    expect(
+      CancelInterviewSchema.safeParse({
+        cancellationReason: 'Candidate requested postponement due to travel.',
+      }).success,
+    ).toBe(true);
+  });
+
+  it('validates scorecard submission', () => {
+    const valid = {
+      recommendation: 'STRONG_HIRE',
+      overallRating: 5,
+      technicalRating: 5,
+      communicationRating: 4,
+      leadershipRating: 4,
+      cultureRating: 5,
+      strengths: 'Outstanding grasp of systems architecture and algorithmic design.',
+      weaknesses: 'Minimal prior experience with Kubernetes on bare metal.',
+      notes: 'Strong candidate for our Platform team.',
+    };
+    expect(SubmitScorecardSchema.safeParse(valid).success).toBe(true);
+
+    // Rejects ratings outside 1-5
+    expect(
+      SubmitScorecardSchema.safeParse({
+        ...valid,
+        overallRating: 6,
+      }).success,
+    ).toBe(false);
+
+    expect(
+      SubmitScorecardSchema.safeParse({
+        ...valid,
+        overallRating: 0,
+      }).success,
+    ).toBe(false);
+  });
+
+  it('validates assessment creation, invite, and completion', () => {
+    expect(
+      CreateAssessmentSchema.safeParse({
+        title: 'Senior Systems Engineering Assessment',
+        description: 'Timed evaluation covering SQL optimization and high throughput queues.',
+        timeLimitMinutes: 60,
+        passingScore: 75,
+      }).success,
+    ).toBe(true);
+
+    expect(
+      InviteAssessmentSchema.safeParse({
+        assessmentId: 'a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11',
+        applicationId: 'b0eebc99-9c0b-4ef8-bb6d-6bb9bd380a22',
+        expiresInDays: 14,
+      }).success,
+    ).toBe(true);
+
+    expect(
+      CompleteAssessmentSchema.safeParse({
+        score: 88,
+        feedback: 'Candidate successfully passed performance and optimization benchmarks.',
+      }).success,
+    ).toBe(true);
+
+    // Rejects score > 100
+    expect(
+      CompleteAssessmentSchema.safeParse({
+        score: 110,
+      }).success,
+    ).toBe(false);
+  });
+});
+
 
 
 

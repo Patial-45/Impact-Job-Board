@@ -601,6 +601,185 @@ export async function recomputeWorkspaceJobAiMatches(
   }
 }
 
+export type InterviewParticipantData = {
+  id: string;
+  userId: string;
+  role: string;
+  user?: {
+    id: string;
+    email: string;
+    profile?: { displayName: string | null };
+  };
+};
+
+export type InterviewScorecardData = {
+  id: string;
+  evaluatorId: string;
+  recommendation: 'STRONG_HIRE' | 'HIRE' | 'NO_HIRE' | 'STRONG_NO_HIRE';
+  overallRating: number;
+  technicalRating?: number | null;
+  communicationRating?: number | null;
+  leadershipRating?: number | null;
+  cultureRating?: number | null;
+  strengths?: string | null;
+  weaknesses?: string | null;
+  notes?: string | null;
+  submittedAt: string;
+  evaluator?: {
+    id: string;
+    email: string;
+    profile?: { displayName: string | null };
+  };
+};
+
+export type InterviewItem = {
+  id: string;
+  workspaceId: string;
+  applicationId: string;
+  title: string;
+  type: 'SCREENING' | 'TECHNICAL' | 'BEHAVIORAL' | 'EXECUTIVE' | 'FINAL';
+  status: 'SCHEDULED' | 'COMPLETED' | 'CANCELLED' | 'RESCHEDULED' | 'NO_SHOW';
+  scheduledAt: string;
+  durationMinutes: number;
+  location?: string | null;
+  timezone: string;
+  notes?: string | null;
+  cancellationReason?: string | null;
+  application: {
+    id: string;
+    currentStage: string;
+    status: string;
+    candidateProfile: {
+      id: string;
+      headline?: string | null;
+      location?: string | null;
+      user?: {
+        email: string;
+        profile?: { displayName: string | null };
+      };
+    };
+    job: {
+      id: string;
+      title: string;
+      slug: string;
+      company?: { name: string; slug: string };
+    };
+  };
+  participants: InterviewParticipantData[];
+  scorecards: InterviewScorecardData[];
+};
+
+export type CandidateInterviewItem = {
+  id: string;
+  title: string;
+  type: string;
+  status: string;
+  scheduledAt: string;
+  durationMinutes: number;
+  location?: string | null;
+  timezone: string;
+  application: {
+    id: string;
+    job: {
+      id: string;
+      title: string;
+      slug: string;
+      company?: { name: string; slug: string };
+      workspace?: { company?: { name: string; slug: string } | null };
+    };
+  };
+};
+
+export type AssessmentItem = {
+  id: string;
+  workspaceId: string;
+  title: string;
+  description?: string | null;
+  timeLimitMinutes?: number | null;
+  passingScore?: number | null;
+  createdAt: string;
+  _count?: { invites: number };
+};
+
+export async function getWorkspaceInterviews(
+  workspaceSlug: string,
+  params?: { status?: string; type?: string },
+): Promise<{ items: InterviewItem[]; total: number }> {
+  const cookie = (await cookies()).toString();
+  try {
+    const cleanParams: Record<string, string> = {};
+    if (params?.status) cleanParams.status = params.status;
+    if (params?.type) cleanParams.type = params.type;
+    const query = new URLSearchParams(cleanParams).toString();
+
+    const response = await fetch(
+      `${apiUrl}/workspaces/${encodeURIComponent(workspaceSlug)}/interviews${query ? `?${query}` : ''}`,
+      {
+        headers: { cookie },
+        cache: 'no-store',
+      },
+    );
+    if (!response.ok) return { items: [], total: 0 };
+    return await response.json();
+  } catch {
+    return { items: [], total: 0 };
+  }
+}
+
+export async function getWorkspaceInterviewDetails(
+  workspaceSlug: string,
+  interviewId: string,
+): Promise<{ interview: InterviewItem } | null> {
+  const cookie = (await cookies()).toString();
+  try {
+    const response = await fetch(
+      `${apiUrl}/workspaces/${encodeURIComponent(workspaceSlug)}/interviews/${encodeURIComponent(interviewId)}`,
+      {
+        headers: { cookie },
+        cache: 'no-store',
+      },
+    );
+    if (!response.ok) return null;
+    return await response.json();
+  } catch {
+    return null;
+  }
+}
+
+export async function getCandidateInterviews(): Promise<{ items: CandidateInterviewItem[] }> {
+  const cookie = (await cookies()).toString();
+  try {
+    const response = await fetch(`${apiUrl}/candidates/me/interviews`, {
+      headers: { cookie },
+      cache: 'no-store',
+    });
+    if (!response.ok) return { items: [] };
+    return await response.json();
+  } catch {
+    return { items: [] };
+  }
+}
+
+export async function getWorkspaceAssessments(
+  workspaceSlug: string,
+): Promise<{ items: AssessmentItem[] }> {
+  const cookie = (await cookies()).toString();
+  try {
+    const response = await fetch(
+      `${apiUrl}/workspaces/${encodeURIComponent(workspaceSlug)}/assessments`,
+      {
+        headers: { cookie },
+        cache: 'no-store',
+      },
+    );
+    if (!response.ok) return { items: [] };
+    return await response.json();
+  } catch {
+    return { items: [] };
+  }
+}
+
+
 
 
 

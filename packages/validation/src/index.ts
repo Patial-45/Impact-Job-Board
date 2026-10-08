@@ -233,6 +233,64 @@ export const RecomputeAiMatchSchema = z.object({
   force: z.boolean().default(false).optional(),
 });
 
+export const CreateInterviewSchema = z.object({
+  applicationId: z.string().uuid(),
+  title: z.string().trim().min(2).max(160),
+  type: z.enum(['SCREENING', 'TECHNICAL', 'BEHAVIORAL', 'EXECUTIVE', 'FINAL']).default('TECHNICAL'),
+  scheduledAt: z.string().datetime({ message: 'Must be a valid ISO 8601 date string' }),
+  durationMinutes: z.coerce.number().int().min(15).max(360).default(45),
+  location: z.string().trim().max(512).optional().nullable(),
+  timezone: z.string().trim().max(64).default('UTC'),
+  notes: z.string().trim().max(5000).optional().nullable(),
+  participantUserIds: z.array(z.string().uuid()).optional(),
+});
+
+export const UpdateInterviewSchema = z.object({
+  title: z.string().trim().min(2).max(160).optional(),
+  type: z.enum(['SCREENING', 'TECHNICAL', 'BEHAVIORAL', 'EXECUTIVE', 'FINAL']).optional(),
+  status: z.enum(['SCHEDULED', 'COMPLETED', 'CANCELLED', 'RESCHEDULED', 'NO_SHOW']).optional(),
+  scheduledAt: z.string().datetime().optional(),
+  durationMinutes: z.coerce.number().int().min(15).max(360).optional(),
+  location: z.string().trim().max(512).optional().nullable(),
+  timezone: z.string().trim().max(64).optional(),
+  notes: z.string().trim().max(5000).optional().nullable(),
+});
+
+export const CancelInterviewSchema = z.object({
+  cancellationReason: z.string().trim().min(1).max(255).optional().nullable(),
+});
+
+export const SubmitScorecardSchema = z.object({
+  recommendation: z.enum(['STRONG_HIRE', 'HIRE', 'NO_HIRE', 'STRONG_NO_HIRE']),
+  overallRating: z.coerce.number().int().min(1).max(5),
+  technicalRating: z.coerce.number().int().min(1).max(5).optional().nullable(),
+  communicationRating: z.coerce.number().int().min(1).max(5).optional().nullable(),
+  leadershipRating: z.coerce.number().int().min(1).max(5).optional().nullable(),
+  cultureRating: z.coerce.number().int().min(1).max(5).optional().nullable(),
+  strengths: z.string().trim().max(5000).optional().nullable(),
+  weaknesses: z.string().trim().max(5000).optional().nullable(),
+  notes: z.string().trim().max(5000).optional().nullable(),
+});
+
+export const CreateAssessmentSchema = z.object({
+  title: z.string().trim().min(3).max(160),
+  description: z.string().trim().max(5000).optional().nullable(),
+  timeLimitMinutes: z.coerce.number().int().min(5).max(360).optional().nullable(),
+  passingScore: z.coerce.number().int().min(1).max(100).optional().nullable(),
+  questions: z.any().optional(),
+});
+
+export const InviteAssessmentSchema = z.object({
+  assessmentId: z.string().uuid(),
+  applicationId: z.string().uuid(),
+  expiresInDays: z.coerce.number().int().min(1).max(60).default(7),
+});
+
+export const CompleteAssessmentSchema = z.object({
+  score: z.coerce.number().int().min(0).max(100),
+  feedback: z.string().trim().max(5000).optional().nullable(),
+});
+
 export type RegisterInput = z.infer<typeof RegisterSchema>;
 export type LoginInput = z.infer<typeof LoginSchema>;
 export type VerifyEmailConfirmInput = z.infer<typeof VerifyEmailConfirmSchema>;
@@ -265,6 +323,14 @@ export type CandidateSearchQueryInput = z.infer<typeof CandidateSearchQuerySchem
 export type SaveCandidateInput = z.infer<typeof SaveCandidateSchema>;
 export type AiMatchQueryInput = z.infer<typeof AiMatchQuerySchema>;
 export type RecomputeAiMatchInput = z.infer<typeof RecomputeAiMatchSchema>;
+export type CreateInterviewInput = z.infer<typeof CreateInterviewSchema>;
+export type UpdateInterviewInput = z.infer<typeof UpdateInterviewSchema>;
+export type CancelInterviewInput = z.infer<typeof CancelInterviewSchema>;
+export type SubmitScorecardInput = z.infer<typeof SubmitScorecardSchema>;
+export type CreateAssessmentInput = z.infer<typeof CreateAssessmentSchema>;
+export type InviteAssessmentInput = z.infer<typeof InviteAssessmentSchema>;
+export type CompleteAssessmentInput = z.infer<typeof CompleteAssessmentSchema>;
+
 
 
 

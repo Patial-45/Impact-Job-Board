@@ -1,8 +1,8 @@
 # Current Development State
 
-Last Updated: 2026-10-06
+Last Updated: 2026-10-07
 
-Current Phase: Phase 7 Completed; Next Phase: Phase 8 — Interviews & Assessments (Roadmap item 8)
+Current Phase: Phase 8 Completed; Next Phase: Phase 9 — Offers, E-Signatures & Onboarding (Roadmap item 9)
 
 Current Branch: `main` (tracking `origin/main` at `https://github.com/Patial-45/Impact-Job-Board.git`)
 
@@ -11,23 +11,23 @@ Current Branch: `main` (tracking `origin/main` at `https://github.com/Patial-45/
 - All 24 Brain architecture and product documents.
 - pnpm monorepo, Next.js public/protected route structure, NestJS API structure.
 - Toolchain verification passed: `pnpm install`, `pnpm db:generate`, `pnpm lint`, `pnpm typecheck`, `pnpm test`, and `pnpm build`.
-- Prisma schema for identity, workspace tenancy, company, candidate profiles, jobs, applications, pipeline stage history, recruiter notes, saved candidate/job relations, candidate/job embeddings, and hybrid match results.
+- Prisma schema for identity, workspace tenancy, company, candidate profiles, jobs, applications, pipeline stage history, recruiter notes, saved candidate/job relations, candidate/job embeddings, hybrid match results, interviews, interview participants, interview scorecards, assessments, and assessment invites.
 - Phase 1 Design System & Public Shells (completed & verified).
 - Phase 2 Authentication, RBAC, Workspace Tenancy & Invitations (completed & verified).
 - Phase 3 Candidate Profiles & Resume Pipeline (completed & verified).
 - Phase 4 Company Profile, Job Requisition Management & Public Discovery (completed & verified).
 - Phase 5 Applications, Candidate Tracking & Recruiter ATS Kanban Pipeline (completed & verified).
 - Phase 6 Search and Matching Foundation & Candidate Discovery (completed & verified).
-- Phase 7 AI Matching & Semantic Embeddings (completed & verified):
-  - `@executive-match/ai`: Cosine similarity vector mathematics, deterministic 384-dimensional hashing embedding provider for zero-cost offline/CI testing, OpenAI embeddings (`text-embedding-3-small`) and LLM (`gpt-4o-mini`) provider adapters with fallback registry, text serializers for candidate profiles and job requisitions, and calibrated hybrid match scoring combining deterministic feature scoring (70%) and semantic dense vector similarity (30%). 12 unit tests passing.
-  - Database schema: `CandidateProfileEmbedding`, `JobEmbedding`, and `MatchResult` models with SHA-256 source hash caching, audit breakdowns, and unique constraints. Prisma Client v6.19.3 regenerated.
-  - Validation: `AiMatchQuerySchema` and `RecomputeAiMatchSchema` with 31 unit tests passing.
-  - Workers & Processing: Worker contracts (`CandidateEmbedPayload`, `JobEmbedPayload`, `MatchCalculatePayload`), BullMQ worker factory, and Redis connection parsing in `workers/processing`. 2 unit tests passing.
-  - NestJS API: `AiModule` with `AiService` providing cached profile/job embedding, hybrid scoring, candidate ranking against requisitions, on-demand recomputing with tenant authorization (`candidates.read`, `jobs.write`), and single candidate evaluation. 8 unit tests in `apps/api/src/modules/ai.service.test.ts` (52 API tests total passing).
-  - Recruiter Frontend (`apps/web`): Enhanced `CandidateSearch` with toggle for Deterministic vs. Semantic AI matching modes, requisition vector recomputation trigger, candidate cards showing hybrid AI fit badges and vector metrics, and rich Talent Dossier modal with 4-pillar breakdown, cosine similarity score, and instant single-candidate re-embedding.
-  - Monorepo Quality Gates: 104 tests passing across all packages, clean TypeScript compilation, zero ESLint errors, and complete Next.js (Turbopack) & NestJS (tsup) production builds.
+- Phase 7 AI Matching & Semantic Embeddings (completed & verified).
+- Phase 8 Interviews, Scorecards & Assessment Management (completed & verified):
+  - Workspace actions `interviews.read`, `interviews.write`, `assessments.read`, `assessments.write` added to `@executive-match/auth`.
+  - Database schema: `Interview`, `InterviewParticipant`, `InterviewScorecard`, `Assessment`, `AssessmentInvite` with relations and unique constraints. Prisma Client v6.19.3 regenerated.
+  - Validation schemas: `CreateInterviewSchema`, `UpdateInterviewSchema`, `CancelInterviewSchema`, `SubmitScorecardSchema`, `CreateAssessmentSchema`, `InviteAssessmentSchema`, `CompleteAssessmentSchema`. 35 unit tests passing.
+  - NestJS API: `InterviewsModule` with `InterviewsService`, `AssessmentsService`, `WorkspaceInterviewsController`, `WorkspaceAssessmentsController`, and `CandidateInterviewsController`. Tenant isolation enforced via `WorkspaceAccessService`. 9 unit tests in `interviews.service.test.ts` (61 API unit tests passing).
+  - Next.js Web: `WorkspaceInterviews` (scheduling modal, status tabs, cancellation flow, 1-5 rating scorecard evaluation modal) and `CandidateInterviews` (candidate dashboard schedule tracker), wired into `/workspace/[workspaceSlug]/[section]` and `/candidate/[section]`.
+  - Monorepo Quality Gates: 113 unit tests passing, zero ESLint errors, clean typecheck, and full Next.js/NestJS production builds.
 - Initial PostgreSQL migration (`packages/database/prisma/migrations/20260929_init`).
-- Published foundation, Phases 1-6 to GitHub: `https://github.com/Patial-45/Impact-Job-Board`.
+- Published foundation, Phases 1-7 to GitHub: `https://github.com/Patial-45/Impact-Job-Board`.
 
 ## Partially completed
 
@@ -36,15 +36,17 @@ Current Branch: `main` (tracking `origin/main` at `https://github.com/Patial-45/
 
 ## Not started
 
-Interviews and assessments (Phase 8), offers and e-signatures (Phase 9), billing and subscriptions (Phase 10), analytics and reporting (Phase 11).
+Offers and e-signatures (Phase 9), billing and subscriptions (Phase 10), analytics and reporting (Phase 11).
 
 ## Immediate next tasks
 
-1. Phase 8 (Interviews, Assessments & Video Screening):
-   - Review `brain/08-ASSESSMENTS-AND-INTERVIEWS.md`, `brain/01-PRODUCT-REQUIREMENTS.md`, and `brain/02-SYSTEM-ARCHITECTURE.md`.
-   - Database schema for interview scheduling, question banks, candidate responses, and evaluator scoring rubrics.
-   - Recruiter interview coordination & scheduling APIs with calendar invites.
-   - Structured scorecard evaluation and rating rubric interface.
+1. Phase 9 (Offers, E-Signatures & Onboarding):
+   - Review `brain/09-OFFERS-AND-ONBOARDING.md`, `brain/01-PRODUCT-REQUIREMENTS.md`, and `brain/02-SYSTEM-ARCHITECTURE.md`.
+   - Workspace RBAC actions: `offers.read`, `offers.write`.
+   - Database schema: `JobOffer`, `OfferDocument`, `OfferSignature` with offer status lifecycle (`DRAFT`, `PENDING_APPROVAL`, `SENT`, `ACCEPTED`, `DECLINED`, `EXPIRED`, `RESCINDED`).
+   - Validation contracts for offer creation, approval, delivery, candidate signature/acceptance, and decline.
+   - NestJS API: `OffersModule` with multi-tenant workspace controller and candidate offer signing controller.
+   - Frontend UI: Employer offer generator & signature tracking dashboard; Candidate offer review and digital signature acceptance flow.
 
 
 
