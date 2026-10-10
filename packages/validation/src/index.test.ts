@@ -44,6 +44,15 @@ import {
   DeclineOfferSchema,
   CreateOnboardingTaskSchema,
   UpdateOnboardingTaskStatusSchema,
+  AdminUserQuerySchema,
+  AdminUpdateUserRoleSchema,
+  AdminWorkspaceQuerySchema,
+  AdminAuditLogQuerySchema,
+  AdminSupportElevationSchema,
+  AdminModerateJobSchema,
+  AnalyticsQuerySchema,
+  UpdateSubscriptionSchema,
+  CancelSubscriptionSchema,
 } from './index';
 
 describe('validation - Authentication schemas', () => {
@@ -688,6 +697,129 @@ describe('validation - Offers and Onboarding schemas', () => {
         status: 'INVALID_STATUS',
       }).success,
     ).toBe(false);
+  });
+});
+
+describe('validation - Platform Admin schemas', () => {
+  it('validates admin user queries', () => {
+    expect(AdminUserQuerySchema.safeParse({}).success).toBe(true);
+    expect(
+      AdminUserQuerySchema.safeParse({
+        search: 'john@example.com',
+        globalRole: 'PLATFORM_ADMIN',
+        page: 2,
+        pageSize: 50,
+      }).success,
+    ).toBe(true);
+    expect(
+      AdminUserQuerySchema.safeParse({
+        globalRole: 'NON_EXISTENT_ROLE',
+      }).success,
+    ).toBe(false);
+  });
+
+  it('validates user role modifications', () => {
+    expect(AdminUpdateUserRoleSchema.safeParse({ globalRole: 'PLATFORM_ADMIN' }).success).toBe(true);
+    expect(AdminUpdateUserRoleSchema.safeParse({ globalRole: 'SUPER_ADMIN' }).success).toBe(true);
+    expect(AdminUpdateUserRoleSchema.safeParse({ globalRole: 'USER' }).success).toBe(true);
+    expect(AdminUpdateUserRoleSchema.safeParse({ globalRole: 'INVALID' }).success).toBe(false);
+  });
+
+  it('validates workspace queries', () => {
+    expect(AdminWorkspaceQuerySchema.safeParse({}).success).toBe(true);
+    expect(AdminWorkspaceQuerySchema.safeParse({ search: 'acme' }).success).toBe(true);
+  });
+
+  it('validates audit log queries', () => {
+    expect(AdminAuditLogQuerySchema.safeParse({}).success).toBe(true);
+    expect(
+      AdminAuditLogQuerySchema.safeParse({
+        action: 'USER_ROLE_UPDATED',
+        targetType: 'USER',
+      }).success,
+    ).toBe(true);
+  });
+
+  it('validates support elevation requests', () => {
+    expect(
+      AdminSupportElevationSchema.safeParse({
+        workspaceSlug: 'acme-corp',
+        reason: 'Investigating billing invoice synchronization issue for customer ticket #402',
+        scope: 'READ_ONLY',
+        durationHours: 4,
+      }).success,
+    ).toBe(true);
+
+    // Reason too short
+    expect(
+      AdminSupportElevationSchema.safeParse({
+        workspaceSlug: 'acme-corp',
+        reason: 'fix',
+      }).success,
+    ).toBe(false);
+
+    // Duration exceeding max 24 hours
+    expect(
+      AdminSupportElevationSchema.safeParse({
+        workspaceSlug: 'acme-corp',
+        reason: 'Investigating issue for customer ticket #402',
+        durationHours: 48,
+      }).success,
+    ).toBe(false);
+  });
+
+  it('validates admin job moderation', () => {
+    expect(
+      AdminModerateJobSchema.safeParse({
+        status: 'CLOSED',
+        moderationReason: 'Contains terms violating platform recruitment policy',
+      }).success,
+    ).toBe(true);
+
+    expect(
+      AdminModerateJobSchema.safeParse({
+        status: 'INVALID_STATUS',
+      }).success,
+    ).toBe(false);
+  });
+});
+
+describe('validation - Analytics & Billing schemas', () => {
+  it('validates analytics query date range', () => {
+    expect(AnalyticsQuerySchema.safeParse({}).success).toBe(true);
+    expect(
+      AnalyticsQuerySchema.safeParse({
+        from: '2026-01-01T00:00:00Z',
+        to: '2026-06-01T00:00:00Z',
+        jobId: '123e4567-e89b-12d3-a456-426614174000',
+      }).success,
+    ).toBe(true);
+    expect(
+      AnalyticsQuerySchema.safeParse({
+        from: 'not-a-date',
+      }).success,
+    ).toBe(false);
+  });
+
+  it('validates subscription updates and cancellations', () => {
+    expect(
+      UpdateSubscriptionSchema.safeParse({
+        tier: 'GROWTH',
+        billingCycle: 'ANNUAL',
+      }).success,
+    ).toBe(true);
+
+    expect(
+      UpdateSubscriptionSchema.safeParse({
+        tier: 'INVALID_TIER',
+      }).success,
+    ).toBe(false);
+
+    expect(
+      CancelSubscriptionSchema.safeParse({
+        reason: 'Downsizing hiring operations this quarter',
+      }).success,
+    ).toBe(true);
   });
 });
 

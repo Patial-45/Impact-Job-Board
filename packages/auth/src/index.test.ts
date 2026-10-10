@@ -22,6 +22,9 @@ describe('RBAC - Workspace permissions', () => {
       'offers.write',
       'onboarding.read',
       'onboarding.write',
+      'analytics.read',
+      'billing.read',
+      'billing.manage',
     ];
     for (const action of actions) {
       expect(canWorkspace('OWNER', action)).toBe(true);
@@ -36,6 +39,9 @@ describe('RBAC - Workspace permissions', () => {
     expect(canWorkspace('ADMIN', 'assessments.write')).toBe(true);
     expect(canWorkspace('ADMIN', 'offers.write')).toBe(true);
     expect(canWorkspace('ADMIN', 'onboarding.write')).toBe(true);
+    expect(canWorkspace('ADMIN', 'analytics.read')).toBe(true);
+    expect(canWorkspace('ADMIN', 'billing.read')).toBe(true);
+    expect(canWorkspace('ADMIN', 'billing.manage')).toBe(false);
   });
 
   it('restricts RECRUITER to recruitment actions without workspace administration', () => {
@@ -47,6 +53,9 @@ describe('RBAC - Workspace permissions', () => {
     expect(canWorkspace('RECRUITER', 'assessments.write')).toBe(true);
     expect(canWorkspace('RECRUITER', 'offers.write')).toBe(true);
     expect(canWorkspace('RECRUITER', 'onboarding.write')).toBe(true);
+    expect(canWorkspace('RECRUITER', 'analytics.read')).toBe(true);
+    expect(canWorkspace('RECRUITER', 'billing.read')).toBe(false);
+    expect(canWorkspace('RECRUITER', 'billing.manage')).toBe(false);
     expect(canWorkspace('RECRUITER', 'workspace.manage')).toBe(false);
     expect(canWorkspace('RECRUITER', 'workspace.members.invite')).toBe(false);
     expect(canWorkspace('RECRUITER', 'workspace.members.manage')).toBe(false);
@@ -62,7 +71,10 @@ describe('RBAC - Workspace permissions', () => {
     expect(canWorkspace('VIEWER', 'assessments.read')).toBe(true);
     expect(canWorkspace('VIEWER', 'offers.read')).toBe(true);
     expect(canWorkspace('VIEWER', 'onboarding.read')).toBe(true);
+    expect(canWorkspace('VIEWER', 'analytics.read')).toBe(true);
 
+    expect(canWorkspace('VIEWER', 'billing.read')).toBe(false);
+    expect(canWorkspace('VIEWER', 'billing.manage')).toBe(false);
     expect(canWorkspace('VIEWER', 'jobs.write')).toBe(false);
     expect(canWorkspace('VIEWER', 'applications.write')).toBe(false);
     expect(canWorkspace('VIEWER', 'interviews.write')).toBe(false);

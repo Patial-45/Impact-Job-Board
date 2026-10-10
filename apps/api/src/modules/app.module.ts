@@ -14,6 +14,9 @@ import { MatchingModule } from './matching.module';
 import { WorkspacesModule } from './workspaces.module';
 import { InterviewsModule } from './interviews.module';
 import { OffersModule } from './offers.module';
+import { AdminModule } from './admin.module';
+import { AnalyticsModule } from './analytics.module';
+import { BillingModule } from './billing.module';
 
 @Module({
   imports: [
@@ -31,6 +34,9 @@ import { OffersModule } from './offers.module';
     AiModule,
     InterviewsModule,
     OffersModule,
+    AdminModule,
+    AnalyticsModule,
+    BillingModule,
   ],
   providers: [{ provide: APP_GUARD, useClass: ThrottlerGuard }],
 })

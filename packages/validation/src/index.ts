@@ -396,6 +396,69 @@ export type DeclineOfferInput = z.infer<typeof DeclineOfferSchema>;
 export type CreateOnboardingTaskInput = z.infer<typeof CreateOnboardingTaskSchema>;
 export type UpdateOnboardingTaskStatusInput = z.infer<typeof UpdateOnboardingTaskStatusSchema>;
 
+export const AdminUserQuerySchema = z.object({
+  search: z.string().trim().optional(),
+  globalRole: z.enum(['USER', 'PLATFORM_ADMIN', 'SUPER_ADMIN']).optional(),
+  page: z.coerce.number().int().positive().default(1),
+  pageSize: z.coerce.number().int().positive().max(100).default(20),
+});
+
+export const AdminUpdateUserRoleSchema = z.object({
+  globalRole: z.enum(['USER', 'PLATFORM_ADMIN', 'SUPER_ADMIN']),
+});
+
+export const AdminWorkspaceQuerySchema = z.object({
+  search: z.string().trim().optional(),
+  page: z.coerce.number().int().positive().default(1),
+  pageSize: z.coerce.number().int().positive().max(100).default(20),
+});
+
+export const AdminAuditLogQuerySchema = z.object({
+  action: z.string().trim().optional(),
+  targetType: z.string().trim().optional(),
+  actorUserId: z.string().uuid().optional(),
+  page: z.coerce.number().int().positive().default(1),
+  pageSize: z.coerce.number().int().positive().max(100).default(20),
+});
+
+export const AdminSupportElevationSchema = z.object({
+  workspaceSlug: WorkspaceSlugSchema,
+  reason: z.string().trim().min(5).max(1000),
+  scope: z.enum(['READ_ONLY', 'SUPPORT_MAINTENANCE']).default('READ_ONLY'),
+  durationHours: z.coerce.number().int().min(1).max(24).default(2),
+});
+
+export const AdminModerateJobSchema = z.object({
+  status: z.enum(['DRAFT', 'PUBLISHED', 'CLOSED']),
+  moderationReason: z.string().trim().min(1).max(1000).optional(),
+});
+
+export const AnalyticsQuerySchema = z.object({
+  from: z.string().datetime().optional(),
+  to: z.string().datetime().optional(),
+  jobId: z.string().uuid().optional(),
+});
+
+export const UpdateSubscriptionSchema = z.object({
+  tier: z.enum(['STARTER', 'GROWTH', 'ENTERPRISE']),
+  billingCycle: z.enum(['MONTHLY', 'ANNUAL']).default('MONTHLY'),
+});
+
+export const CancelSubscriptionSchema = z.object({
+  reason: z.string().trim().max(1000).optional().nullable(),
+});
+
+export type AdminUserQueryInput = z.infer<typeof AdminUserQuerySchema>;
+export type AdminUpdateUserRoleInput = z.infer<typeof AdminUpdateUserRoleSchema>;
+export type AdminWorkspaceQueryInput = z.infer<typeof AdminWorkspaceQuerySchema>;
+export type AdminAuditLogQueryInput = z.infer<typeof AdminAuditLogQuerySchema>;
+export type AdminSupportElevationInput = z.infer<typeof AdminSupportElevationSchema>;
+export type AdminModerateJobInput = z.infer<typeof AdminModerateJobSchema>;
+export type AnalyticsQueryInput = z.infer<typeof AnalyticsQuerySchema>;
+export type UpdateSubscriptionInput = z.infer<typeof UpdateSubscriptionSchema>;
+export type CancelSubscriptionInput = z.infer<typeof CancelSubscriptionSchema>;
+
+
 
 
 

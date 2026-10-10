@@ -43,6 +43,8 @@ model User {
   interviewScorecards      InterviewScorecard[]
   createdOffers            JobOffer[]               @relation("CreatedByUser")
   approvedOffers           JobOffer[]               @relation("ApprovedByUser")
+  supportElevations        SupportElevation[]       @relation("AdminSupportElevations")
+  auditLogs                AuditLog[]               @relation("UserAuditLogs")
 
   @@map("users")
 }
@@ -101,6 +103,9 @@ model Workspace {
   assessments      Assessment[]
   offers           JobOffer[]
   onboardingTasks  OnboardingTask[]
+  subscription     WorkspaceSubscription?
+  supportElevations SupportElevation[]
+  auditLogs        AuditLog[]
 
   @@map("workspaces")
 }
@@ -727,6 +732,86 @@ model OnboardingTask {
   @@index([workspaceId])
   @@index([offerId])
   @@map("onboarding_tasks")
+}
+
+enum SubscriptionTier {
+  STARTER
+  GROWTH
+  ENTERPRISE
+}
+
+enum SubscriptionStatus {
+  ACTIVE
+  TRIALING
+  PAST_DUE
+  CANCELED
+}
+
+enum BillingCycle {
+  MONTHLY
+  ANNUAL
+}
+
+model WorkspaceSubscription {
+  id                   String             @id @default(uuid()) @db.Uuid
+  workspaceId          String             @unique @map("workspace_id") @db.Uuid
+  tier                 SubscriptionTier   @default(STARTER)
+  status               SubscriptionStatus @default(ACTIVE)
+  billingCycle         BillingCycle       @default(MONTHLY) @map("billing_cycle")
+  currentPeriodStart   DateTime           @default(now()) @map("current_period_start")
+  currentPeriodEnd     DateTime           @map("current_period_end")
+  cancelAtPeriodEnd    Boolean            @default(false) @map("cancel_at_period_end")
+  activeJobLimit       Int                @default(3) @map("active_job_limit")
+  candidateSearchLimit Int                @default(50) @map("candidate_search_limit")
+  stripeCustomerId     String?            @map("stripe_customer_id") @db.VarChar(255)
+  stripeSubscriptionId String?            @map("stripe_subscription_id") @db.VarChar(255)
+  createdAt            DateTime           @default(now()) @map("created_at")
+  updatedAt            DateTime           @updatedAt @map("updated_at")
+
+  workspace            Workspace          @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+
+  @@index([workspaceId, status])
+  @@map("workspace_subscriptions")
+}
+
+model SupportElevation {
+  id           String    @id @default(uuid()) @db.Uuid
+  workspaceId  String    @map("workspace_id") @db.Uuid
+  adminUserId  String    @map("admin_user_id") @db.Uuid
+  reason       String    @db.Text
+  scope        String    @default("READ_ONLY") @db.VarChar(100)
+  expiresAt    DateTime  @map("expires_at")
+  revokedAt    DateTime? @map("revoked_at")
+  createdAt    DateTime  @default(now()) @map("created_at")
+
+  workspace    Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  adminUser    User      @relation("AdminSupportElevations", fields: [adminUserId], references: [id], onDelete: Cascade)
+
+  @@index([workspaceId, expiresAt])
+  @@index([adminUserId, expiresAt])
+  @@map("support_elevations")
+}
+
+model AuditLog {
+  id          String     @id @default(uuid()) @db.Uuid
+  workspaceId String?    @map("workspace_id") @db.Uuid
+  actorUserId String?    @map("actor_user_id") @db.Uuid
+  actorEmail  String     @map("actor_email") @db.VarChar(320)
+  action      String     @db.VarChar(100)
+  targetType  String     @map("target_type") @db.VarChar(60)
+  targetId    String?    @map("target_id") @db.VarChar(100)
+  details     Json?
+  ipAddress   String?    @map("ip_address") @db.VarChar(64)
+  userAgent   String?    @map("user_agent") @db.Text
+  createdAt   DateTime   @default(now()) @map("created_at")
+
+  workspace   Workspace? @relation(fields: [workspaceId], references: [id], onDelete: SetNull)
+  actorUser   User?      @relation("UserAuditLogs", fields: [actorUserId], references: [id], onDelete: SetNull)
+
+  @@index([workspaceId, createdAt])
+  @@index([actorUserId, createdAt])
+  @@index([action, createdAt])
+  @@map("audit_logs")
 }
 
 

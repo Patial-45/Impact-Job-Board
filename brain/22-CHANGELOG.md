@@ -1,5 +1,65 @@
 # Changelog
 
+## 2026-10-10 — Phase 10: Platform Admin Portal, Analytics & Billing
+
+- Expanded workspace RBAC permissions (`packages/auth`):
+  - Added `analytics.read`, `billing.read`, and `billing.manage` to `WorkspaceAction`.
+  - Configured workspace grants: `OWNER` (full), `ADMIN` (`analytics.read`, `billing.read`), `RECRUITER` (`analytics.read`), `VIEWER` (`analytics.read`).
+  - Tested RBAC grants in `packages/auth/src/index.test.ts` (5 tests passing).
+- Database schema expansion (`packages/database/prisma/schema.prisma`):
+  - Added enums: `SubscriptionTier` (`STARTER`, `GROWTH`, `ENTERPRISE`), `SubscriptionStatus` (`ACTIVE`, `TRIALING`, `PAST_DUE`, `CANCELED`), `BillingCycle` (`MONTHLY`, `ANNUAL`).
+  - Added models:
+    - `WorkspaceSubscription`: 1-to-1 with `Workspace`, tracking active job limits, candidate search limits, cycle start/end, and cancellation flags.
+    - `SupportElevation`: Audited exceptional platform administrator support access to tenant workspaces with mandatory reason, scope (`READ_ONLY` or `SUPPORT_MAINTENANCE`), and expiration.
+    - `AuditLog`: Immutable platform and workspace audit trail recording `actorUserId`, `actorEmail`, `action`, `targetType`, `targetId`, and JSON details.
+  - Regenerated Prisma Client v6.19.3.
+- Validation contracts (`packages/validation`):
+  - Added schemas: `AdminUserQuerySchema`, `AdminUpdateUserRoleSchema`, `AdminWorkspaceQuerySchema`, `AdminAuditLogQuerySchema`, `AdminSupportElevationSchema`, `AdminModerateJobSchema`, `AnalyticsQuerySchema`, `UpdateSubscriptionSchema`, `CancelSubscriptionSchema`.
+  - 47 unit tests passing in `packages/validation/src/index.test.ts`.
+- NestJS API implementation (`apps/api`):
+  - Guards: `PlatformAdminGuard` and `SuperAdminGuard` in `apps/api/src/platform/platform-admin.guard.ts`.
+  - `AdminModule` (`apps/api/src/modules/admin.module.ts`):
+    - `AdminService` with `getOverviewStats`, `listUsers`, `updateUserRole` (with sole SuperAdmin demotion guard and audit log), `listWorkspaces`, `requestSupportElevation`, `listAuditLogs`, `getSystemHealth` (database ping & memory diagnostics), and `moderateJob`.
+    - `AdminController` with routes at `/api/v1/admin/*`.
+    - 8 unit tests in `apps/api/src/modules/admin.service.test.ts`.
+  - `AnalyticsModule` (`apps/api/src/modules/analytics.module.ts`):
+    - `AnalyticsService` calculating non-fabricated recruitment metrics: candidate pipeline funnel (`APPLIED`, `SCREENING`, `INTERVIEW`, `OFFER`, `HIRED`), pass-through conversion rates, average time-to-hire (in days), offer win/acceptance rates, interviewer scorecard ratings & recommendation distributions, and per-requisition performance.
+    - `AnalyticsController` (`GET /api/v1/workspaces/:slug/analytics`).
+    - 1 unit test in `apps/api/src/modules/analytics.service.test.ts`.
+  - `BillingModule` (`apps/api/src/modules/billing.module.ts`):
+    - `BillingService` providing plan limits (`STARTER`: 3 jobs, 50 searches; `GROWTH`: 15 jobs, 500 searches; `ENTERPRISE`: 100 jobs, 5,000 searches), usage meters, plan upgrade, and scheduled cancellation.
+    - `BillingController` (`GET /api/v1/workspaces/:slug/billing`, `POST .../upgrade`, `POST .../cancel`).
+    - 3 unit tests in `apps/api/src/modules/billing.service.test.ts`.
+  - Registered all modules in `AppModule`. Total 84 API unit tests passing across 12 test suites.
+- Next.js 16 Frontend experiences (`apps/web`):
+  - Added client helpers and TypeScript types in `apps/web/src/lib/api.ts`: `getAdminStats`, `getAdminUsers`, `getAdminWorkspaces`, `getAdminAuditLogs`, `getAdminSystemHealth`, `getWorkspaceAnalytics`, `getWorkspaceBilling`.
+  - Built `AdminDashboard` (`apps/web/src/components/admin-dashboard.tsx`):
+    - KPI cards (Users, Workspaces, Jobs, Applications, Offers, Subscriptions, Health).
+    - Operational diagnostics (Database latency, memory usage, uptime).
+    - Recent security audit activity stream.
+    - Interactive Support Elevation modal with reason, scope, and duration inputs.
+  - Built `AdminUsersTable` (`apps/web/src/components/admin-users-table.tsx`):
+    - Searchable user table with candidate headline preview, workspace memberships, and global role modifier dropdown.
+  - Built `AdminWorkspacesTable` (`apps/web/src/components/admin-workspaces-table.tsx`):
+    - Tenant directory with subscription badges, team member counts, active requisition metrics, and support elevation trigger.
+  - Built `AdminSystemTable` (`apps/web/src/components/admin-system-table.tsx`):
+    - Operational diagnostics cards and audit log ledger with action/target filters and metadata payload inspector.
+  - Built `WorkspaceAnalytics` (`apps/web/src/components/workspace-analytics.tsx`):
+    - Requisition selector filter.
+    - KPI cards (Total Applicants, Active in Pipeline, Average Time-to-Hire, Offer Acceptance Rate).
+    - 5-stage recruitment funnel progression visualization with conversion percentages.
+    - Offer win rate & status breakdown.
+    - Interview scorecard calibration (average star rating and recommendation distribution).
+    - Requisition performance table.
+  - Built `WorkspaceBilling` (`apps/web/src/components/workspace-billing.tsx`):
+    - Current plan overview with active job slot meter and candidate discovery credit progress.
+    - Monthly vs. Annual toggle with discount calculation.
+    - Three-tier plan feature comparison grid with live upgrade action.
+    - Self-service plan cancellation modal.
+  - Wired into `/admin`, `/admin/[section]`, and `/workspace/[workspaceSlug]/[section]` (analytics and billing tabs).
+- Recorded ADR-023 in `brain/21-DECISIONS.md`.
+- Verified quality gates: 154 unit tests passing across monorepo, zero ESLint errors, clean typecheck, and full Next.js/NestJS production builds.
+
 ## 2026-10-08 — Phase 9: Offers, Digital E-Signatures & Onboarding Checklist
 
 - Expanded workspace RBAC permissions (`packages/auth`):

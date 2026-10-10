@@ -6,11 +6,15 @@ import { WorkspaceJobs } from '@/components/workspace-jobs';
 import { CandidateSearch } from '@/components/candidate-search';
 import { WorkspaceInterviews } from '@/components/workspace-interviews';
 import { WorkspaceOffers } from '@/components/workspace-offers';
+import { WorkspaceAnalytics } from '@/components/workspace-analytics';
+import { WorkspaceBilling } from '@/components/workspace-billing';
 import {
   getWorkspaceJobs,
   searchWorkspaceCandidates,
   getWorkspaceInterviews,
   getWorkspaceOffers,
+  getWorkspaceAnalytics,
+  getWorkspaceBilling,
 } from '@/lib/api';
 import { Button, Card, Badge } from '@executive-match/ui';
 
@@ -24,6 +28,7 @@ const pages: Record<string, { title: string; description: string }> = {
     description: 'Extend job offers, track digital signatures, and manage onboarding checklists.',
   },
   analytics: { title: 'Analytics', description: 'Understand the progress of your hiring process.' },
+  billing: { title: 'Billing & Plans', description: 'Manage subscription tiers, limits, and team seats.' },
   team: { title: 'Team', description: 'Collaborate with workspace members.' },
   settings: {
     title: 'Workspace settings',
@@ -166,6 +171,46 @@ export default async function WorkspaceSection({
         <WorkspaceOffers
           workspaceSlug={workspaceSlug}
           initialOffers={offerData.items}
+        />
+      </main>
+    );
+  }
+
+  if (section === 'analytics') {
+    const analyticsData = await getWorkspaceAnalytics(workspaceSlug);
+    return (
+      <main className="shell-page space-y-6">
+        <header className="shell-header" style={{ marginBottom: '32px' }}>
+          <span className="ui-eyebrow">RECRUITMENT ANALYTICS</span>
+          <h1>Hiring Pipeline Analytics & Conversion</h1>
+          <p>
+            Track stage-by-stage pipeline velocity, offer acceptance metrics, interviewer scorecards,
+            and requisition performance across your hiring team.
+          </p>
+        </header>
+        <WorkspaceAnalytics
+          workspaceSlug={workspaceSlug}
+          initialAnalytics={analyticsData}
+        />
+      </main>
+    );
+  }
+
+  if (section === 'billing') {
+    const billingData = await getWorkspaceBilling(workspaceSlug);
+    return (
+      <main className="shell-page space-y-6">
+        <header className="shell-header" style={{ marginBottom: '32px' }}>
+          <span className="ui-eyebrow">WORKSPACE BILLING</span>
+          <h1>Subscription Tiers & Usage Limits</h1>
+          <p>
+            Review active job requisition limits, candidate discovery credits, and manage your
+            workspace subscription tier.
+          </p>
+        </header>
+        <WorkspaceBilling
+          workspaceSlug={workspaceSlug}
+          initialBilling={billingData}
         />
       </main>
     );

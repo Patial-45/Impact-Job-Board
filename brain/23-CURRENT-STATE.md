@@ -1,8 +1,8 @@
 # Current Development State
 
-Last Updated: 2026-10-08
+Last Updated: 2026-10-10
 
-Current Phase: Phase 9 Completed; Next Phase: Phase 10 — Platform Admin Portal, Analytics & Billing (Roadmap items 9-10)
+Current Phase: Phase 10 Completed; Next Phase: Phase 11 — Integrations, Webhooks & Enterprise Connectors (Roadmap items 10-11)
 
 Current Branch: `main` (tracking `origin/main` at `https://github.com/Patial-45/Impact-Job-Board.git`)
 
@@ -11,7 +11,7 @@ Current Branch: `main` (tracking `origin/main` at `https://github.com/Patial-45/
 - All 24 Brain architecture and product documents.
 - pnpm monorepo, Next.js public/protected route structure, NestJS API structure.
 - Toolchain verification passed: `pnpm install`, `pnpm db:generate`, `pnpm lint`, `pnpm typecheck`, `pnpm test`, and `pnpm build`.
-- Prisma schema for identity, workspace tenancy, company, candidate profiles, jobs, applications, pipeline stage history, recruiter notes, saved candidate/job relations, candidate/job embeddings, hybrid match results, interviews, interview participants, interview scorecards, assessments, assessment invites, job offers, offer signatures, and onboarding tasks.
+- Prisma schema for identity, workspace tenancy, company, candidate profiles, jobs, applications, pipeline stage history, recruiter notes, saved candidate/job relations, candidate/job embeddings, hybrid match results, interviews, interview participants, interview scorecards, assessments, assessment invites, job offers, offer signatures, onboarding tasks, workspace subscriptions, support elevations, and system audit logs.
 - Phase 1 Design System & Public Shells (completed & verified).
 - Phase 2 Authentication, RBAC, Workspace Tenancy & Invitations (completed & verified).
 - Phase 3 Candidate Profiles & Resume Pipeline (completed & verified).
@@ -20,15 +20,28 @@ Current Branch: `main` (tracking `origin/main` at `https://github.com/Patial-45/
 - Phase 6 Search and Matching Foundation & Candidate Discovery (completed & verified).
 - Phase 7 AI Matching & Semantic Embeddings (completed & verified).
 - Phase 8 Interviews, Scorecards & Assessment Management (completed & verified).
-- Phase 9 Offers, Digital E-Signatures & Onboarding Checklist (completed & verified):
-  - Workspace actions `offers.read`, `offers.write`, `onboarding.read`, `onboarding.write` added to `@executive-match/auth`.
-  - Database schema: `JobOffer`, `OfferSignature`, `OnboardingTask` with lifecycle status enums (`OfferStatus`, `OnboardingTaskStatus`). Prisma Client v6.19.3 regenerated.
-  - Validation schemas: `CreateOfferSchema`, `UpdateOfferSchema`, `RescindOfferSchema`, `AcceptOfferSchema`, `DeclineOfferSchema`, `CreateOnboardingTaskSchema`, `UpdateOnboardingTaskStatusSchema`. 39 unit tests passing.
-  - NestJS API: `OffersModule` with `OffersService`, `WorkspaceOffersController`, `CandidateOffersController`, and `CandidateOnboardingController`. Multi-tenant authorization enforced via `WorkspaceAccessService`. 11 unit tests in `offers.service.test.ts` (72 API unit tests passing).
-  - Next.js Web: `WorkspaceOffers` (draft offer modal, compensation breakdown, approval/send workflows, rescind modal, and onboarding task manager) and `CandidateOffers` (received offers, review & digital ESIGN acceptance modal, decline modal, and interactive new-hire onboarding checklist with live progress tracker). Wired into workspace and candidate layouts and sections.
-  - Monorepo Quality Gates: 143 unit tests passing across 13 packages, zero ESLint errors, clean typecheck, and full Next.js/NestJS production builds.
+- Phase 9 Offers, Digital E-Signatures & Onboarding Checklist (completed & verified).
+- Phase 10 Platform Admin Portal, Analytics & Billing (completed & verified):
+  - Workspace actions `analytics.read`, `billing.read`, `billing.manage` added to `@executive-match/auth` with role grants.
+  - Database schema: `WorkspaceSubscription`, `SupportElevation`, and `AuditLog` models with `SubscriptionTier`, `SubscriptionStatus`, and `BillingCycle` enums. Prisma Client regenerated.
+  - Validation schemas: 9 Zod schemas for admin operations, analytics queries, support elevation, and subscription management. 47 tests passing in `packages/validation`.
+  - NestJS API:
+    - `PlatformAdminGuard` and `SuperAdminGuard` for strict global administration.
+    - `AdminModule` (`AdminService`, `AdminController`) with stats, user oversight, super admin protection, workspace management, audited support elevation, system diagnostics, and job moderation (8 unit tests).
+    - `AnalyticsModule` (`AnalyticsService`, `AnalyticsController`) with recruitment pipeline funnel, conversion rates, average time-to-hire, offer win rate, scorecard calibrations, and per-job breakdown (1 unit test).
+    - `BillingModule` (`BillingService`, `BillingController`) with tiered subscription quotas (Starter, Growth, Enterprise), usage meters, upgrades, and cancellations (3 unit tests).
+    - All 84 API unit tests passing across 12 suites.
+  - Next.js Web:
+    - `AdminDashboard`: KPI telemetry cards, infrastructure diagnostics, security audit log stream, and interactive support elevation modal.
+    - `AdminUsersTable`: platform user directory and live global role management.
+    - `AdminWorkspacesTable`: tenant directory with subscription indicators, member counts, and support elevation triggers.
+    - `AdminSystemTable`: operational diagnostics and audit log ledger with filters and JSON metadata inspector.
+    - `WorkspaceAnalytics`: hiring funnel progression with pass-through conversion percentages, offer outcomes, scorecard distribution, and requisition breakdown.
+    - `WorkspaceBilling`: subscription tier overview, active job slot meter, candidate search credit progress, comparison grid, and cancellation modal.
+    - Wired into `/admin`, `/admin/[section]`, and `/workspace/[workspaceSlug]/[section]`.
+  - Monorepo Quality Gates: 154 unit tests passing across packages, 0 ESLint errors, clean typecheck, and full Next.js Turbopack / NestJS tsup production builds.
 - Initial PostgreSQL migration (`packages/database/prisma/migrations/20260929_init`).
-- Published foundation, Phases 1-9 to GitHub: `https://github.com/Patial-45/Impact-Job-Board` (GitHub Actions CI workflow run 37896432156 verified GREEN).
+- Published foundation, Phases 1-9 to GitHub: `https://github.com/Patial-45/Impact-Job-Board`.
 
 ## Partially completed
 
@@ -37,16 +50,11 @@ Current Branch: `main` (tracking `origin/main` at `https://github.com/Patial-45/
 
 ## Not started
 
-Platform admin operations, global audit logs, system health overview, employer hiring metrics/analytics, usage-based subscriptions and billing (Phase 10), third-party ATS integrations (Phase 11).
+Third-party ATS integrations, webhooks, and production hardening (Phases 11-12).
 
 ## Immediate next tasks
 
-1. Phase 10 (Platform Admin Portal, Analytics & Billing):
-   - Review `brain/12-ADMIN-PORTAL.md`, `brain/01-PRODUCT-REQUIREMENTS.md`, and `brain/02-SYSTEM-ARCHITECTURE.md`.
-   - Global admin RBAC enforcement (`canPlatform('admin.read')` / `canPlatform('admin.manage')`).
-   - Admin oversight APIs for platform users, workspaces, job requisitions, and audit events.
-   - Employer recruitment analytics engine: pipeline velocity, stage conversion rates, time-to-hire, and interview metrics.
-   - Admin portal interface and employer workspace analytics dashboards.
-
-
-
+1. Phase 11 (Integrations, Webhooks & Enterprise ATS Connectors):
+   - Review `brain/01-PRODUCT-REQUIREMENTS.md` and integration architecture.
+   - Design webhook registration, delivery queue, signature verification, and event dispatch.
+   - Third-party ATS export/import connectors (Greenhouse, Lever, Workday schema mappings).

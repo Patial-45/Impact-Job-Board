@@ -18,7 +18,10 @@ export type WorkspaceAction =
   | 'offers.read'
   | 'offers.write'
   | 'onboarding.read'
-  | 'onboarding.write';
+  | 'onboarding.write'
+  | 'analytics.read'
+  | 'billing.read'
+  | 'billing.manage';
 
 const grants: Record<WorkspaceRole, ReadonlySet<WorkspaceAction>> = {
   OWNER: new Set([
@@ -40,6 +43,9 @@ const grants: Record<WorkspaceRole, ReadonlySet<WorkspaceAction>> = {
     'offers.write',
     'onboarding.read',
     'onboarding.write',
+    'analytics.read',
+    'billing.read',
+    'billing.manage',
   ]),
   ADMIN: new Set([
     'workspace.read',
@@ -60,6 +66,8 @@ const grants: Record<WorkspaceRole, ReadonlySet<WorkspaceAction>> = {
     'offers.write',
     'onboarding.read',
     'onboarding.write',
+    'analytics.read',
+    'billing.read',
   ]),
   RECRUITER: new Set([
     'workspace.read',
@@ -77,6 +85,7 @@ const grants: Record<WorkspaceRole, ReadonlySet<WorkspaceAction>> = {
     'offers.write',
     'onboarding.read',
     'onboarding.write',
+    'analytics.read',
   ]),
   VIEWER: new Set([
     'workspace.read',
@@ -88,6 +97,7 @@ const grants: Record<WorkspaceRole, ReadonlySet<WorkspaceAction>> = {
     'assessments.read',
     'offers.read',
     'onboarding.read',
+    'analytics.read',
   ]),
 };
 

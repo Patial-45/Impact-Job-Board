@@ -135,6 +135,31 @@ Alternatives: Relying on third-party external e-signature embeds (DocuSign/Hello
 
 Consequence: Employers have centralized compensation and signature records; candidates have an end-to-end transparent offer acceptance and onboarding checklist experience.
 
+## ADR-023 — Platform Administration, Recruitment Analytics Engine, and Workspace Tiered Subscriptions
+
+Decision: Implement global platform administration, recruitment pipeline analytics, and multi-tenant tiered billing.
+1. Global RBAC & Boundary Isolation: Distinguish global roles (`USER`, `PLATFORM_ADMIN`, `SUPER_ADMIN`) using `canPlatform(role, 'admin.read' | 'admin.manage')`. Platform admins do NOT implicitly inherit workspace tenancy. Exceptional customer workspace support requires explicit, time-bounded support elevation (`SupportElevation` model) with mandatory reason, scope (`READ_ONLY` or `SUPPORT_MAINTENANCE`), expiration (1-24 hours), and an immutable system audit trail (`AuditLog` model).
+2. Super Admin Safety: Prevent demoting the last remaining `SUPER_ADMIN` to maintain platform operability.
+3. System Audit Log Ledger: Immutable audit trail records `actorUserId`, `actorEmail`, `action`, `targetType`, `targetId`, and JSON payload details across user privilege modifications, workspace elevations, requisition moderations, and subscription changes.
+4. Recruitment Analytics Engine: Compute real, non-fabricated metrics for workspace hiring teams via `GET /workspaces/:slug/analytics` (requiring `analytics.read`):
+   - Pipeline Funnel: stage volumes (`APPLIED`, `SCREENING`, `INTERVIEW`, `OFFER`, `HIRED`) with pass-through conversion rates.
+   - Time-to-Hire: average calendar days from application submission to hire event.
+   - Offer Win Rate: acceptance ratio of accepted versus declined proposals.
+   - Evaluator Calibration: completed interviews count, average rating (1-5 stars), and distribution of evaluator recommendations.
+   - Requisition Breakdown: applicant volumes, active candidates, and hires by specific open requisition.
+5. Tiered Subscriptions & Usage Limits:
+   - Three tiers (`STARTER`, `GROWTH`, `ENTERPRISE`) with defined quotas for active job requisitions (3, 15, 100) and monthly candidate discovery searches (50, 500, 5,000).
+   - Usage meters displayed in workspace billing settings with upgrade and scheduled end-of-period cancellation workflows.
+
+Context: Phase 10 establishes centralized platform operations, oversight, analytics, and business model sustainability while enforcing strict multi-tenant boundary compliance.
+
+Reasoning: Guarantees complete platform accountability, transparency, and tenant privacy. Prevents platform administrators from silently browsing employer candidate dossiers without an audited elevation record. Provides hiring teams with actionable, calibrated recruitment velocity metrics grounded in actual database stage histories.
+
+Alternatives: Allowing platform admins global access to all workspaces without audited elevation; storing mock or random analytics numbers; using a rigid single-tier billing model without quota enforcement.
+
+Consequence: Administrators have robust system oversight and compliance logs; employers have actionable recruitment analytics and flexible self-service plan management.
+
+
 
 
 

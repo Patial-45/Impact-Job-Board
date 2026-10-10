@@ -999,6 +999,327 @@ export async function getCandidateOnboarding(): Promise<CandidateOnboardingRespo
   }
 }
 
+export type AdminStats = {
+  totalUsers: number;
+  totalWorkspaces: number;
+  totalJobs: number;
+  publishedJobs: number;
+  totalApplications: number;
+  totalOffers: number;
+  acceptedOffers: number;
+  activeSubscriptions: number;
+  recentAuditLogs: Array<{
+    id: string;
+    action: string;
+    targetType: string;
+    targetId: string | null;
+    createdAt: string;
+    actorEmail: string;
+    actorUser?: { id: string; email: string; profile?: { displayName: string | null } | null } | null;
+    workspace?: { id: string; name: string; slug: string } | null;
+    details?: Record<string, unknown> | null;
+  }>;
+};
+
+export type AdminUserItem = {
+  id: string;
+  email: string;
+  globalRole: string;
+  emailVerified: string | null;
+  createdAt: string;
+  profile?: { displayName: string | null; avatarKey: string | null } | null;
+  candidate?: { id: string; headline: string | null } | null;
+  memberships: Array<{
+    role: string;
+    workspace: { id: string; name: string; slug: string };
+  }>;
+};
+
+export type AdminWorkspaceItem = {
+  id: string;
+  name: string;
+  slug: string;
+  createdAt: string;
+  company?: { name: string; industry: string | null; location: string | null } | null;
+  subscription?: {
+    tier: string;
+    status: string;
+    billingCycle: string;
+    activeJobLimit: number;
+  } | null;
+  _count: {
+    memberships: number;
+    jobs: number;
+    offers: number;
+  };
+};
+
+export type AdminAuditLogItem = {
+  id: string;
+  action: string;
+  targetType: string;
+  targetId: string | null;
+  actorEmail: string;
+  createdAt: string;
+  actorUser?: {
+    id: string;
+    email: string;
+    profile?: { displayName: string | null } | null;
+  } | null;
+  workspace?: { id: string; name: string; slug: string } | null;
+  details?: Record<string, unknown> | null;
+};
+
+export type AdminSystemHealth = {
+  status: 'HEALTHY' | 'DEGRADED';
+  database: {
+    status: 'CONNECTED' | 'DISCONNECTED';
+    latencyMs: number;
+  };
+  memory: {
+    rssMb: number;
+    heapUsedMb: number;
+    heapTotalMb: number;
+  };
+  uptimeSeconds: number;
+  nodeVersion: string;
+  timestamp: string;
+};
+
+export type WorkspaceAnalyticsData = {
+  workspace: { id: string; slug: string; name: string };
+  summary: {
+    totalApplicants: number;
+    activePipelineCount: number;
+    hiredCount: number;
+    rejectedCount: number;
+    withdrawnCount: number;
+    averageTimeToHireDays: number | null;
+    offerAcceptanceRate: number | null;
+  };
+  funnel: {
+    applied: number;
+    screening: number;
+    interview: number;
+    offer: number;
+    hired: number;
+    conversionRates: {
+      appliedToScreening: number;
+      screeningToInterview: number;
+      interviewToOffer: number;
+      offerToHire: number;
+      overallConversion: number;
+    };
+  };
+  offers: {
+    totalOffers: number;
+    accepted: number;
+    declined: number;
+    pending: number;
+    acceptanceRate: number | null;
+  };
+  interviews: {
+    totalInterviews: number;
+    completedInterviews: number;
+    averageRating: number | null;
+    recommendations: {
+      STRONG_HIRE: number;
+      HIRE: number;
+      NO_HIRE: number;
+      STRONG_NO_HIRE: number;
+    };
+  };
+  jobBreakdown: Array<{
+    id: string;
+    title: string;
+    slug: string;
+    status: string;
+    department: string | null;
+    totalApplicants: number;
+    activeApplicants: number;
+    hiresCount: number;
+  }>;
+};
+
+export type WorkspaceBillingData = {
+  workspace: { id: string; slug: string; name: string };
+  subscription: {
+    id: string;
+    workspaceId: string;
+    tier: 'STARTER' | 'GROWTH' | 'ENTERPRISE';
+    status: string;
+    billingCycle: 'MONTHLY' | 'ANNUAL';
+    currentPeriodStart: string;
+    currentPeriodEnd: string;
+    cancelAtPeriodEnd: boolean;
+    activeJobLimit: number;
+    candidateSearchLimit: number;
+  };
+  currentUsage: {
+    activeJobsCount: number;
+    activeJobLimit: number;
+    membersCount: number;
+    candidateSearchLimit: number;
+  };
+  availablePlans: Array<{
+    tier: 'STARTER' | 'GROWTH' | 'ENTERPRISE';
+    name: string;
+    priceMonthly: number;
+    priceAnnual: number;
+    activeJobLimit: number;
+    candidateSearchLimit: number;
+    features: readonly string[];
+  }>;
+};
+
+export async function getAdminStats(): Promise<AdminStats | null> {
+  const cookie = (await cookies()).toString();
+  try {
+    const response = await fetch(`${apiUrl}/admin/stats`, {
+      headers: { cookie },
+      cache: 'no-store',
+    });
+    if (!response.ok) return null;
+    return await response.json();
+  } catch {
+    return null;
+  }
+}
+
+export async function getAdminUsers(params?: {
+  search?: string;
+  globalRole?: string;
+  page?: number;
+  pageSize?: number;
+}): Promise<{ items: AdminUserItem[]; total: number; page: number; pageSize: number; totalPages: number }> {
+  const cookie = (await cookies()).toString();
+  try {
+    const q = new URLSearchParams();
+    if (params?.search) q.set('search', params.search);
+    if (params?.globalRole) q.set('globalRole', params.globalRole);
+    if (params?.page) q.set('page', String(params.page));
+    if (params?.pageSize) q.set('pageSize', String(params.pageSize));
+
+    const queryStr = q.toString() ? `?${q.toString()}` : '';
+    const response = await fetch(`${apiUrl}/admin/users${queryStr}`, {
+      headers: { cookie },
+      cache: 'no-store',
+    });
+    if (!response.ok) return { items: [], total: 0, page: 1, pageSize: 20, totalPages: 0 };
+    return await response.json();
+  } catch {
+    return { items: [], total: 0, page: 1, pageSize: 20, totalPages: 0 };
+  }
+}
+
+export async function getAdminWorkspaces(params?: {
+  search?: string;
+  page?: number;
+  pageSize?: number;
+}): Promise<{ items: AdminWorkspaceItem[]; total: number; page: number; pageSize: number; totalPages: number }> {
+  const cookie = (await cookies()).toString();
+  try {
+    const q = new URLSearchParams();
+    if (params?.search) q.set('search', params.search);
+    if (params?.page) q.set('page', String(params.page));
+    if (params?.pageSize) q.set('pageSize', String(params.pageSize));
+
+    const queryStr = q.toString() ? `?${q.toString()}` : '';
+    const response = await fetch(`${apiUrl}/admin/workspaces${queryStr}`, {
+      headers: { cookie },
+      cache: 'no-store',
+    });
+    if (!response.ok) return { items: [], total: 0, page: 1, pageSize: 20, totalPages: 0 };
+    return await response.json();
+  } catch {
+    return { items: [], total: 0, page: 1, pageSize: 20, totalPages: 0 };
+  }
+}
+
+export async function getAdminAuditLogs(params?: {
+  action?: string;
+  targetType?: string;
+  page?: number;
+  pageSize?: number;
+}): Promise<{ items: AdminAuditLogItem[]; total: number; page: number; pageSize: number; totalPages: number }> {
+  const cookie = (await cookies()).toString();
+  try {
+    const q = new URLSearchParams();
+    if (params?.action) q.set('action', params.action);
+    if (params?.targetType) q.set('targetType', params.targetType);
+    if (params?.page) q.set('page', String(params.page));
+    if (params?.pageSize) q.set('pageSize', String(params.pageSize));
+
+    const queryStr = q.toString() ? `?${q.toString()}` : '';
+    const response = await fetch(`${apiUrl}/admin/audit-logs${queryStr}`, {
+      headers: { cookie },
+      cache: 'no-store',
+    });
+    if (!response.ok) return { items: [], total: 0, page: 1, pageSize: 20, totalPages: 0 };
+    return await response.json();
+  } catch {
+    return { items: [], total: 0, page: 1, pageSize: 20, totalPages: 0 };
+  }
+}
+
+export async function getAdminSystemHealth(): Promise<AdminSystemHealth | null> {
+  const cookie = (await cookies()).toString();
+  try {
+    const response = await fetch(`${apiUrl}/admin/health`, {
+      headers: { cookie },
+      cache: 'no-store',
+    });
+    if (!response.ok) return null;
+    return await response.json();
+  } catch {
+    return null;
+  }
+}
+
+export async function getWorkspaceAnalytics(
+  workspaceSlug: string,
+  params?: { from?: string; to?: string; jobId?: string },
+): Promise<WorkspaceAnalyticsData | null> {
+  const cookie = (await cookies()).toString();
+  try {
+    const q = new URLSearchParams();
+    if (params?.from) q.set('from', params.from);
+    if (params?.to) q.set('to', params.to);
+    if (params?.jobId) q.set('jobId', params.jobId);
+
+    const queryStr = q.toString() ? `?${q.toString()}` : '';
+    const response = await fetch(
+      `${apiUrl}/workspaces/${encodeURIComponent(workspaceSlug)}/analytics${queryStr}`,
+      {
+        headers: { cookie },
+        cache: 'no-store',
+      },
+    );
+    if (!response.ok) return null;
+    return await response.json();
+  } catch {
+    return null;
+  }
+}
+
+export async function getWorkspaceBilling(workspaceSlug: string): Promise<WorkspaceBillingData | null> {
+  const cookie = (await cookies()).toString();
+  try {
+    const response = await fetch(
+      `${apiUrl}/workspaces/${encodeURIComponent(workspaceSlug)}/billing`,
+      {
+        headers: { cookie },
+        cache: 'no-store',
+      },
+    );
+    if (!response.ok) return null;
+    return await response.json();
+  } catch {
+    return null;
+  }
+}
+
+
 
 
 
