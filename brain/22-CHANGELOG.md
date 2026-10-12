@@ -1,5 +1,48 @@
 # Changelog
 
+## 2026-10-12 — Phase 11: Integrations, Webhooks, ATS Connectors & 3D UI Modernization
+
+- Comprehensive UI/UX Modernization & 3D Design Overhaul:
+  - Installed `lucide-react` across `@executive-match/ui` and `@executive-match/web`.
+  - Upgraded typography in `apps/web/src/app/layout.tsx` to variable fonts (`Plus_Jakarta_Sans`, `Inter`, `Geist_Mono`).
+  - Added 3D spatial tokens and physics in `apps/web/src/app/globals.css`: multi-layered ambient drop shadows (`--shadow-3d`, `--shadow-3d-hover`, `--shadow-glow`), tactile press physics (`button:active { transform: scale(0.975) translateY(1px); }`), 3D elevated cards (`.card-3d`, `.glass-panel`), and specular button bevels.
+  - Designed custom isometric 3D faceted geometry brand mark (`LogoMark`, `Logo` in `packages/ui/src/logo.tsx`).
+  - Upgraded public header/footer and `AppShell` with modern icons, 3D brand geometry, glassmorphism, and active route emerald glow indicators.
+- Expanded workspace RBAC permissions (`packages/auth`):
+  - Added `integrations.read` and `integrations.write` to `WorkspaceAction`.
+  - Granted to workspace `OWNER` and `ADMIN` roles. Unit tests updated and passing in `packages/auth/src/index.test.ts`.
+- Database schema expansion (`packages/database/prisma/schema.prisma`):
+  - Added enums: `WebhookEndpointStatus` (`ACTIVE`, `INACTIVE`, `FAILED`), `AtsProvider` (`GREENHOUSE`, `LEVER`, `WORKDAY`), `AtsIntegrationStatus` (`CONNECTED`, `ERROR`, `DISCONNECTED`).
+  - Added models:
+    - `WebhookEndpoint`: Workspace-isolated URL, event filter subscriptions, signing secret (`whsec_...`), and active status.
+    - `WebhookDelivery`: Immutable delivery dispatch log with payload, response status code, round-trip latency, error tracking, and event type.
+    - `ApiKey`: Cryptographic key ledger storing SHA-256 digest (`keyHash`), key prefix (`em_live_...`), name, and revocation timestamp. Raw key shown once upon creation.
+    - `AtsIntegration`: Connectors for Greenhouse, Lever, and Workday with credential payload, sync frequency, status, error messages, and last sync timestamp.
+  - Regenerated Prisma Client v6.19.3 and updated package index re-exports.
+- Validation contracts (`packages/validation`):
+  - Added schemas: `CreateWebhookEndpointSchema`, `UpdateWebhookEndpointSchema`, `TestWebhookEndpointSchema`, `CreateApiKeySchema`, `ConfigureAtsIntegrationSchema`, `SyncAtsIntegrationSchema`.
+  - 50 unit tests passing in `packages/validation/src/index.test.ts`.
+- NestJS API implementation (`apps/api`):
+  - Created `IntegrationsModule` (`apps/api/src/modules/integrations.module.ts`):
+    - `IntegrationsService` with tenant-isolated webhook management, HMAC-SHA256 test ping dispatch, delivery log queries, cryptographically secure API key generation/revocation, and ATS connector configuration & sync simulations.
+    - `IntegrationsController` exposing endpoints at `/api/v1/workspaces/:slug/integrations/*`.
+    - Unit test suite in `apps/api/src/modules/integrations.service.test.ts` (6 tests passing).
+  - All 90 unit tests passing across 13 test suites in `apps/api`.
+- Next.js 16 Web Application (`apps/web`):
+  - Added integration server methods and types in `apps/web/src/lib/api.ts`.
+  - Added `/workspace/[workspaceSlug]/integrations` tab route in workspace layout.
+  - Built `WorkspaceIntegrations` (`apps/web/src/components/workspace-integrations.tsx`) client interface:
+    - 3D metric overview cards for Webhooks, API Keys, and ATS Connectors.
+    - Webhook tab: Endpoint list with event pill badges, signing secret inspector, live test ping trigger, delivery logs drawer with HTTP status and latency, and endpoint creation modal.
+    - API Key tab: Key list with masked prefix, revocation button, and creation modal featuring a one-time copyable raw secret key banner.
+    - ATS Connectors tab: Grid of Greenhouse, Lever, and Workday integrations with credential configuration dialog, sync mode selection, and manual trigger sync button.
+  - Connected component in `apps/web/src/app/(workspace)/workspace/[workspaceSlug]/[section]/page.tsx`.
+- Quality Gates & Verification:
+  - 169 unit tests passing across all packages.
+  - 0 ESLint errors across 13 packages.
+  - 0 TypeScript errors across 13 packages.
+  - Full Next.js Turbopack and NestJS tsup production builds succeeded.
+
 ## 2026-10-10 — Phase 10: Platform Admin Portal, Analytics & Billing
 
 - Expanded workspace RBAC permissions (`packages/auth`):

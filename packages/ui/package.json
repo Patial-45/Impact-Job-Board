@@ -17,5 +17,8 @@
     "@executive-match/eslint-config": "workspace:*",
     "@types/react": "19.1.13",
     "vitest": "3.2.4"
+  },
+  "dependencies": {
+    "lucide-react": "^1.54.0"
   }
 }

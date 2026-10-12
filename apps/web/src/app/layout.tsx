@@ -1,16 +1,16 @@
 import type { Metadata } from 'next';
-import { DM_Sans, Manrope, Geist_Mono } from 'next/font/google';
+import { Plus_Jakarta_Sans, Inter, Geist_Mono } from 'next/font/google';
 import './globals.css';
 
-const dmSans = DM_Sans({
+const plusJakartaSans = Plus_Jakarta_Sans({
   subsets: ['latin'],
-  variable: '--font-body',
+  variable: '--font-display',
   display: 'swap',
 });
 
-const manrope = Manrope({
+const inter = Inter({
   subsets: ['latin'],
-  variable: '--font-display',
+  variable: '--font-body',
   display: 'swap',
 });
 
@@ -22,12 +22,15 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: { default: 'Executive Match', template: '%s | Executive Match' },
-  description: 'A clearer, evidence-driven way to connect talent and opportunity.',
+  description: 'Next-generation executive talent acquisition, AI semantic matching & hiring intelligence.',
 };
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html lang="en" className={`${dmSans.variable} ${manrope.variable} ${geistMono.variable}`}>
+    <html
+      lang="en"
+      className={`${plusJakartaSans.variable} ${inter.variable} ${geistMono.variable}`}
+    >
       <body>{children}</body>
     </html>
   );

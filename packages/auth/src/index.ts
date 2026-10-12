@@ -21,7 +21,9 @@ export type WorkspaceAction =
   | 'onboarding.write'
   | 'analytics.read'
   | 'billing.read'
-  | 'billing.manage';
+  | 'billing.manage'
+  | 'integrations.read'
+  | 'integrations.write';
 
 const grants: Record<WorkspaceRole, ReadonlySet<WorkspaceAction>> = {
   OWNER: new Set([
@@ -46,6 +48,8 @@ const grants: Record<WorkspaceRole, ReadonlySet<WorkspaceAction>> = {
     'analytics.read',
     'billing.read',
     'billing.manage',
+    'integrations.read',
+    'integrations.write',
   ]),
   ADMIN: new Set([
     'workspace.read',
@@ -68,6 +72,8 @@ const grants: Record<WorkspaceRole, ReadonlySet<WorkspaceAction>> = {
     'onboarding.write',
     'analytics.read',
     'billing.read',
+    'integrations.read',
+    'integrations.write',
   ]),
   RECRUITER: new Set([
     'workspace.read',

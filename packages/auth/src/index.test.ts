@@ -25,6 +25,8 @@ describe('RBAC - Workspace permissions', () => {
       'analytics.read',
       'billing.read',
       'billing.manage',
+      'integrations.read',
+      'integrations.write',
     ];
     for (const action of actions) {
       expect(canWorkspace('OWNER', action)).toBe(true);
@@ -42,6 +44,8 @@ describe('RBAC - Workspace permissions', () => {
     expect(canWorkspace('ADMIN', 'analytics.read')).toBe(true);
     expect(canWorkspace('ADMIN', 'billing.read')).toBe(true);
     expect(canWorkspace('ADMIN', 'billing.manage')).toBe(false);
+    expect(canWorkspace('ADMIN', 'integrations.read')).toBe(true);
+    expect(canWorkspace('ADMIN', 'integrations.write')).toBe(true);
   });
 
   it('restricts RECRUITER to recruitment actions without workspace administration', () => {
@@ -56,6 +60,8 @@ describe('RBAC - Workspace permissions', () => {
     expect(canWorkspace('RECRUITER', 'analytics.read')).toBe(true);
     expect(canWorkspace('RECRUITER', 'billing.read')).toBe(false);
     expect(canWorkspace('RECRUITER', 'billing.manage')).toBe(false);
+    expect(canWorkspace('RECRUITER', 'integrations.read')).toBe(false);
+    expect(canWorkspace('RECRUITER', 'integrations.write')).toBe(false);
     expect(canWorkspace('RECRUITER', 'workspace.manage')).toBe(false);
     expect(canWorkspace('RECRUITER', 'workspace.members.invite')).toBe(false);
     expect(canWorkspace('RECRUITER', 'workspace.members.manage')).toBe(false);
@@ -75,6 +81,8 @@ describe('RBAC - Workspace permissions', () => {
 
     expect(canWorkspace('VIEWER', 'billing.read')).toBe(false);
     expect(canWorkspace('VIEWER', 'billing.manage')).toBe(false);
+    expect(canWorkspace('VIEWER', 'integrations.read')).toBe(false);
+    expect(canWorkspace('VIEWER', 'integrations.write')).toBe(false);
     expect(canWorkspace('VIEWER', 'jobs.write')).toBe(false);
     expect(canWorkspace('VIEWER', 'applications.write')).toBe(false);
     expect(canWorkspace('VIEWER', 'interviews.write')).toBe(false);

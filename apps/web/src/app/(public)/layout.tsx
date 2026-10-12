@@ -1,16 +1,14 @@
 import Link from 'next/link';
 import type { ReactNode } from 'react';
+import { Logo } from '@executive-match/ui';
 
 export default function PublicLayout({ children }: { children: ReactNode }) {
   return (
     <>
       <header className="site-header">
         <div className="container site-header-inner">
-          <Link href="/" className="wordmark" aria-label="Executive Match Home">
-            <span className="brand-mark" aria-hidden="true">
-              EM<span>.</span>
-            </span>
-            <span>Executive Match</span>
+          <Link href="/" aria-label="Executive Match Home" className="transition-transform hover:opacity-95">
+            <Logo size="md" showText={true} />
           </Link>
 
           <nav className="site-nav" aria-label="Main navigation">
@@ -37,11 +35,8 @@ export default function PublicLayout({ children }: { children: ReactNode }) {
       <footer className="site-footer">
         <div className="container footer-grid">
           <div className="footer-brand">
-            <Link href="/" className="wordmark">
-              <span className="brand-mark">
-                EM<span>.</span>
-              </span>
-              <span>Executive Match</span>
+            <Link href="/" aria-label="Executive Match Home" className="transition-transform hover:opacity-95">
+              <Logo size="sm" showText={true} />
             </Link>
             <p className="footer-tagline">
               Evidence-driven talent matching and structured hiring workflows. Built for clarity, transparency, and human decisions.

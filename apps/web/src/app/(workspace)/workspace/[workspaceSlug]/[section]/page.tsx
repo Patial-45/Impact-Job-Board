@@ -8,6 +8,7 @@ import { WorkspaceInterviews } from '@/components/workspace-interviews';
 import { WorkspaceOffers } from '@/components/workspace-offers';
 import { WorkspaceAnalytics } from '@/components/workspace-analytics';
 import { WorkspaceBilling } from '@/components/workspace-billing';
+import { WorkspaceIntegrations } from '@/components/workspace-integrations';
 import {
   getWorkspaceJobs,
   searchWorkspaceCandidates,
@@ -15,6 +16,10 @@ import {
   getWorkspaceOffers,
   getWorkspaceAnalytics,
   getWorkspaceBilling,
+  getWorkspaceIntegrationsSummary,
+  getWorkspaceWebhooks,
+  getWorkspaceApiKeys,
+  getWorkspaceAtsIntegrations,
 } from '@/lib/api';
 import { Button, Card, Badge } from '@executive-match/ui';
 
@@ -29,6 +34,10 @@ const pages: Record<string, { title: string; description: string }> = {
   },
   analytics: { title: 'Analytics', description: 'Understand the progress of your hiring process.' },
   billing: { title: 'Billing & Plans', description: 'Manage subscription tiers, limits, and team seats.' },
+  integrations: {
+    title: 'Integrations & Webhooks',
+    description: 'Configure real-time webhooks, API keys, and enterprise ATS connectors.',
+  },
   team: { title: 'Team', description: 'Collaborate with workspace members.' },
   settings: {
     title: 'Workspace settings',
@@ -211,6 +220,34 @@ export default async function WorkspaceSection({
         <WorkspaceBilling
           workspaceSlug={workspaceSlug}
           initialBilling={billingData}
+        />
+      </main>
+    );
+  }
+
+  if (section === 'integrations') {
+    const [summary, webhooks, apiKeys, ats] = await Promise.all([
+      getWorkspaceIntegrationsSummary(workspaceSlug),
+      getWorkspaceWebhooks(workspaceSlug),
+      getWorkspaceApiKeys(workspaceSlug),
+      getWorkspaceAtsIntegrations(workspaceSlug),
+    ]);
+
+    return (
+      <main className="shell-page space-y-6">
+        <header className="shell-header" style={{ marginBottom: '32px' }}>
+          <span className="ui-eyebrow">INTEGRATIONS & WEBHOOKS</span>
+          <h1>Integrations, Webhooks & API Keys</h1>
+          <p>
+            Configure real-time event webhooks, cryptographically hashed API keys, and enterprise ATS connectors (Greenhouse, Lever, Workday).
+          </p>
+        </header>
+        <WorkspaceIntegrations
+          workspaceSlug={workspaceSlug}
+          initialSummary={summary}
+          initialWebhooks={webhooks}
+          initialApiKeys={apiKeys}
+          initialAts={ats}
         />
       </main>
     );

@@ -53,6 +53,12 @@ import {
   AnalyticsQuerySchema,
   UpdateSubscriptionSchema,
   CancelSubscriptionSchema,
+  CreateWebhookEndpointSchema,
+  UpdateWebhookEndpointSchema,
+  TestWebhookEndpointSchema,
+  CreateApiKeySchema,
+  ConfigureAtsIntegrationSchema,
+  SyncAtsIntegrationSchema,
 } from './index';
 
 describe('validation - Authentication schemas', () => {
@@ -822,6 +828,100 @@ describe('validation - Analytics & Billing schemas', () => {
     ).toBe(true);
   });
 });
+
+describe('validation - Integrations, Webhooks & ATS schemas', () => {
+  it('validates webhook endpoint creation and updates', () => {
+    expect(
+      CreateWebhookEndpointSchema.safeParse({
+        url: 'https://api.acme.com/webhooks/em',
+        description: 'Production event receiver',
+        eventTypes: ['application.created', 'offer.signed'],
+      }).success,
+    ).toBe(true);
+
+    expect(
+      CreateWebhookEndpointSchema.safeParse({
+        url: 'not-a-valid-url',
+        eventTypes: ['application.created'],
+      }).success,
+    ).toBe(false);
+
+    expect(
+      CreateWebhookEndpointSchema.safeParse({
+        url: 'https://api.acme.com/webhooks',
+        eventTypes: [],
+      }).success,
+    ).toBe(false);
+
+    expect(
+      UpdateWebhookEndpointSchema.safeParse({
+        status: 'PAUSED',
+        description: 'Temporarily disabled for maintenance',
+      }).success,
+    ).toBe(true);
+
+    expect(
+      TestWebhookEndpointSchema.safeParse({
+        eventType: 'ping',
+      }).success,
+    ).toBe(true);
+
+    expect(
+      TestWebhookEndpointSchema.safeParse({
+        eventType: '',
+      }).success,
+    ).toBe(false);
+  });
+
+  it('validates API key creation and constraints', () => {
+    expect(
+      CreateApiKeySchema.safeParse({
+        name: 'Zapier Automation Key',
+        scopes: ['read', 'write'],
+        expiresInDays: 90,
+      }).success,
+    ).toBe(true);
+
+    expect(
+      CreateApiKeySchema.safeParse({
+        name: 'A',
+        scopes: ['read'],
+      }).success,
+    ).toBe(false);
+
+    expect(
+      CreateApiKeySchema.safeParse({
+        name: 'Valid Name',
+        expiresInDays: 500,
+      }).success,
+    ).toBe(false);
+  });
+
+  it('validates ATS integration configuration and sync trigger', () => {
+    expect(
+      ConfigureAtsIntegrationSchema.safeParse({
+        provider: 'GREENHOUSE',
+        apiKey: 'gh_harvest_live_key_998877',
+        syncConfig: { autoImportJobs: true },
+      }).success,
+    ).toBe(true);
+
+    expect(
+      ConfigureAtsIntegrationSchema.safeParse({
+        provider: 'UNKNOWN_ATS',
+        apiKey: 'key123',
+      }).success,
+    ).toBe(false);
+
+    expect(
+      SyncAtsIntegrationSchema.safeParse({
+        provider: 'LEVER',
+        direction: 'EXPORT_CANDIDATES',
+      }).success,
+    ).toBe(true);
+  });
+});
+
 
 
 

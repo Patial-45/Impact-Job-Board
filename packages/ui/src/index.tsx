@@ -13,3 +13,4 @@ export * from './feedback';
 export * from './table';
 export * from './layout';
 export * from './recruitment';
+export * from './logo';

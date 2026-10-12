@@ -16,6 +16,12 @@ export {
   AssessmentInviteStatus,
   OfferStatus,
   OnboardingTaskStatus,
+  SubscriptionTier,
+  SubscriptionStatus,
+  BillingCycle,
+  WebhookEndpointStatus,
+  AtsProvider,
+  AtsIntegrationStatus,
 } from '@prisma/client';
 export type {
   User,
@@ -49,7 +55,15 @@ export type {
   JobOffer,
   OfferSignature,
   OnboardingTask,
+  WorkspaceSubscription,
+  SupportElevation,
+  AuditLog,
+  WebhookEndpoint,
+  WebhookDelivery,
+  ApiKey,
+  AtsIntegration,
 } from '@prisma/client';
+
 
 
 

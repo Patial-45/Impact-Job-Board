@@ -1319,6 +1319,123 @@ export async function getWorkspaceBilling(workspaceSlug: string): Promise<Worksp
   }
 }
 
+export type IntegrationsSummary = {
+  activeWebhooks: number;
+  activeApiKeys: number;
+  connectedAts: number;
+  availableAtsProviders: string[];
+};
+
+export type WebhookEndpointItem = {
+  id: string;
+  url: string;
+  description: string | null;
+  eventTypes: string[];
+  status: 'ACTIVE' | 'PAUSED' | 'DISABLED';
+  maskedSecret: string;
+  deliveriesCount: number;
+  createdAt: string;
+  updatedAt: string;
+};
+
+export type WebhookDeliveryItem = {
+  id: string;
+  endpointId: string;
+  eventType: string;
+  payload: Record<string, unknown>;
+  responseStatus: number | null;
+  responseBody: string | null;
+  durationMs: number | null;
+  error: string | null;
+  createdAt: string;
+};
+
+export type ApiKeyItem = {
+  id: string;
+  name: string;
+  keyPrefix: string;
+  scopes: string[];
+  lastUsedAt: string | null;
+  expiresAt: string | null;
+  revokedAt: string | null;
+  createdAt: string;
+};
+
+export type AtsIntegrationItem = {
+  provider: 'GREENHOUSE' | 'LEVER' | 'WORKDAY';
+  status: 'DISCONNECTED' | 'CONNECTED' | 'SYNCING' | 'ERROR';
+  maskedApiKey: string | null;
+  syncConfig: Record<string, unknown> | null;
+  lastSyncedAt: string | null;
+  errorMessage: string | null;
+  updatedAt: string | null;
+};
+
+export async function getWorkspaceIntegrationsSummary(
+  workspaceSlug: string,
+): Promise<IntegrationsSummary | null> {
+  const cookie = (await cookies()).toString();
+  try {
+    const res = await fetch(
+      `${apiUrl}/workspaces/${encodeURIComponent(workspaceSlug)}/integrations/summary`,
+      { headers: { cookie }, cache: 'no-store' },
+    );
+    if (!res.ok) return null;
+    return await res.json();
+  } catch {
+    return null;
+  }
+}
+
+export async function getWorkspaceWebhooks(
+  workspaceSlug: string,
+): Promise<WebhookEndpointItem[]> {
+  const cookie = (await cookies()).toString();
+  try {
+    const res = await fetch(
+      `${apiUrl}/workspaces/${encodeURIComponent(workspaceSlug)}/integrations/webhooks`,
+      { headers: { cookie }, cache: 'no-store' },
+    );
+    if (!res.ok) return [];
+    return await res.json();
+  } catch {
+    return [];
+  }
+}
+
+export async function getWorkspaceApiKeys(
+  workspaceSlug: string,
+): Promise<ApiKeyItem[]> {
+  const cookie = (await cookies()).toString();
+  try {
+    const res = await fetch(
+      `${apiUrl}/workspaces/${encodeURIComponent(workspaceSlug)}/integrations/api-keys`,
+      { headers: { cookie }, cache: 'no-store' },
+    );
+    if (!res.ok) return [];
+    return await res.json();
+  } catch {
+    return [];
+  }
+}
+
+export async function getWorkspaceAtsIntegrations(
+  workspaceSlug: string,
+): Promise<AtsIntegrationItem[]> {
+  const cookie = (await cookies()).toString();
+  try {
+    const res = await fetch(
+      `${apiUrl}/workspaces/${encodeURIComponent(workspaceSlug)}/integrations/ats`,
+      { headers: { cookie }, cache: 'no-store' },
+    );
+    if (!res.ok) return [];
+    return await res.json();
+  } catch {
+    return [];
+  }
+}
+
+
 
 
 

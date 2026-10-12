@@ -159,6 +159,41 @@ Alternatives: Allowing platform admins global access to all workspaces without a
 
 Consequence: Administrators have robust system oversight and compliance logs; employers have actionable recruitment analytics and flexible self-service plan management.
 
+## ADR-024 — Multi-Tenant Webhooks, Cryptographic API Keys, Enterprise ATS Connectors & Modern 3D Spatial UI Overhaul
+
+Decision: Implement a secure multi-tenant webhook dispatch ledger, cryptographically hashed API keys, ATS connector sync engine, and modern 3D spatial design system overhaul.
+1. Workspace Tenant Isolation & RBAC:
+   - Webhook endpoints, deliveries, API keys, and ATS configurations are strictly isolated by `workspaceId`.
+   - Granular RBAC actions: `integrations.read` and `integrations.write` granted to workspace `OWNER` and `ADMIN` roles.
+2. Cryptographic API Key Security:
+   - Raw keys are generated with secure random entropy formatted as `em_live_<32 hex chars>`.
+   - Raw keys are displayed to the user exactly once upon creation and never stored in plaintext.
+   - The database stores a SHA-256 cryptographic digest (`keyHash`), key prefix for identification (`em_live_...`), and revocation timestamp.
+3. Webhook Delivery & Signature Verification:
+   - Webhook subscriptions support selective event filtering (e.g., `application.created`, `application.stage_changed`, `offer.created`, `offer.accepted`).
+   - Every endpoint is provisioned with a cryptographic signing secret `whsec_<hex>`.
+   - Outbound webhook HTTP payloads include timestamp and HMAC-SHA256 signature in the `X-Signature-256` header to guarantee authenticity.
+   - Comprehensive delivery ledger (`WebhookDelivery`) records response status code, round-trip latency, payload, and error messages for auditability and debugging.
+4. Enterprise ATS Connectors:
+   - Dedicated connector adapters for Greenhouse, Lever, and Workday.
+   - Secure credential storage (API key, webhook secret, environment target) with bi-directional or outbound candidate/requisition sync modes.
+   - Audit trail tracking last synchronized timestamp, sync status, and item counters.
+5. Modern 3D Spatial UI & Tactile Motion Overhaul:
+   - Upgraded UI design tokens with authentic 3D spatial elevation, multi-layer ambient specular drop shadows, and interactive spring physics.
+   - Tactile click feedback across buttons and cards with `transform: translateY(1px) scale(0.975)` and active glow borders.
+   - Modernized typography system with variable fonts (`Plus Jakarta Sans`, `Inter`, `Geist Mono`).
+   - Replaced legacy icons with `lucide-react` across navigation, workspace shells, and data tables.
+   - Custom 3D isometric faceted geometry logo (`LogoMark`, `Logo`) with emerald glow gradients.
+
+Context: Phase 11 enables enterprises to automate hiring workflows, sync pipeline candidates with their legacy ATS infrastructure, and programmatically consume recruitment events, wrapped in a modern, tactile, premium design system.
+
+Reasoning: Guarantees zero plaintext secret leakage, cryptographic message verification, reliable delivery auditing, and an engaging executive user experience that feels solid and responsive.
+
+Alternatives: Storing plaintext API keys (severe security vulnerability); third-party uninspected webhook forwarders; flat, dated UI typography and iconography.
+
+Consequence: Hiring teams can safely integrate Executive Match with their tech stack, while candidates and recruiters enjoy a modern, tactile, 3D interface.
+
+
 
 
 

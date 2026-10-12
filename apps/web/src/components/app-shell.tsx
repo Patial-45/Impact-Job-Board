@@ -1,6 +1,54 @@
+'use client';
+
 import Link from 'next/link';
-import type { ReactNode } from 'react';
-import { Avatar, Badge } from '@executive-match/ui';
+import { usePathname } from 'next/navigation';
+import type { ComponentType, ReactNode } from 'react';
+import { Avatar, Badge, Logo } from '@executive-match/ui';
+import {
+  LayoutDashboard,
+  Briefcase,
+  Users,
+  Calendar,
+  FileSignature,
+  BarChart3,
+  CreditCard,
+  Webhook,
+  UserPlus,
+  Settings,
+  Building2,
+  FileText,
+  Bookmark,
+  UserCheck,
+  Activity,
+  Layers,
+  LogOut,
+  Sparkles,
+} from 'lucide-react';
+
+function getNavIcon(label: string, href: string): ComponentType<{ size?: number; className?: string; strokeWidth?: number }> {
+  const normalized = label.toLowerCase();
+  const normalizedHref = href.toLowerCase();
+
+  if (normalized.includes('overview') || normalized.includes('dashboard')) return LayoutDashboard;
+  if (normalized.includes('job') && !normalized.includes('saved')) return Briefcase;
+  if (normalized.includes('saved')) return Bookmark;
+  if (normalized.includes('candidate') && !normalized.includes('search')) return Users;
+  if (normalized.includes('application')) return Layers;
+  if (normalized.includes('interview')) return Calendar;
+  if (normalized.includes('offer')) return FileSignature;
+  if (normalized.includes('analytic')) return BarChart3;
+  if (normalized.includes('billing')) return CreditCard;
+  if (normalized.includes('integration') || normalized.includes('webhook') || normalizedHref.includes('integrations')) return Webhook;
+  if (normalized.includes('team') || normalized.includes('member')) return UserPlus;
+  if (normalized.includes('profile')) return UserCheck;
+  if (normalized.includes('resume')) return FileText;
+  if (normalized.includes('setting')) return Settings;
+  if (normalized.includes('user')) return Users;
+  if (normalized.includes('workspace')) return Building2;
+  if (normalized.includes('compan')) return Building2;
+  if (normalized.includes('system') || normalized.includes('audit')) return Activity;
+  return Sparkles;
+}
 
 export function AppShell({
   kind,
@@ -15,28 +63,48 @@ export function AppShell({
   links: { href: string; label: string }[];
   children: ReactNode;
 }) {
+  const pathname = usePathname();
+
   return (
     <div className="app-shell">
       <aside className="app-sidebar">
-        <Link href="/" className="wordmark" aria-label="Executive Match Home">
-          <span className="brand-mark" aria-hidden="true">
-            EM<span>.</span>
-          </span>
-          <span>Executive Match</span>
-        </Link>
+        <div className="sidebar-brand-wrapper">
+          <Link href="/" aria-label="Executive Match Home" className="transition-transform hover:scale-[1.02] active:scale-[0.98]">
+            <Logo size="md" showText={true} />
+          </Link>
+        </div>
 
         {label && (
           <div className="workspace-tag">
-            <span>{label}</span>
+            <span className="workspace-tag-dot" aria-hidden="true" />
+            <span className="workspace-tag-text">{label}</span>
           </div>
         )}
 
         <nav className="app-nav" aria-label={`${kind} navigation`}>
-          {links.map((link) => (
-            <Link key={link.href} href={link.href}>
-              {link.label}
-            </Link>
-          ))}
+          {links.map((link) => {
+            const Icon = getNavIcon(link.label, link.href);
+            const isActive =
+              pathname === link.href ||
+              (link.href !== '/' &&
+                link.href !== '/admin' &&
+                link.href !== '/candidate' &&
+                !link.href.endsWith('/workspace') &&
+                pathname.startsWith(link.href + '/'));
+
+            return (
+              <Link
+                key={link.href}
+                href={link.href}
+                className={`app-nav-link ${isActive ? 'active' : ''}`}
+                aria-current={isActive ? 'page' : undefined}
+              >
+                <Icon size={18} strokeWidth={2} className="nav-icon" />
+                <span className="nav-label">{link.label}</span>
+                {isActive && <span className="nav-active-pill" aria-hidden="true" />}
+              </Link>
+            );
+          })}
         </nav>
 
         <div className="app-sidebar-bottom">
@@ -61,8 +129,9 @@ export function AppShell({
               <Avatar name={email} size="sm" />
               <span className="shell-user">{email}</span>
             </div>
-            <Link href="/login" className="topbar-signout">
-              Sign out
+            <Link href="/login" className="topbar-signout" aria-label="Sign out">
+              <LogOut size={14} className="signout-icon" />
+              <span>Sign out</span>
             </Link>
           </div>
         </header>

@@ -458,6 +458,60 @@ export type AnalyticsQueryInput = z.infer<typeof AnalyticsQuerySchema>;
 export type UpdateSubscriptionInput = z.infer<typeof UpdateSubscriptionSchema>;
 export type CancelSubscriptionInput = z.infer<typeof CancelSubscriptionSchema>;
 
+export const WebhookEndpointEventTypes = [
+  'application.created',
+  'application.stage_changed',
+  'interview.scheduled',
+  'interview.completed',
+  'offer.created',
+  'offer.sent',
+  'offer.accepted',
+  'offer.rejected',
+  'onboarding.task_completed',
+] as const;
+
+export const CreateWebhookEndpointSchema = z.object({
+  url: z.string().trim().url().max(1000),
+  description: z.string().trim().max(255).optional().nullable(),
+  eventTypes: z.array(z.string().trim().min(1)).min(1),
+});
+
+export const UpdateWebhookEndpointSchema = z.object({
+  url: z.string().trim().url().max(1000).optional(),
+  description: z.string().trim().max(255).optional().nullable(),
+  eventTypes: z.array(z.string().trim().min(1)).optional(),
+  status: z.enum(['ACTIVE', 'PAUSED', 'DISABLED']).optional(),
+});
+
+export const TestWebhookEndpointSchema = z.object({
+  eventType: z.string().trim().min(1).default('ping'),
+});
+
+export const CreateApiKeySchema = z.object({
+  name: z.string().trim().min(2).max(100),
+  scopes: z.array(z.string().trim().min(1)).min(1).default(['read']),
+  expiresInDays: z.coerce.number().int().min(1).max(365).optional().nullable(),
+});
+
+export const ConfigureAtsIntegrationSchema = z.object({
+  provider: z.enum(['GREENHOUSE', 'LEVER', 'WORKDAY']),
+  apiKey: z.string().trim().min(1),
+  syncConfig: z.record(z.string(), z.unknown()).optional().nullable(),
+});
+
+export const SyncAtsIntegrationSchema = z.object({
+  provider: z.enum(['GREENHOUSE', 'LEVER', 'WORKDAY']),
+  direction: z.enum(['IMPORT_JOBS', 'EXPORT_CANDIDATES', 'FULL_SYNC']).default('FULL_SYNC'),
+});
+
+export type CreateWebhookEndpointInput = z.infer<typeof CreateWebhookEndpointSchema>;
+export type UpdateWebhookEndpointInput = z.infer<typeof UpdateWebhookEndpointSchema>;
+export type TestWebhookEndpointInput = z.infer<typeof TestWebhookEndpointSchema>;
+export type CreateApiKeyInput = z.infer<typeof CreateApiKeySchema>;
+export type ConfigureAtsIntegrationInput = z.infer<typeof ConfigureAtsIntegrationSchema>;
+export type SyncAtsIntegrationInput = z.infer<typeof SyncAtsIntegrationSchema>;
+
+
 
 
 
