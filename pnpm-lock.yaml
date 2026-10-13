@@ -260,6 +260,18 @@ importers:
 
   workers/processing:
     dependencies:
+      '@executive-match/ai':
+        specifier: workspace:*
+        version: link:../../packages/ai
+      '@executive-match/config':
+        specifier: workspace:*
+        version: link:../../packages/config
+      '@executive-match/database':
+        specifier: workspace:*
+        version: link:../../packages/database
+      '@executive-match/email':
+        specifier: workspace:*
+        version: link:../../packages/email
       '@executive-match/shared':
         specifier: workspace:*
         version: link:../../packages/shared

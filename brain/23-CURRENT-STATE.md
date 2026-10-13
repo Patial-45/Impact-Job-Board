@@ -41,15 +41,24 @@ Current Branch: `main` (tracking `origin/main` at `https://github.com/Patial-45/
   - Enhanced `RequestContextMiddleware` propagating `x-request-id` and `x-correlation-id`, with query string parameter redaction.
   - Production health, liveness, and readiness probes: `HealthController` exposing `/api/v1/health/live`, `/api/v1/health/liveness`, `/api/v1/health/ready`, and `/api/v1/health/readiness` with real database ping latency and memory utilization metrics.
   - Modern 3D web error boundaries: `apps/web/src/app/not-found.tsx`, `error.tsx` (with digest display and retry physics), and `global-error.tsx`.
-  - Monorepo Quality Gates: 185 unit tests passing across all packages, 0 ESLint errors, clean typecheck, and full Next.js Turbopack / NestJS tsup production builds.
+  - Monorepo Quality Gates: 193 unit tests passing across all packages, 0 ESLint errors, clean typecheck, and full Next.js Turbopack / NestJS tsup production builds.
+- Distributed Background Queue Worker Runtime (completed & verified):
+  - Standalone worker execution engine in `workers/processing`.
+  - BullMQ queue processors for `candidate.index` / `resume.embed`, `job.embed`, `match.calculate`, and `notification.email`.
+  - `CandidateEmbedProcessor`: normalizes candidate headline, bio, experience timeline, educations, and verified skills into text documents, computes SHA-256 source hash, generates 1536-dimensional embeddings, and upserts `CandidateProfileEmbedding`.
+  - `JobEmbedProcessor`: vectorizes job requisitions into 1536-dimensional embeddings and upserts `JobEmbedding`.
+  - `MatchCalculateProcessor`: computes calibrated hybrid compatibility scores and explanations combining deterministic scoring and embedding cosine similarity, upserting `MatchResult`.
+  - `NotificationEmailProcessor`: dispatches transactional emails via `@executive-match/email` provider port with idempotency keys.
+  - Standalone worker service lifecycle coordinator (`workers/processing/src/worker.ts`) with BullMQ Redis connection and graceful shutdown (`SIGTERM`, `SIGINT`).
+  - 10 unit tests passing in `workers/processing/src/index.test.ts`.
 - Initial PostgreSQL migration (`packages/database/prisma/migrations/20260929_init`).
-- Published foundation, Phases 1-11 to GitHub: `https://github.com/Patial-45/Impact-Job-Board`.
+- Published foundation, Phases 1-12, and Background Worker Runtime to GitHub: `https://github.com/Patial-45/Impact-Job-Board`.
 
 ## Partially completed
 
-- AI/BullMQ background queue worker execution: interfaces, contracts, and worker factory exist; background worker service runtime process wiring is ready for live queue deployment.
+None — all core application domains, RBAC, ATS pipelines, AI match engines, admin portal, analytics, billing, webhooks, ATS connectors, production hardening, and background worker runtimes are complete and verified.
 
 ## Next operational steps
 
-1. Production cloud deployment & environment secret configuration (Railway/Render for API, Vercel for Web, managed PostgreSQL, Cloudflare R2).
+1. Production cloud deployment & environment secret configuration (Railway/Render for API & Worker, Vercel for Web, managed PostgreSQL, Cloudflare R2).
 2. Live smoke tests against managed cloud database.

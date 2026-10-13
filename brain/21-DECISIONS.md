@@ -223,6 +223,35 @@ Alternatives: Leaving default development error stack traces in production (seve
 
 Consequence: The platform is hardened against common web attack vectors, prevents sensitive information leakage, and provides clear operational health telemetry for DevOps and monitoring tools.
 
+## ADR-026 — Distributed Background Queue Worker Runtime & Hybrid Match Processing Pipeline
+
+Decision: Implement a dedicated, resilient background worker processing runtime (`workers/processing`) coordinating asynchronous candidate embedding, job embedding, hybrid match calculation, and transactional notification dispatch.
+1. Architecture & Process Isolation:
+   - Worker runtime operates as an independent Node.js process decoupled from API request-response loops.
+   - Leverages BullMQ backed by Redis for durable, versioned job execution with exponential backoff retries (3 attempts).
+   - Graceful fallback: when `REDIS_URL` is unconfigured (local test or development), workers register in standby mode without blocking monorepo operations.
+2. Candidate Profile & Job Embedding Processors:
+   - `CandidateEmbedProcessor`: constructs normalized profile text document with employment history, educations, and verified skills tags, computes sha256 source hash, generates 1536-dimensional vector embedding, and upserts `CandidateProfileEmbedding`. Skips recomputation if source hash is unchanged unless `force: true`.
+   - `JobEmbedProcessor`: normalizes requisition specifications, requirements, and preferred skills, computes source hash, generates vector embedding, and upserts `JobEmbedding`.
+3. Asynchronous Match Calculation Pipeline:
+   - `MatchCalculateProcessor`: loads candidate and job profiles with vector embeddings.
+   - Evaluates deterministic competencies, skills overlap, and seniority weights, alongside semantic embedding cosine similarity.
+   - Computes calibrated hybrid match score and explanation using `calculateHybridScore()`.
+   - Persists or updates `MatchResult` records for immediate query by recruiter ATS and candidate discovery pipelines.
+4. Transactional Notification Dispatch:
+   - `NotificationEmailProcessor`: consumes notification queue events and sends multi-format transactional emails through `@executive-match/email` provider port with idempotency keys.
+5. Process Lifecycle & Graceful Shutdown:
+   - Standalone CLI runner `workers/processing/src/worker.ts` traps `SIGTERM` and `SIGINT` signals, draining in-flight jobs and cleanly closing Redis connections and Prisma database clients.
+
+Context: Background worker runtime is required to offload expensive text normalization, embedding generation, and bulk match recalculation out of synchronous API request threads.
+
+Reasoning: Guarantees high API throughput, prevents HTTP request timeouts, isolates AI and external provider failures, and provides automatic exponential retry policies.
+
+Alternatives: Synchronous in-request embedding generation (causes high HTTP latency and timeout risk); client-side matching.
+
+Consequence: The platform processes heavy vector embedding and match scoring jobs reliably in the background while keeping API responses fast and predictable.
+
+
 
 
 

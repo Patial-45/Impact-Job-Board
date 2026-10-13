@@ -1,5 +1,33 @@
 # Changelog
 
+## 2026-10-13 — Background Queue Worker Execution Engine & Distributed Processing Runtime
+
+- Built Distributed Worker Processing Runtime (`workers/processing`):
+  - Added workspace dependencies `@executive-match/database`, `@executive-match/ai`, `@executive-match/email`, and `@executive-match/config` to `workers/processing/package.json`.
+  - Created Candidate Embedding Processor (`createCandidateEmbedProcessor` in `workers/processing/src/processors/candidate-embed.processor.ts`):
+    - Normalizes candidate headline, bio, experience timeline, educations, and verified skills into text documents.
+    - Generates 1536-dimensional embeddings with sha256 source hashing and skip-if-unchanged optimization.
+    - Upserts into `CandidateProfileEmbedding`.
+  - Created Job Embedding Processor (`createJobEmbedProcessor` in `workers/processing/src/processors/job-embed.processor.ts`):
+    - Normalizes job requisition specifications, required/preferred skills, and descriptions.
+    - Generates 1536-dimensional embeddings with sha256 source hashing.
+    - Upserts into `JobEmbedding`.
+  - Created Match Calculation Processor (`createMatchCalculateProcessor` in `workers/processing/src/processors/match-calculate.processor.ts`):
+    - Computes hybrid candidate-job compatibility score combining deterministic scoring and embedding cosine similarity.
+    - Upserts calibrated `MatchResult` records.
+  - Created Notification Email Processor (`createNotificationEmailProcessor` in `workers/processing/src/processors/notification-email.processor.ts`):
+    - Consumes transactional email payloads and dispatches via configured `@executive-match/email` provider with idempotency keys.
+  - Built Standalone Worker Service Lifecycle Coordinator (`workers/processing/src/worker.ts`):
+    - Starts BullMQ workers across `candidate`, `job`, `match`, and `notification` queues when `REDIS_URL` is configured.
+    - Gracefully degrades to standby mode without Redis.
+    - Handles `SIGTERM` and `SIGINT` process signals for clean worker drain and database disconnection.
+  - Expanded unit test suite in `workers/processing/src/index.test.ts` (10 tests passing).
+- Monorepo Quality Gates:
+  - 193 unit tests passing across all packages.
+  - 0 ESLint errors across 13 packages.
+  - 0 TypeScript errors across 13 packages.
+  - Full Next.js Turbopack and NestJS tsup production builds succeeded.
+
 ## 2026-10-13 — Phase 12: Production Hardening, Observability & Security Probes
 
 - Production Security & HTTP Policy Hardening:

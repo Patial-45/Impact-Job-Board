@@ -10,6 +10,10 @@
   },
   "dependencies": {
     "@executive-match/shared": "workspace:*",
+    "@executive-match/database": "workspace:*",
+    "@executive-match/ai": "workspace:*",
+    "@executive-match/email": "workspace:*",
+    "@executive-match/config": "workspace:*",
     "bullmq": "5.58.5"
   },
   "devDependencies": {

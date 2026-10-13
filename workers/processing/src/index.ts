@@ -53,3 +53,10 @@ export function createWorker<T>(
     concurrency,
   });
 }
+
+export * from './processors/candidate-embed.processor';
+export * from './processors/job-embed.processor';
+export * from './processors/match-calculate.processor';
+export * from './processors/notification-email.processor';
+export * from './worker';
+
