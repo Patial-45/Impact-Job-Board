@@ -4,6 +4,7 @@ import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
 import { DatabaseModule } from '../platform/database.module';
 import { EmailModule } from '../platform/email.module';
 import { StorageModule } from '../platform/storage.module';
+import { ObservabilityModule } from '../platform/observability.module';
 import { AuthModule } from './auth.module';
 import { CandidatesModule } from './candidates.module';
 import { HealthModule } from './health.module';
@@ -24,6 +25,7 @@ import { IntegrationsModule } from './integrations.module';
     DatabaseModule,
     EmailModule,
     StorageModule,
+    ObservabilityModule,
     ThrottlerModule.forRoot([{ ttl: 60_000, limit: 60 }]),
     AuthModule,
     CandidatesModule,

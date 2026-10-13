@@ -15,7 +15,20 @@ async function bootstrap() {
   loadEnv({ path: resolve(process.cwd(), '../../.env') });
   const env = parseServerEnv(process.env);
   const app = await NestFactory.create(AppModule, { rawBody: true });
-  app.use(helmet());
+  app.use(
+    helmet({
+      crossOriginEmbedderPolicy: false,
+      crossOriginResourcePolicy: { policy: 'cross-origin' },
+      referrerPolicy: { policy: 'strict-origin-when-cross-origin' },
+      hsts: {
+        maxAge: 31536000,
+        includeSubDomains: true,
+        preload: true,
+      },
+      frameguard: { action: 'deny' },
+      noSniff: true,
+    }),
+  );
   app.use(cookieParser());
   app.use(new RequestContextMiddleware().use);
   app.use(new OriginGuardMiddleware(env.WEB_URL).use);

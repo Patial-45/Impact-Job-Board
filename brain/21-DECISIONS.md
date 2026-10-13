@@ -193,6 +193,37 @@ Alternatives: Storing plaintext API keys (severe security vulnerability); third-
 
 Consequence: Hiring teams can safely integrate Executive Match with their tech stack, while candidates and recruiters enjoy a modern, tactile, 3D interface.
 
+## ADR-025 — Production Hardening, Security Headers, Structured Observability & Health Readiness Probes
+
+Decision: Implement comprehensive production hardening, HTTP security policies, structured telemetry with automated redaction, and deep container/orchestrator health readiness probes.
+1. Security Headers & Helmet Policies:
+   - Configured Helmet middleware in `main.ts` with strict HSTS (`maxAge: 31536000`, `includeSubDomains: true`, `preload: true`), `frameguard` (`DENY`), `noSniff` (`nosniff`), and strict referrer policy (`strict-origin-when-cross-origin`).
+   - Configured Next.js 16 response headers in `next.config.ts` enforcing `Strict-Transport-Security`, `X-Frame-Options: DENY`, `X-Content-Type-Options: nosniff`, `Referrer-Policy: strict-origin-when-cross-origin`, `Permissions-Policy: camera=(), microphone=(), geolocation=(), browsing-topics=()`, `X-XSS-Protection: 1; mode=block`, and DNS prefetch control.
+2. Error Masking & Exception Sanitization:
+   - Enhanced `HttpErrorFilter` to strictly mask 500 internal server error messages in production mode (`process.env.NODE_ENV === 'production'`), returning a safe, non-leaking user-facing message while recording full error names, messages, stacks, routes, and correlation IDs to server telemetry logs.
+   - Response payloads uniformly include `code`, `message`, `requestId`, `path`, and ISO timestamp.
+3. Structured Observability & Sensitive Data Redaction:
+   - Created injectable `ObservabilityService` emitting standardized JSON events (`timestamp`, `level`, `event`, `correlationId`, `metadata`, `error`).
+   - Recursively redacts sensitive payload attributes (`password`, `token`, `secret`, `key`, `apiKey`, `keyHash`, `authorization`, `cookie`, `signingSecret`).
+   - Enhanced `RequestContextMiddleware` to echo and propagate `x-request-id` and `x-correlation-id`, with query string parameter redaction.
+4. Production Health & Readiness Probes:
+   - `GET /api/v1/health/live` & `GET /api/v1/health/liveness`: Lightweight process liveness verification returning `{ status: 'ok', uptimeSeconds, timestamp }`.
+   - `GET /api/v1/health/ready` & `GET /api/v1/health/readiness`: Deep readiness check executing `SELECT 1` on PostgreSQL, reporting database latency in ms, measuring process heap and RSS memory utilization in MB, and returning HTTP 503 if the database is disconnected.
+   - Backward-compatible `GET /api/v1/health` endpoint returning database status and query latency.
+5. Modern 3D Web Error Boundaries:
+   - Upgraded `not-found.tsx` with 3D spatial card elevation, subtle background glow, `lucide-react` icons, and navigation actions.
+   - Upgraded `error.tsx` with error digest tracking, amber/rose ambient glows, and tactile retry physics.
+   - Added `global-error.tsx` as root layout fallback.
+
+Context: Phase 12 prepares the Executive Match platform for robust, secure, and observable multi-tenant production operation across containerized and edge environments.
+
+Reasoning: Guarantees zero credential or stack trace leakage to clients, enables automated container orchestrator traffic routing via standardized readiness probes, and ensures full operational observability.
+
+Alternatives: Leaving default development error stack traces in production (severe security vulnerability); relying on raw unredacted console logs; unmonitored container deployments without database latency checks.
+
+Consequence: The platform is hardened against common web attack vectors, prevents sensitive information leakage, and provides clear operational health telemetry for DevOps and monitoring tools.
+
+
 
 
 

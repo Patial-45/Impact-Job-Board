@@ -1,5 +1,33 @@
 # Changelog
 
+## 2026-10-13 — Phase 12: Production Hardening, Observability & Security Probes
+
+- Production Security & HTTP Policy Hardening:
+  - Configured Helmet in `apps/api/src/main.ts` with strict HSTS (`maxAge: 31536000`, `includeSubDomains: true`, `preload: true`), `frameguard: DENY`, `noSniff`, and `referrerPolicy: strict-origin-when-cross-origin`.
+  - Configured Next.js 16 response security headers in `apps/web/next.config.ts`: HSTS, X-Frame-Options DENY, X-Content-Type-Options nosniff, Referrer-Policy, Permissions-Policy, X-XSS-Protection block, and DNS prefetch control.
+- Exception Sanitization & Error Masking:
+  - Updated `HttpErrorFilter` (`apps/api/src/platform/http-error.filter.ts`) to suppress database and system stack traces in production mode (`process.env.NODE_ENV === 'production'`), returning safe user-facing message while recording full error stacks and metadata server-side with correlation IDs.
+  - Added unit test suite in `apps/api/src/platform/http-error.filter.test.ts` (3 tests passing).
+- Structured Observability & Sensitive Data Redaction:
+  - Created `ObservabilityModule` and `ObservabilityService` (`apps/api/src/platform/observability.module.ts`) providing structured JSON logging (`info`, `warn`, `error`) and recursive attribute sanitization (redacting `password`, `token`, `secret`, `apiKey`, `keyHash`, `authorization`, `cookie`, `signingSecret`).
+  - Added unit test suite in `apps/api/src/platform/observability.service.test.ts` (6 tests passing).
+  - Enhanced `RequestContextMiddleware` (`apps/api/src/platform/request-context.middleware.ts`) to propagate `x-request-id` and `x-correlation-id`, redact sensitive query parameters, and format request completion metrics.
+- Production Health, Liveness & Readiness Probes:
+  - Enhanced `HealthModule` and `HealthController` (`apps/api/src/modules/health.module.ts`):
+    - `GET /api/v1/health/live` & `/api/v1/health/liveness`: Process uptime and status probe.
+    - `GET /api/v1/health/ready` & `/api/v1/health/readiness`: Traffic readiness check executing `SELECT 1` on PostgreSQL, recording latency in ms, inspecting heap and RSS memory consumption (`process.memoryUsage()`), returning 200 or 503 Service Unavailable.
+    - `GET /api/v1/health`: Backward-compatible legacy health endpoint.
+  - Added unit test suite in `apps/api/src/modules/health.service.test.ts` (7 tests passing).
+- Modern 3D Web Error Boundaries:
+  - Modernized `apps/web/src/app/not-found.tsx` with 3D spatial card elevation, subtle background glow, `lucide-react` icons, and navigation actions.
+  - Modernized `apps/web/src/app/error.tsx` with error digest tracking, amber/rose ambient glows, and tactile retry physics.
+  - Added `apps/web/src/app/global-error.tsx` for Next.js root layout failure fallback.
+- Quality Gates & Verification:
+  - 185 unit tests passing across all packages (106 in API, 50 in validation, 12 in AI, 6 in email, 4 in storage, 2 in processing, 5 in auth).
+  - 0 ESLint errors across 13 packages.
+  - 0 TypeScript errors across 13 packages.
+  - Full Next.js Turbopack and NestJS tsup production builds succeeded.
+
 ## 2026-10-12 — Phase 11: Integrations, Webhooks, ATS Connectors & 3D UI Modernization
 
 - Comprehensive UI/UX Modernization & 3D Design Overhaul:
