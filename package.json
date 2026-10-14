@@ -13,6 +13,8 @@
     "test": "turbo test",
     "db": "pnpm --filter @executive-match/database db:migrate",
     "db:generate": "pnpm --filter @executive-match/database db:generate",
+    "db:deploy": "pnpm --filter @executive-match/database db:deploy",
+    "db:seed": "pnpm --filter @executive-match/database db:seed",
     "format": "prettier --write .",
     "format:check": "prettier --check ."
   },

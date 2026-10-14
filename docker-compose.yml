@@ -1,25 +1,73 @@
 services:
   postgres:
     image: postgres:16-alpine
+    container_name: executive-match-postgres
+    restart: unless-stopped
     environment:
       POSTGRES_USER: executive
       POSTGRES_PASSWORD: executive
       POSTGRES_DB: executive_match
     ports:
-      - '5432:5432'
+      - "5432:5432"
     volumes:
-      - executive_postgres:/var/lib/postgresql/data
+      - postgres_data:/var/lib/postgresql/data
     healthcheck:
-      test: ['CMD-SHELL', 'pg_isready -U executive -d executive_match']
+      test: ["CMD-SHELL", "pg_isready -U executive -d executive_match"]
       interval: 5s
-      retries: 10
+      timeout: 5s
+      retries: 5
+
   redis:
     image: redis:7-alpine
+    container_name: executive-match-redis
+    restart: unless-stopped
     ports:
-      - '6379:6379'
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
     healthcheck:
-      test: ['CMD', 'redis-cli', 'ping']
+      test: ["CMD", "redis-cli", "ping"]
       interval: 5s
-      retries: 10
+      timeout: 5s
+      retries: 5
+
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile.api
+    container_name: executive-match-api
+    restart: unless-stopped
+    ports:
+      - "4000:4000"
+    environment:
+      DATABASE_URL: postgresql://executive:executive@postgres:5432/executive_match?schema=public
+      REDIS_URL: redis://redis:6379
+      AUTH_SECRET: default-production-ready-auth-secret-minimum-32-chars
+      WEB_URL: http://localhost:3000
+      API_PORT: 4000
+      NODE_ENV: production
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+
+  worker:
+    build:
+      context: .
+      dockerfile: Dockerfile.worker
+    container_name: executive-match-worker
+    restart: unless-stopped
+    environment:
+      DATABASE_URL: postgresql://executive:executive@postgres:5432/executive_match?schema=public
+      REDIS_URL: redis://redis:6379
+      NODE_ENV: production
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+
 volumes:
-  executive_postgres:
+  postgres_data:
+  redis_data:

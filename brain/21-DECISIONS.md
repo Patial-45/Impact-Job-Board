@@ -261,3 +261,34 @@ Consequence: The platform processes heavy vector embedding and match scoring job
 
 
 
+
+
+## ADR-027 — Production Containerization, CI Workflow Hardening & Database Seed Tooling
+
+Decision: Implement multi-stage production Dockerfiles for NestJS API and background processing worker, root `docker-compose.yml` for unified local/preview orchestration, GitHub Actions CI hardening, and programmatic database seeding (`pnpm db:seed`).
+
+1. Production Container Orchestration:
+   - `Dockerfile.api`: Multi-stage build (base, builder, runner) packaging compiled NestJS API bundle (`apps/api/dist/main.js`), Prisma client engine, dumb-init signal handler, curl health check probes against `/api/v1/health/live`, and non-root unprivileged `nestjs` user execution (UID 10001).
+   - `Dockerfile.worker`: Multi-stage production container for the background processing worker (`workers/processing`), packaging BullMQ processors, Redis connectors, and graceful `SIGTERM`/`SIGINT` handling under non-root unprivileged `worker` user.
+   - `docker-compose.yml`: Comprehensive production-ready local stack orchestrating PostgreSQL 16 (`pgvector/pgvector:pg16`), Redis 7 (`redis:7-alpine`), API service, and Worker service with internal health checks, dependency wait conditions, isolated internal network (`executive-match-net`), and persistent data volumes.
+
+2. CI Workflow Hardening (`.github/workflows/ci.yml`):
+   - Added concurrency management (`concurrency: { group: ..., cancel-in-progress: true }`) to abort stale runs on subsequent pushes.
+   - Configured automated fallback `.env` initialization from `.env.example` in CI runner environments.
+   - Explicitly provided dummy secrets and mock provider URLs (`DATABASE_URL`, `REDIS_URL`, `JWT_SECRET`, `SESSION_SECRET`, `OPENAI_API_KEY`, `RESEND_API_KEY`, `S3_ENDPOINT`) for deterministic typechecking, testing, and production Next.js static page prerendering in ephemeral runners.
+
+3. Database Seeding Tooling (`packages/database/prisma/seed.ts`):
+   - Programmatic idempotent seed script initializing:
+     - Platform Super Admin user (`admin@executive-match.internal`) with hashed credentials.
+     - Enterprise employer user (`recruiter@horizon.example.com`) and organization (`Horizon Executive Search`, `Horizon Ventures`) with active Enterprise subscription tier.
+     - Active executive job requisitions (`VP of Engineering`, `Chief Product Officer`) with required/preferred skills competencies and compensation ranges.
+     - Pre-populated executive candidate profile (`Alex Rivera`) with verified skill taxonomy, current platform engineering leadership experience, and search visibility.
+   - Registered root and package npm scripts: `pnpm db:seed` and `pnpm db:deploy`.
+
+Context: Prepares the platform for zero-friction deployment to container registries and managed container orchestrators (Railway, Render, AWS ECS, Fly.io, or Kubernetes) while ensuring CI builds pass deterministically without missing environment variables.
+
+Reasoning: Isolates micro-runtimes into small, secure non-root containers, enables full local stack preview via a single `docker compose up` invocation, and provides standard sample data for staging and developer verification.
+
+Alternatives: Relying on manual developer setup; deploying raw Node processes without container isolation; maintaining fragile external seed scripts.
+
+Consequence: Developers and CI environments can spin up or seed the entire system reproducibly; production containers are locked down with non-root users and active health probes.
