@@ -20,8 +20,14 @@
   - About Page (`apps/web/src/app/(public)/about/page.tsx`):
     - Enhanced philosophy principles grid with dedicated glowing 3D icon badges (`BrainCircuit`, `ShieldCheck`, `Award`, `Code2`).
     - Added high-contrast 3D callout banner with ambient blur background.
-  - Jobs Page (`apps/web/src/app/(public)/jobs/page.tsx`):
-    - Modernized opportunity cards with `.card-3d` elevation, `Sparkles`, and `ArrowUpRight` action buttons.
+  - Candidate Dashboard (`apps/web/src/app/(candidate)/candidate/page.tsx`):
+    - Upgraded profile strength gauge with gradient progress bar and step-by-step checklist.
+    - Added 3D cards with modern Lucide icons (`Briefcase`, `FileText`, `Sparkles`, `Upload`, `UserCheck`, `GraduationCap`, `Activity`).
+    - Modernized primary resume indicator and quick action navigation grid.
+  - Employer Workspace Overview (`apps/web/src/app/(workspace)/workspace/[workspaceSlug]/page.tsx`):
+    - Converted static placeholders into live 3D StatCards backed by `getWorkspaceJobs` and `getWorkspaceAnalytics` (active requisitions, total applicants, active pipeline count, and accepted offers).
+    - Added 6 high-impact 3D command center cards for ATS Kanban, AI Candidate Discovery, Interviews, Analytics, Offers, and Integrations with Lucide icons (`Kanban`, `Sparkles`, `Calendar`, `BarChart3`, `Award`, `Key`, `ArrowUpRight`).
+    - Added tenant isolation badge and quick role create action.
   - Global Styles (`apps/web/src/app/globals.css`):
     - Added tactile 3D button press physics (`.btn-3d`, `.btn-3d-secondary`) with 3D shadow collapse on active state.
     - Added `@keyframes pulseRing` and specular depth utilities.

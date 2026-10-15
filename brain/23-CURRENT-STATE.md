@@ -58,13 +58,15 @@ Current Branch: `main` (tracking `origin/main` at `https://github.com/Patial-45/
   - Programmatic database seed script (`packages/database/prisma/seed.ts`) and scripts (`pnpm db:seed`, `pnpm db:deploy`).
   - GitHub Actions CI workflow hardened (`.github/workflows/ci.yml`) with automated fallback `.env` generation and job concurrency controls (`cancel-in-progress: true`).
   - Verified 100% clean quality gates: 193 unit tests passing, 0 ESLint errors across 13 packages, 0 TypeScript errors across 14 packages, Next.js Turbopack & NestJS tsup production builds successful.
-- Modern 3D Spatial UI, Interactive Evidence Showcase & Public Surface Polish (completed & verified):
+- Modern 3D Spatial UI, Interactive Evidence Showcase & Dashboard Modernization (completed & verified):
   - Interactive 3D Evidence Match Showcase widget (`InteractiveHero3D`) with dynamic role switching (VP of Eng, Staff Architect, CPO), mouse cursor 3D spatial tilt tracking (`perspective: 1200px`), and animated competency alignment bars.
   - Interactive Pricing Matrix (`PricingTable`) with monthly/annual billing cycle toggle, 20% discount badge, and elevated 3D recommended card with emerald halo.
   - Complete public surface modernization: modern Lucide icon pack across all 6 platform capabilities, candidate & recruiter workflow steps, philosophy principles, and discovery jobs.
+  - Candidate Portal Home (`/candidate`): 3D profile strength gauge, primary resume card, featured skills, and quick links with modern Lucide icons (`Briefcase`, `FileText`, `Sparkles`, `Upload`, `UserCheck`, `GraduationCap`, `Activity`).
+  - Employer Workspace Overview (`/workspace/[slug]`): Real-time live 3D StatCards backed by `getWorkspaceJobs` and `getWorkspaceAnalytics`, and 6 high-impact command center cards for ATS Kanban, Candidate Discovery, Interviews, Analytics, Offers, and Integrations with Lucide icons.
   - Tactile 3D button press physics (`.btn-3d`, `.btn-3d-secondary`) with active state shadow collapse.
 - Initial PostgreSQL migration (`packages/database/prisma/migrations/20260929_init`).
-- Published foundation, Phases 1-12, Background Worker Runtime, Container Deployment Tooling, and Modern 3D UI to GitHub: `https://github.com/Patial-45/Impact-Job-Board`.
+- Published foundation, Phases 1-12, Background Worker Runtime, Container Deployment Tooling, and Modern 3D Dashboards to GitHub: `https://github.com/Patial-45/Impact-Job-Board`.
 
 ## Partially completed
 
