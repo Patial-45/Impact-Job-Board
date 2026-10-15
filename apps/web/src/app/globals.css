@@ -168,6 +168,32 @@ button:active:not(:disabled), .btn:active:not(:disabled), [role="button"]:active
   animation: pulseGlow 3s ease-in-out infinite;
 }
 
+@keyframes pulseRing {
+  0% { transform: scale(0.95); opacity: 0.8; }
+  50% { transform: scale(1.15); opacity: 0.3; }
+  100% { transform: scale(0.95); opacity: 0.8; }
+}
+
+.btn-3d {
+  position: relative;
+  box-shadow: 0 4px 0 var(--accent-dark), 0 8px 16px rgba(32, 75, 59, 0.25);
+  transition: all 0.15s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.btn-3d:active {
+  transform: translateY(3px) scale(0.98);
+  box-shadow: 0 1px 0 var(--accent-dark), 0 3px 6px rgba(32, 75, 59, 0.18);
+}
+
+.btn-3d-secondary {
+  position: relative;
+  box-shadow: 0 3px 0 var(--line-strong), 0 6px 12px rgba(24, 35, 32, 0.08);
+  transition: all 0.15s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.btn-3d-secondary:active {
+  transform: translateY(2px) scale(0.98);
+  box-shadow: 0 1px 0 var(--line-strong), 0 2px 4px rgba(24, 35, 32, 0.05);
+}
+
 ::selection {
   background: #d7e8dc;
   color: var(--ink);

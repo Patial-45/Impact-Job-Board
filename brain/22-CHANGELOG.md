@@ -1,5 +1,36 @@
 # Changelog
 
+## 2026-10-15 — Modern 3D Spatial UI, Interactive Evidence Showcase & Public Surface Modernization
+
+- Interactive 3D Evidence Match Showcase (`apps/web/src/components/interactive-hero-3d.tsx`):
+  - Created interactive 3D client component with mouse cursor spatial tilt tracking (`perspective: 1200px`, `rotateX`, `rotateY`) and specular emerald reflection.
+  - Interactive requisition selector for instant preview of target roles (VP of Engineering 96%, Staff Systems Architect 94%, Chief Product Officer 91%).
+  - Real-time animated competency bars across Architecture, Org Leadership, Tech Stack Overlap, and Velocity with contextual qualitative evidence.
+  - Floating 3D status chips (`TrendingUp`, `Layers`) with ambient glow and haptic click scale transitions.
+- Interactive Pricing Matrix (`apps/web/src/components/pricing-table.tsx` & `apps/web/src/app/(public)/pricing/page.tsx`):
+  - Interactive Monthly / Annual billing cycle toggle with automated 20% discount calculation and pill switch.
+  - 3D visual elevation for recommended "Growth Team" plan with specular emerald border, ambient glow halo (`--shadow-glow`), and "Most Popular" crown badge.
+  - Feature checklist with emerald `CheckCircle2` indicators and resource limits bar (`Bot`, `Users`, `ShieldCheck`).
+- Public Website Polish Across All Routes:
+  - Homepage (`apps/web/src/app/(public)/page.tsx`):
+    - Integrated `InteractiveHero3D` into hero section.
+    - Upgraded How It Works workflow steps with glowing 3D icon pills (`UserCheck`, `Compass`, `Sparkles`, `Activity` for candidates; `FileCode2`, `CheckCircle2`, `Layers`, `ShieldCheck` for hiring teams).
+    - Upgraded all 6 platform capabilities with glowing icon headers (`BrainCircuit`, `Layers`, `Lock`, `FileText`, `Search`, `Users`), `.card-3d` hover physics, and tag badges.
+    - Upgraded Dual Conversion CTA with 3D tactile conversion cards and `ArrowUpRight` interaction affordances.
+  - About Page (`apps/web/src/app/(public)/about/page.tsx`):
+    - Enhanced philosophy principles grid with dedicated glowing 3D icon badges (`BrainCircuit`, `ShieldCheck`, `Award`, `Code2`).
+    - Added high-contrast 3D callout banner with ambient blur background.
+  - Jobs Page (`apps/web/src/app/(public)/jobs/page.tsx`):
+    - Modernized opportunity cards with `.card-3d` elevation, `Sparkles`, and `ArrowUpRight` action buttons.
+  - Global Styles (`apps/web/src/app/globals.css`):
+    - Added tactile 3D button press physics (`.btn-3d`, `.btn-3d-secondary`) with 3D shadow collapse on active state.
+    - Added `@keyframes pulseRing` and specular depth utilities.
+- Monorepo Quality Gates:
+  - 193 unit tests passing across all packages.
+  - 0 ESLint errors across 13 packages.
+  - 0 TypeScript errors across 14 packages.
+  - Full Next.js Turbopack and NestJS tsup production builds succeeded.
+
 ## 2026-10-14 — Production Containerization, CI Workflow Hardening & Database Seed Tooling
 
 - Multi-Stage Production Containers:

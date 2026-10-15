@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import { ArrowUpRight, Sparkles } from 'lucide-react';
 import { getPublicJobs } from '@/lib/api';
 import {
   Button,
@@ -50,14 +51,18 @@ export default async function JobsPage() {
   const hasLiveJobs = liveJobs.length > 0;
 
   return (
-    <main className="container simple-page">
+    <main className="container simple-page pb-16">
       <PageHeader
         eyebrow="DISCOVERY PORTAL"
         title="Explore opportunities"
-        description="Transparent requisitions with verified salary ranges, explicit tech stacks, and evidence alignment."
+        description="Transparent requisitions with verified salary ranges, explicit tech stacks, and explainable evidence alignment."
         actions={
           <Link href="/register">
-            <Button variant="primary">Create Candidate Profile ↗</Button>
+            <Button variant="primary" className="flex items-center gap-1.5 font-bold shadow-md">
+              <Sparkles className="w-4 h-4" />
+              <span>Create Candidate Profile</span>
+              <ArrowUpRight className="w-4 h-4" />
+            </Button>
           </Link>
         }
       />
@@ -65,62 +70,66 @@ export default async function JobsPage() {
       <FilterBar
         searchSlot={<SearchInput placeholder="Search roles, tech stack, or companies…" />}
         actionSlot={
-          <span className="text-caption">
+          <span className="text-caption font-mono font-medium text-emerald-800">
             Showing {hasLiveJobs ? total : sampleRoles.length} curated opportunities
           </span>
         }
       />
 
-      <div style={{ display: 'grid', gap: '20px', marginTop: '24px' }}>
+      <div className="grid gap-5 mt-6">
         {hasLiveJobs ? (
           liveJobs.map((job) => (
-            <JobCard
-              key={job.id}
-              title={job.title}
-              companyName={job.company?.name || 'Confidential'}
-              location={job.location || 'Remote'}
-              type={
-                job.remoteType === 'ONSITE'
-                  ? 'On-site'
-                  : job.remoteType === 'HYBRID'
-                  ? 'Hybrid'
-                  : 'Remote'
-              }
-              salary={
-                job.minSalary && job.maxSalary
-                  ? `$${job.minSalary.toLocaleString()} - $${job.maxSalary.toLocaleString()}`
-                  : undefined
-              }
-              postedAt={job.publishedAt ? new Date(job.publishedAt).toLocaleDateString() : 'Recent'}
-              skills={job.skills.map((s) => s.name)}
-              actionSlot={
-                <Link href={`/jobs/${job.slug}`}>
-                  <Button variant="secondary" size="sm">
-                    View Requisition ↗
-                  </Button>
-                </Link>
-              }
-            />
+            <div key={job.id} className="card-3d rounded-xl">
+              <JobCard
+                title={job.title}
+                companyName={job.company?.name || 'Confidential'}
+                location={job.location || 'Remote'}
+                type={
+                  job.remoteType === 'ONSITE'
+                    ? 'On-site'
+                    : job.remoteType === 'HYBRID'
+                    ? 'Hybrid'
+                    : 'Remote'
+                }
+                salary={
+                  job.minSalary && job.maxSalary
+                    ? `$${job.minSalary.toLocaleString()} - $${job.maxSalary.toLocaleString()}`
+                    : undefined
+                }
+                postedAt={job.publishedAt ? new Date(job.publishedAt).toLocaleDateString() : 'Recent'}
+                skills={job.skills.map((s) => s.name)}
+                actionSlot={
+                  <Link href={`/jobs/${job.slug}`}>
+                    <Button variant="secondary" size="sm" className="flex items-center gap-1 font-semibold">
+                      <span>View Requisition</span>
+                      <ArrowUpRight className="w-3.5 h-3.5" />
+                    </Button>
+                  </Link>
+                }
+              />
+            </div>
           ))
         ) : (
           sampleRoles.map((role) => (
-            <JobCard
-              key={role.id}
-              title={role.title}
-              companyName={role.companyName}
-              location={role.location}
-              type={role.type}
-              salary={role.salary}
-              postedAt={role.postedAt}
-              skills={role.skills}
-              actionSlot={
-                <Link href="/register">
-                  <Button variant="secondary" size="sm">
-                    View Alignment ↗
-                  </Button>
-                </Link>
-              }
-            />
+            <div key={role.id} className="card-3d rounded-xl">
+              <JobCard
+                title={role.title}
+                companyName={role.companyName}
+                location={role.location}
+                type={role.type}
+                salary={role.salary}
+                postedAt={role.postedAt}
+                skills={role.skills}
+                actionSlot={
+                  <Link href="/register">
+                    <Button variant="secondary" size="sm" className="flex items-center gap-1 font-semibold">
+                      <span>View Alignment</span>
+                      <ArrowUpRight className="w-3.5 h-3.5" />
+                    </Button>
+                  </Link>
+                }
+              />
+            </div>
           ))
         )}
       </div>

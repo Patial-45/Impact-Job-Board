@@ -292,3 +292,38 @@ Reasoning: Isolates micro-runtimes into small, secure non-root containers, enabl
 Alternatives: Relying on manual developer setup; deploying raw Node processes without container isolation; maintaining fragile external seed scripts.
 
 Consequence: Developers and CI environments can spin up or seed the entire system reproducibly; production containers are locked down with non-root users and active health probes.
+
+
+## ADR-028 — Modern 3D Spatial UI, Interactive Evidence Showcase, Lucide Icon Pack & Public Surface Polish
+
+Decision: Implement an interactive 3D evidence demonstration widget with dynamic role switching and real-time competency breakdown, interactive pricing matrix with monthly/annual billing cycle toggle, rich Lucide icon pack across all public features/workflows/philosophies, and 3D tactile button press physics (`.btn-3d`, `.btn-3d-secondary`).
+
+1. Interactive 3D Hero Evidence Showcase (`InteractiveHero3D` in `apps/web/src/components/interactive-hero-3d.tsx`):
+   - Interactive role selector: dynamically switches between VP of Engineering (96% match), Staff Systems Architect (94% match), and Chief Product Officer (91% match).
+   - Real-time 3D spatial cursor tracking (`perspective: 1200px`, `rotateX`, `rotateY`, `translateZ`) with ambient specular emerald reflection and floating multi-layer badges (`TrendingUp`, `Layers`).
+   - Granular breakdown of explainable competencies (Architecture & Scalability, Org Leadership, Tech Stack Overlap, Execution Velocity) with animated gradient fill bars and contextual highlights.
+   - Verified metadata header: compensation bounds, hybrid/remote status, skill tags, and cryptographic workspace isolation badge.
+
+2. Modern Public Homepage & Workflow Upgrades (`apps/web/src/app/(public)/page.tsx`):
+   - Hero section modernized with `InteractiveHero3D` preview replacing legacy static orbit markup.
+   - How It Works (Section 03): Replaced plain numeric badges with glowing 3D icon pills (`UserCheck`, `Compass`, `Sparkles`, `Activity` for candidates; `FileCode2`, `CheckCircle2`, `Layers`, `ShieldCheck` for hiring teams).
+   - Platform Capabilities (Section 04): Upgraded all 6 feature cards with glowing icon headers (`BrainCircuit`, `Layers`, `Lock`, `FileText`, `Search`, `Users`), `.card-3d` hover physics, and tag badges.
+   - Dual Conversion CTA (Section 06): Modernized 3D tactile conversion cards with emerald ambient glow and `ArrowUpRight` interaction affordances.
+
+3. Interactive Pricing Matrix (`PricingTable` in `apps/web/src/components/pricing-table.tsx`):
+   - Added interactive client component supporting Monthly and Annual billing cycles with automated 20% discount calculation and pill switch.
+   - 3D visual elevation for recommended "Growth Team" plan with specular emerald border, ambient glow halo (`--shadow-glow`), and "Most Popular" crown badge.
+   - Comprehensive feature breakdown with `CheckCircle2` indicators and resource limits bar (`Bot`, `Users`, `ShieldCheck`).
+
+4. Public Polish Across Supporting Routes (`/about`, `/jobs`, `globals.css`):
+   - `/about`: Philosophy principles upgraded with dedicated glowing 3D icon badges (`BrainCircuit`, `ShieldCheck`, `Award`, `Code2`) and callout banner.
+   - `/jobs`: Discovery portal modernized with `Sparkles`, `ArrowUpRight`, and 3D card wrappers.
+   - `globals.css`: Added tactile 3D button press physics (`.btn-3d`, `.btn-3d-secondary`), `@keyframes pulseRing`, and specular depth classes.
+
+Context: Fulfills the user request for modern, high-craft 3D visual design, dynamic interactive animations, rich icon packs, and tactile click effects across the Executive Match platform.
+
+Reasoning: Significantly increases candidate and enterprise employer trust and conversion through interactive evidence demonstration rather than static claims, while preserving clean modular separation and zero build overhead.
+
+Alternatives: Leaving static placeholder orbits; using heavy WebGL/Three.js bundles that impact initial LCP/CLS performance.
+
+Consequence: Fast, lightweight, pure-CSS/React 3D spatial depth with high interactivity, zero bundle bloat, and consistent design language across all public surfaces.
