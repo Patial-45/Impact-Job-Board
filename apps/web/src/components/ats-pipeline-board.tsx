@@ -4,6 +4,18 @@ import { useState } from 'react';
 import Link from 'next/link';
 import { Button, Card, Badge, Textarea } from '@executive-match/ui';
 import type { ApplicationData } from '@/lib/api';
+import {
+  ArrowLeft,
+  ExternalLink,
+  Search,
+  FileText,
+  MessageSquare,
+  ArrowRight,
+  UserX,
+  Eye,
+  Download,
+  X,
+} from 'lucide-react';
 
 const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000/api/v1';
 
@@ -201,20 +213,22 @@ export function AtsPipelineBoard({
       {/* Top Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-border">
         <div>
-          <div className="flex items-center gap-2 mb-1">
+          <div className="flex items-center gap-2 mb-1.5">
             <Link
               href={`/workspace/${workspaceSlug}/jobs`}
-              className="text-xs font-semibold text-primary hover:underline inline-block"
+              className="inline-flex items-center gap-1.5 text-xs font-semibold text-primary hover:underline"
             >
-              ← Back to Job Requisitions
+              <ArrowLeft className="w-3.5 h-3.5" />
+              <span>Back to Job Requisitions</span>
             </Link>
             <span className="text-xs text-muted-foreground">•</span>
             <Link
               href={`/jobs/${jobSlug}`}
               target="_blank"
-              className="text-xs text-muted-foreground hover:text-foreground inline-block"
+              className="inline-flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground"
             >
-              Public Listing ↗
+              <span>Public Listing</span>
+              <ExternalLink className="w-3 h-3" />
             </Link>
           </div>
           <h2 className="text-2xl font-bold tracking-tight text-foreground">{jobTitle}</h2>
@@ -223,13 +237,14 @@ export function AtsPipelineBoard({
           </p>
         </div>
 
-        <div className="flex items-center gap-3">
+        <div className="relative">
+          <Search className="w-3.5 h-3.5 text-muted-foreground absolute left-3 top-1/2 -translate-y-1/2" />
           <input
             type="text"
-            placeholder="Search by candidate name, skill, or email..."
+            placeholder="Search candidate name, skill, email..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="px-3 py-1.5 text-xs rounded-lg border border-border bg-background text-foreground w-64 focus:outline-none focus:ring-1 focus:ring-primary"
+            className="pl-9 pr-3 py-1.5 text-xs rounded-lg border border-border bg-background text-foreground w-64 focus:outline-none focus:ring-1 focus:ring-primary shadow-xs"
           />
         </div>
       </div>
@@ -244,7 +259,7 @@ export function AtsPipelineBoard({
           return (
             <div
               key={col.key}
-              className="bg-card/50 rounded-xl border border-border p-3 space-y-3 min-h-[500px] flex flex-col"
+              className="bg-card/60 backdrop-blur-xs rounded-xl border border-border p-3 space-y-3 min-h-[500px] flex flex-col shadow-xs"
             >
               <div className="flex items-center justify-between pb-2 border-b border-border/80">
                 <span className="text-xs font-bold uppercase tracking-wider text-foreground">
@@ -264,8 +279,7 @@ export function AtsPipelineBoard({
                   colApps.map((app) => (
                     <Card
                       key={app.id}
-                      variant="outline"
-                      className="p-3.5 space-y-3 hover:border-primary/50 transition-colors shadow-sm bg-card"
+                      className="card-3d p-3.5 space-y-3 hover:border-primary/50 transition-all shadow-sm bg-card"
                     >
                       <div className="space-y-1">
                         <div className="flex items-center justify-between">
@@ -307,10 +321,12 @@ export function AtsPipelineBoard({
                       {/* Resume & Notes Indicators */}
                       <div className="flex items-center justify-between text-[10px] text-muted-foreground pt-1 border-t border-border/40">
                         <span className="flex items-center gap-1">
-                          {app.resume ? '📄 Resume' : 'No Resume'}
+                          <FileText className="w-3 h-3 text-muted-foreground" />
+                          <span>{app.resume ? 'Resume' : 'No Resume'}</span>
                         </span>
-                        <span>
-                          💬 {app._count?.notes || 0} note{app._count?.notes === 1 ? '' : 's'}
+                        <span className="flex items-center gap-1">
+                          <MessageSquare className="w-3 h-3 text-muted-foreground" />
+                          <span>{app._count?.notes || 0} note{app._count?.notes === 1 ? '' : 's'}</span>
                         </span>
                       </div>
 
@@ -320,10 +336,11 @@ export function AtsPipelineBoard({
                           <Button
                             variant="secondary"
                             size="sm"
-                            className="text-[10px] py-1 px-2 flex-1 h-7"
+                            className="btn-3d-secondary text-[10px] py-1 px-2 flex-1 h-7 gap-1"
                             onClick={() => handleAdvanceStage(app.id, col.nextStage!)}
                           >
-                            Advance →
+                            <span>Advance</span>
+                            <ArrowRight className="w-3 h-3" />
                           </Button>
                         )}
                         <Button
@@ -337,10 +354,11 @@ export function AtsPipelineBoard({
                         <Button
                           variant="ghost"
                           size="sm"
-                          className="text-[10px] py-1 px-2 h-7"
+                          className="text-[10px] py-1 px-2 h-7 gap-1"
                           onClick={() => fetchApplicationDetail(app.id)}
                         >
-                          View
+                          <Eye className="w-3 h-3" />
+                          <span>View</span>
                         </Button>
                       </div>
                     </Card>
@@ -404,13 +422,15 @@ export function AtsPipelineBoard({
                 </p>
               </div>
               <button
+                type="button"
                 onClick={() => {
                   setSelectedApp(null);
                   setDetailData(null);
                 }}
-                className="text-muted-foreground hover:text-foreground p-1 text-sm font-semibold"
+                className="text-muted-foreground hover:text-foreground p-1 rounded-md hover:bg-muted/50 transition-colors"
+                aria-label="Close dossier"
               >
-                ✕
+                <X className="w-4 h-4" />
               </button>
             </div>
 
@@ -431,9 +451,10 @@ export function AtsPipelineBoard({
                       href={detailData.resumeDownloadUrl}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-primary text-primary-foreground font-semibold hover:opacity-90"
+                      className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-primary text-primary-foreground font-semibold hover:opacity-90 btn-3d text-xs shadow-xs"
                     >
-                      Download Resume ↗
+                      <Download className="w-3.5 h-3.5" />
+                      <span>Download Resume</span>
                     </a>
                   )}
                 </div>
@@ -595,8 +616,11 @@ export function AtsPipelineBoard({
       {/* Reject Modal */}
       {rejectingAppId && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-background/80 backdrop-blur-sm animate-in fade-in">
-          <div className="w-full max-w-md bg-card border border-border rounded-xl shadow-2xl p-6 space-y-4">
-            <h3 className="text-lg font-bold text-foreground">Disqualify Candidate</h3>
+          <div className="card-3d w-full max-w-md bg-card border border-border rounded-xl shadow-2xl p-6 space-y-4">
+            <div className="flex items-center gap-2">
+              <UserX className="w-5 h-5 text-red-500" />
+              <h3 className="text-lg font-bold text-foreground">Disqualify Candidate</h3>
+            </div>
             <p className="text-xs text-muted-foreground">
               Mark this candidate as REJECTED. They will be moved out of active interview stages.
             </p>
@@ -607,7 +631,7 @@ export function AtsPipelineBoard({
               </label>
               <input
                 type="text"
-                className="w-full px-3 py-2 text-xs rounded-lg border border-border bg-background text-foreground"
+                className="w-full px-3 py-2 text-xs rounded-lg border border-border bg-background text-foreground focus:ring-1 focus:ring-primary outline-none"
                 placeholder="e.g. Compensation expectations out of band, lack of required cloud experience"
                 value={rejectReason}
                 onChange={(e) => setRejectReason(e.target.value)}
@@ -617,6 +641,7 @@ export function AtsPipelineBoard({
             <div className="flex items-center justify-end gap-3 pt-2">
               <Button
                 variant="ghost"
+                className="btn-3d-secondary text-xs"
                 onClick={() => {
                   setRejectingAppId(null);
                   setRejectReason('');
@@ -626,6 +651,7 @@ export function AtsPipelineBoard({
               </Button>
               <Button
                 variant="danger"
+                className="btn-3d text-xs font-semibold"
                 onClick={() => handleReject(rejectingAppId)}
                 disabled={submittingReject}
               >

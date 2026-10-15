@@ -13,6 +13,17 @@ import {
   CardFooter,
   Input,
 } from '@executive-match/ui';
+import {
+  KeyRound,
+  Lock,
+  Mail,
+  ArrowLeft,
+  CheckCircle2,
+  AlertCircle,
+  Eye,
+  EyeOff,
+  ShieldCheck,
+} from 'lucide-react';
 
 const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000/api/v1';
 
@@ -29,6 +40,8 @@ function ResetPasswordContent() {
   // Confirm mode state
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
+  const [showNewPassword, setShowNewPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [confirmDone, setConfirmDone] = useState(false);
   const [confirmBusy, setConfirmBusy] = useState(false);
   const [confirmError, setConfirmError] = useState('');
@@ -95,66 +108,122 @@ function ResetPasswordContent() {
 
   if (token) {
     return (
-      <Card style={{ maxWidth: '480px', width: '100%', margin: '60px auto' }}>
-        <CardHeader>
-          <span className="ui-eyebrow">ACCOUNT RECOVERY</span>
-          <CardTitle>Set New Password</CardTitle>
-          <CardDescription>Enter a strong new password for your account (at least 12 characters)</CardDescription>
+      <Card className="card-3d max-w-md w-full mx-auto my-12 border border-border/80 shadow-xl backdrop-blur-xs">
+        <CardHeader className="space-y-2 pb-4">
+          <div className="flex items-center gap-2">
+            <div className="w-8 h-8 rounded-lg bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 flex items-center justify-center">
+              <KeyRound className="w-4 h-4" />
+            </div>
+            <span className="ui-eyebrow text-xs font-semibold tracking-wider text-emerald-600 dark:text-emerald-400">
+              ACCOUNT RECOVERY
+            </span>
+          </div>
+          <CardTitle className="text-2xl font-bold tracking-tight">Set New Password</CardTitle>
+          <CardDescription>
+            Enter a strong new password for your account (minimum 12 characters).
+          </CardDescription>
         </CardHeader>
-        <CardContent>
+        <CardContent className="space-y-4">
           {confirmDone ? (
-            <div style={{ backgroundColor: 'var(--soft)', padding: '16px', borderRadius: '8px' }}>
-              <strong style={{ color: 'var(--accent)', display: 'block', marginBottom: '8px' }}>
-                Password Updated!
-              </strong>
-              <p style={{ color: 'var(--ink)', fontSize: '14px', margin: 0 }}>
-                Your password has been successfully reset. All prior active sessions have been revoked.
-              </p>
+            <div className="p-4 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-950 dark:text-emerald-100 flex items-start gap-3">
+              <CheckCircle2 className="w-5 h-5 text-emerald-600 dark:text-emerald-400 shrink-0 mt-0.5" />
+              <div className="space-y-1 text-sm">
+                <strong className="font-semibold text-emerald-800 dark:text-emerald-300 block">
+                  Password Updated!
+                </strong>
+                <p className="text-muted-foreground leading-relaxed">
+                  Your password has been successfully reset. All prior active sessions have been revoked.
+                </p>
+              </div>
             </div>
           ) : (
-            <form id="confirm-form" onSubmit={handleConfirm} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-              <label style={{ display: 'flex', flexDirection: 'column', gap: '6px', fontSize: '14px', fontWeight: 500 }}>
-                New Password
-                <Input
-                  type="password"
-                  required
-                  minLength={12}
-                  value={newPassword}
-                  onChange={(e) => setNewPassword(e.target.value)}
-                  placeholder="Minimum 12 characters"
-                />
-              </label>
+            <form id="confirm-form" onSubmit={handleConfirm} className="space-y-4">
+              <div className="space-y-1.5">
+                <label className="text-xs font-medium text-foreground flex items-center gap-1.5">
+                  <Lock className="w-3.5 h-3.5 text-muted-foreground" />
+                  New Password
+                </label>
+                <div className="relative">
+                  <Input
+                    type={showNewPassword ? 'text' : 'password'}
+                    required
+                    minLength={12}
+                    value={newPassword}
+                    onChange={(e) => setNewPassword(e.target.value)}
+                    placeholder="Minimum 12 characters"
+                    className="pr-10"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowNewPassword(!showNewPassword)}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+                    aria-label={showNewPassword ? 'Hide password' : 'Show password'}
+                  >
+                    {showNewPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                  </button>
+                </div>
+              </div>
 
-              <label style={{ display: 'flex', flexDirection: 'column', gap: '6px', fontSize: '14px', fontWeight: 500 }}>
-                Confirm New Password
-                <Input
-                  type="password"
-                  required
-                  minLength={12}
-                  value={confirmPassword}
-                  onChange={(e) => setConfirmPassword(e.target.value)}
-                  placeholder="Re-enter your password"
-                />
-              </label>
+              <div className="space-y-1.5">
+                <label className="text-xs font-medium text-foreground flex items-center gap-1.5">
+                  <Lock className="w-3.5 h-3.5 text-muted-foreground" />
+                  Confirm New Password
+                </label>
+                <div className="relative">
+                  <Input
+                    type={showConfirmPassword ? 'text' : 'password'}
+                    required
+                    minLength={12}
+                    value={confirmPassword}
+                    onChange={(e) => setConfirmPassword(e.target.value)}
+                    placeholder="Re-enter your password"
+                    className="pr-10"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+                    aria-label={showConfirmPassword ? 'Hide password' : 'Show password'}
+                  >
+                    {showConfirmPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                  </button>
+                </div>
+              </div>
 
               {confirmError && (
-                <p role="alert" style={{ color: 'var(--color-danger, #d13438)', fontSize: '13px', margin: 0 }}>
-                  {confirmError}
-                </p>
+                <div
+                  role="alert"
+                  className="p-3 rounded-lg bg-red-500/10 border border-red-500/20 text-red-600 dark:text-red-400 text-xs flex items-center gap-2"
+                >
+                  <AlertCircle className="w-4 h-4 shrink-0" />
+                  <span>{confirmError}</span>
+                </div>
               )}
             </form>
           )}
         </CardContent>
-        <CardFooter style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-          <Link href="/login" style={{ color: 'var(--muted)', fontSize: '14px' }}>
+        <CardFooter className="flex items-center justify-between pt-2">
+          <Link
+            href="/login"
+            className="inline-flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground transition-colors"
+          >
+            <ArrowLeft className="w-3.5 h-3.5" />
             Back to login
           </Link>
           {confirmDone ? (
             <Link href="/login">
-              <Button variant="primary">Log In Now</Button>
+              <Button variant="primary" className="btn-3d text-xs font-semibold">
+                Log In Now
+              </Button>
             </Link>
           ) : (
-            <Button form="confirm-form" type="submit" variant="primary" disabled={confirmBusy}>
+            <Button
+              form="confirm-form"
+              type="submit"
+              variant="primary"
+              disabled={confirmBusy}
+              className="btn-3d text-xs font-semibold"
+            >
               {confirmBusy ? 'Updating...' : 'Update Password'}
             </Button>
           )}
@@ -164,26 +233,41 @@ function ResetPasswordContent() {
   }
 
   return (
-    <Card style={{ maxWidth: '480px', width: '100%', margin: '60px auto' }}>
-      <CardHeader>
-        <span className="ui-eyebrow">ACCOUNT RECOVERY</span>
-        <CardTitle>Reset Password</CardTitle>
-        <CardDescription>We will send instructions to your email to safely reset your password</CardDescription>
+    <Card className="card-3d max-w-md w-full mx-auto my-12 border border-border/80 shadow-xl backdrop-blur-xs">
+      <CardHeader className="space-y-2 pb-4">
+        <div className="flex items-center gap-2">
+          <div className="w-8 h-8 rounded-lg bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 flex items-center justify-center">
+            <ShieldCheck className="w-4 h-4" />
+          </div>
+          <span className="ui-eyebrow text-xs font-semibold tracking-wider text-emerald-600 dark:text-emerald-400">
+            ACCOUNT RECOVERY
+          </span>
+        </div>
+        <CardTitle className="text-2xl font-bold tracking-tight">Reset Password</CardTitle>
+        <CardDescription>
+          Enter your registered email address and we will dispatch a secure link to reset your credentials.
+        </CardDescription>
       </CardHeader>
-      <CardContent>
+      <CardContent className="space-y-4">
         {requestSent ? (
-          <div style={{ backgroundColor: 'var(--soft)', padding: '16px', borderRadius: '8px' }}>
-            <strong style={{ color: 'var(--accent)', display: 'block', marginBottom: '8px' }}>
-              Instructions Dispatched
-            </strong>
-            <p style={{ color: 'var(--ink)', fontSize: '14px', margin: 0 }}>
-              If an account matches <strong>{requestEmail}</strong>, you will receive an email shortly with a secure link to reset your password.
-            </p>
+          <div className="p-4 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-950 dark:text-emerald-100 flex items-start gap-3">
+            <CheckCircle2 className="w-5 h-5 text-emerald-600 dark:text-emerald-400 shrink-0 mt-0.5" />
+            <div className="space-y-1 text-sm">
+              <strong className="font-semibold text-emerald-800 dark:text-emerald-300 block">
+                Instructions Dispatched
+              </strong>
+              <p className="text-muted-foreground leading-relaxed text-xs">
+                If an account matches <strong>{requestEmail}</strong>, you will receive an email shortly with a secure link to reset your password.
+              </p>
+            </div>
           </div>
         ) : (
-          <form id="request-form" onSubmit={handleRequest} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-            <label style={{ display: 'flex', flexDirection: 'column', gap: '6px', fontSize: '14px', fontWeight: 500 }}>
-              Email address
+          <form id="request-form" onSubmit={handleRequest} className="space-y-4">
+            <div className="space-y-1.5">
+              <label className="text-xs font-medium text-foreground flex items-center gap-1.5">
+                <Mail className="w-3.5 h-3.5 text-muted-foreground" />
+                Email address
+              </label>
               <Input
                 type="email"
                 required
@@ -191,22 +275,36 @@ function ResetPasswordContent() {
                 onChange={(e) => setRequestEmail(e.target.value)}
                 placeholder="you@company.com"
               />
-            </label>
+            </div>
 
             {requestError && (
-              <p role="alert" style={{ color: 'var(--color-danger, #d13438)', fontSize: '13px', margin: 0 }}>
-                {requestError}
-              </p>
+              <div
+                role="alert"
+                className="p-3 rounded-lg bg-red-500/10 border border-red-500/20 text-red-600 dark:text-red-400 text-xs flex items-center gap-2"
+              >
+                <AlertCircle className="w-4 h-4 shrink-0" />
+                <span>{requestError}</span>
+              </div>
             )}
           </form>
         )}
       </CardContent>
-      <CardFooter style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-        <Link href="/login" style={{ color: 'var(--muted)', fontSize: '14px' }}>
+      <CardFooter className="flex items-center justify-between pt-2">
+        <Link
+          href="/login"
+          className="inline-flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground transition-colors"
+        >
+          <ArrowLeft className="w-3.5 h-3.5" />
           Back to login
         </Link>
         {!requestSent && (
-          <Button form="request-form" type="submit" variant="primary" disabled={requestBusy}>
+          <Button
+            form="request-form"
+            type="submit"
+            variant="primary"
+            disabled={requestBusy}
+            className="btn-3d text-xs font-semibold"
+          >
             {requestBusy ? 'Sending...' : 'Send Reset Link'}
           </Button>
         )}

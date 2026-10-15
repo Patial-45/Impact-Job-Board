@@ -3,6 +3,25 @@
 import React, { useState } from 'react';
 import { Card, Button, Badge } from '@executive-match/ui';
 import type { AdminStats, AdminSystemHealth } from '@/lib/api';
+import {
+  Users,
+  Building2,
+  Briefcase,
+  FileText,
+  Send,
+  CheckCircle2,
+  CreditCard,
+  Activity,
+  ShieldAlert,
+  Server,
+  Cpu,
+  Clock,
+  History,
+  X,
+  ShieldCheck,
+  Database,
+  AlertCircle,
+} from 'lucide-react';
 
 interface AdminDashboardProps {
   stats: AdminStats | null;
@@ -64,47 +83,62 @@ export function AdminDashboard({ stats, health }: AdminDashboardProps) {
     <div className="space-y-8">
       {/* Platform Overview KPIs */}
       <section className="space-y-4">
-        <div className="flex items-center justify-between">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div>
-            <h2 className="text-xl font-bold text-foreground">Platform Telemetry</h2>
+            <div className="flex items-center gap-2 mb-1">
+              <span className="ui-eyebrow text-xs font-semibold tracking-wider text-emerald-600 dark:text-emerald-400">
+                SYSTEM TELEMETRY
+              </span>
+            </div>
+            <h2 className="text-2xl font-bold tracking-tight text-foreground">Platform Telemetry</h2>
             <p className="text-sm text-muted-foreground">
               Aggregated system metrics across all tenants and active workloads.
             </p>
           </div>
           <Button
             variant="outline"
-            className="text-xs"
+            className="btn-3d-secondary text-xs font-medium gap-2 self-start sm:self-auto"
             onClick={() => setElevationOpen(true)}
           >
-            🛡️ Request Support Elevation
+            <ShieldAlert className="w-3.5 h-3.5 text-amber-500" />
+            <span>Request Support Elevation</span>
           </Button>
         </div>
 
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          <Card className="p-4 space-y-1">
-            <span className="text-xs uppercase tracking-wider text-muted-foreground font-semibold">
-              Total Users
-            </span>
+          <Card className="card-3d p-4 space-y-2 hover:translate-y-[-2px] transition-all duration-200">
+            <div className="flex items-center justify-between text-muted-foreground">
+              <span className="text-xs uppercase tracking-wider font-semibold">Total Users</span>
+              <div className="w-7 h-7 rounded-lg bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 flex items-center justify-center">
+                <Users className="w-3.5 h-3.5" />
+              </div>
+            </div>
             <div className="text-2xl font-black text-foreground">
               {stats?.totalUsers?.toLocaleString() ?? '—'}
             </div>
             <p className="text-xs text-muted-foreground">All global identity records</p>
           </Card>
 
-          <Card className="p-4 space-y-1">
-            <span className="text-xs uppercase tracking-wider text-muted-foreground font-semibold">
-              Workspaces
-            </span>
+          <Card className="card-3d p-4 space-y-2 hover:translate-y-[-2px] transition-all duration-200">
+            <div className="flex items-center justify-between text-muted-foreground">
+              <span className="text-xs uppercase tracking-wider font-semibold">Workspaces</span>
+              <div className="w-7 h-7 rounded-lg bg-blue-500/10 text-blue-600 dark:text-blue-400 flex items-center justify-center">
+                <Building2 className="w-3.5 h-3.5" />
+              </div>
+            </div>
             <div className="text-2xl font-black text-foreground">
               {stats?.totalWorkspaces?.toLocaleString() ?? '—'}
             </div>
             <p className="text-xs text-muted-foreground">Isolated tenant environments</p>
           </Card>
 
-          <Card className="p-4 space-y-1">
-            <span className="text-xs uppercase tracking-wider text-muted-foreground font-semibold">
-              Active Jobs
-            </span>
+          <Card className="card-3d p-4 space-y-2 hover:translate-y-[-2px] transition-all duration-200">
+            <div className="flex items-center justify-between text-muted-foreground">
+              <span className="text-xs uppercase tracking-wider font-semibold">Active Jobs</span>
+              <div className="w-7 h-7 rounded-lg bg-violet-500/10 text-violet-600 dark:text-violet-400 flex items-center justify-center">
+                <Briefcase className="w-3.5 h-3.5" />
+              </div>
+            </div>
             <div className="text-2xl font-black text-foreground">
               {stats?.publishedJobs?.toLocaleString() ?? '—'}
               <span className="text-sm font-normal text-muted-foreground ml-1.5">
@@ -114,53 +148,68 @@ export function AdminDashboard({ stats, health }: AdminDashboardProps) {
             <p className="text-xs text-muted-foreground">Published requisitions</p>
           </Card>
 
-          <Card className="p-4 space-y-1">
-            <span className="text-xs uppercase tracking-wider text-muted-foreground font-semibold">
-              Applications
-            </span>
+          <Card className="card-3d p-4 space-y-2 hover:translate-y-[-2px] transition-all duration-200">
+            <div className="flex items-center justify-between text-muted-foreground">
+              <span className="text-xs uppercase tracking-wider font-semibold">Applications</span>
+              <div className="w-7 h-7 rounded-lg bg-amber-500/10 text-amber-600 dark:text-amber-400 flex items-center justify-center">
+                <FileText className="w-3.5 h-3.5" />
+              </div>
+            </div>
             <div className="text-2xl font-black text-foreground">
               {stats?.totalApplications?.toLocaleString() ?? '—'}
             </div>
             <p className="text-xs text-muted-foreground">Candidate submissions</p>
           </Card>
 
-          <Card className="p-4 space-y-1">
-            <span className="text-xs uppercase tracking-wider text-muted-foreground font-semibold">
-              Offers Extended
-            </span>
+          <Card className="card-3d p-4 space-y-2 hover:translate-y-[-2px] transition-all duration-200">
+            <div className="flex items-center justify-between text-muted-foreground">
+              <span className="text-xs uppercase tracking-wider font-semibold">Offers Extended</span>
+              <div className="w-7 h-7 rounded-lg bg-cyan-500/10 text-cyan-600 dark:text-cyan-400 flex items-center justify-center">
+                <Send className="w-3.5 h-3.5" />
+              </div>
+            </div>
             <div className="text-2xl font-black text-foreground">
               {stats?.totalOffers?.toLocaleString() ?? '—'}
             </div>
             <p className="text-xs text-muted-foreground">Drafted & sent compensation packages</p>
           </Card>
 
-          <Card className="p-4 space-y-1">
-            <span className="text-xs uppercase tracking-wider text-muted-foreground font-semibold">
-              Accepted Offers
-            </span>
+          <Card className="card-3d p-4 space-y-2 hover:translate-y-[-2px] transition-all duration-200">
+            <div className="flex items-center justify-between text-muted-foreground">
+              <span className="text-xs uppercase tracking-wider font-semibold">Accepted Offers</span>
+              <div className="w-7 h-7 rounded-lg bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 flex items-center justify-center">
+                <CheckCircle2 className="w-3.5 h-3.5" />
+              </div>
+            </div>
             <div className="text-2xl font-black text-emerald-600 dark:text-emerald-400">
               {stats?.acceptedOffers?.toLocaleString() ?? '—'}
             </div>
             <p className="text-xs text-muted-foreground">Completed e-signatures</p>
           </Card>
 
-          <Card className="p-4 space-y-1">
-            <span className="text-xs uppercase tracking-wider text-muted-foreground font-semibold">
-              Active Subscriptions
-            </span>
+          <Card className="card-3d p-4 space-y-2 hover:translate-y-[-2px] transition-all duration-200">
+            <div className="flex items-center justify-between text-muted-foreground">
+              <span className="text-xs uppercase tracking-wider font-semibold">Active Subscriptions</span>
+              <div className="w-7 h-7 rounded-lg bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 flex items-center justify-center">
+                <CreditCard className="w-3.5 h-3.5" />
+              </div>
+            </div>
             <div className="text-2xl font-black text-indigo-600 dark:text-indigo-400">
               {stats?.activeSubscriptions?.toLocaleString() ?? '—'}
             </div>
             <p className="text-xs text-muted-foreground">Paying & trial workspace plans</p>
           </Card>
 
-          <Card className="p-4 space-y-1">
-            <span className="text-xs uppercase tracking-wider text-muted-foreground font-semibold">
-              System Status
-            </span>
-            <div className="flex items-center space-x-2 pt-1">
+          <Card className="card-3d p-4 space-y-2 hover:translate-y-[-2px] transition-all duration-200">
+            <div className="flex items-center justify-between text-muted-foreground">
+              <span className="text-xs uppercase tracking-wider font-semibold">System Status</span>
+              <div className="w-7 h-7 rounded-lg bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 flex items-center justify-center">
+                <Activity className="w-3.5 h-3.5" />
+              </div>
+            </div>
+            <div className="flex items-center space-x-2 pt-0.5">
               <span
-                className={`w-3 h-3 rounded-full ${
+                className={`w-2.5 h-2.5 rounded-full ${
                   health?.status === 'HEALTHY' ? 'bg-emerald-500 animate-pulse' : 'bg-amber-500'
                 }`}
               />
@@ -178,37 +227,58 @@ export function AdminDashboard({ stats, health }: AdminDashboardProps) {
       {/* System Health Breakdown */}
       {health && (
         <section className="space-y-4">
-          <h2 className="text-xl font-bold text-foreground">Infrastructure Diagnostics</h2>
+          <div className="flex items-center gap-2">
+            <Server className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
+            <h2 className="text-xl font-bold tracking-tight text-foreground">Infrastructure Diagnostics</h2>
+          </div>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <Card className="p-5 space-y-2">
+            <Card className="card-3d p-5 space-y-3">
               <div className="flex items-center justify-between">
-                <span className="text-sm font-semibold text-foreground">Database Engine</span>
+                <div className="flex items-center gap-2">
+                  <Database className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
+                  <span className="text-sm font-semibold text-foreground">Database Engine</span>
+                </div>
                 <Badge variant={health.database.status === 'CONNECTED' ? 'success' : 'danger'}>
                   {health.database.status}
                 </Badge>
               </div>
-              <div className="text-xs text-muted-foreground">
-                Response Latency: <span className="font-mono font-bold text-foreground">{health.database.latencyMs}ms</span>
+              <div className="text-xs text-muted-foreground flex items-center justify-between">
+                <span>Response Latency:</span>
+                <span className="font-mono font-bold text-foreground px-2 py-0.5 rounded bg-muted/60">
+                  {health.database.latencyMs}ms
+                </span>
               </div>
             </Card>
 
-            <Card className="p-5 space-y-2">
+            <Card className="card-3d p-5 space-y-3">
               <div className="flex items-center justify-between">
-                <span className="text-sm font-semibold text-foreground">Memory Footprint</span>
+                <div className="flex items-center gap-2">
+                  <Cpu className="w-4 h-4 text-blue-600 dark:text-blue-400" />
+                  <span className="text-sm font-semibold text-foreground">Memory Footprint</span>
+                </div>
                 <Badge variant="neutral">RSS: {health.memory.rssMb} MB</Badge>
               </div>
-              <div className="text-xs text-muted-foreground">
-                Heap Used: <span className="font-mono font-bold text-foreground">{health.memory.heapUsedMb} MB</span> / {health.memory.heapTotalMb} MB
+              <div className="text-xs text-muted-foreground flex items-center justify-between">
+                <span>Heap Allocation:</span>
+                <span className="font-mono font-bold text-foreground px-2 py-0.5 rounded bg-muted/60">
+                  {health.memory.heapUsedMb} MB / {health.memory.heapTotalMb} MB
+                </span>
               </div>
             </Card>
 
-            <Card className="p-5 space-y-2">
+            <Card className="card-3d p-5 space-y-3">
               <div className="flex items-center justify-between">
-                <span className="text-sm font-semibold text-foreground">Process Runtime</span>
+                <div className="flex items-center gap-2">
+                  <Clock className="w-4 h-4 text-violet-600 dark:text-violet-400" />
+                  <span className="text-sm font-semibold text-foreground">Process Runtime</span>
+                </div>
                 <Badge variant="neutral">{health.nodeVersion}</Badge>
               </div>
-              <div className="text-xs text-muted-foreground">
-                Uptime: <span className="font-mono font-bold text-foreground">{formatUptime(health.uptimeSeconds)}</span>
+              <div className="text-xs text-muted-foreground flex items-center justify-between">
+                <span>Total Uptime:</span>
+                <span className="font-mono font-bold text-foreground px-2 py-0.5 rounded bg-muted/60">
+                  {formatUptime(health.uptimeSeconds)}
+                </span>
               </div>
             </Card>
           </div>
@@ -218,19 +288,22 @@ export function AdminDashboard({ stats, health }: AdminDashboardProps) {
       {/* Audit Log Activity Feed */}
       <section className="space-y-4">
         <div className="flex items-center justify-between">
-          <div>
-            <h2 className="text-xl font-bold text-foreground">Recent Security & Audit Logs</h2>
-            <p className="text-sm text-muted-foreground">
-              Immutable chronological record of administrative actions, role elevations, and tenant events.
-            </p>
+          <div className="flex items-center gap-2">
+            <History className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
+            <div>
+              <h2 className="text-xl font-bold tracking-tight text-foreground">Recent Security & Audit Logs</h2>
+              <p className="text-sm text-muted-foreground">
+                Immutable chronological record of administrative actions, role elevations, and tenant events.
+              </p>
+            </div>
           </div>
         </div>
 
-        <Card variant="outline" className="overflow-hidden">
+        <Card className="card-3d overflow-hidden border border-border/80">
           {stats?.recentAuditLogs && stats.recentAuditLogs.length > 0 ? (
             <div className="divide-y divide-border">
               {stats.recentAuditLogs.map((log) => (
-                <div key={log.id} className="p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-sm">
+                <div key={log.id} className="p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-sm hover:bg-muted/30 transition-colors">
                   <div className="space-y-1">
                     <div className="flex items-center gap-2">
                       <Badge
@@ -272,20 +345,24 @@ export function AdminDashboard({ stats, health }: AdminDashboardProps) {
       {/* Support Elevation Modal */}
       {elevationOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-xs p-4">
-          <Card className="w-full max-w-lg p-6 space-y-5 bg-card border-border shadow-xl">
+          <Card className="card-3d w-full max-w-lg p-6 space-y-5 bg-card border-border shadow-2xl">
             <div className="flex items-center justify-between border-b pb-3">
-              <h3 className="text-lg font-bold text-foreground">Request Support Elevation</h3>
+              <div className="flex items-center gap-2">
+                <ShieldCheck className="w-5 h-5 text-amber-500" />
+                <h3 className="text-lg font-bold text-foreground">Request Support Elevation</h3>
+              </div>
               <button
                 type="button"
                 onClick={() => setElevationOpen(false)}
-                className="text-muted-foreground hover:text-foreground text-sm font-bold"
+                className="text-muted-foreground hover:text-foreground p-1 rounded-md hover:bg-muted/50 transition-colors"
+                aria-label="Close dialog"
               >
-                ✕
+                <X className="w-4 h-4" />
               </button>
             </div>
 
             <p className="text-xs text-muted-foreground leading-relaxed">
-              In accordance with <code className="font-mono bg-muted px-1 rounded">brain/12-ADMIN-PORTAL.md</code>,
+              In accordance with <code className="font-mono bg-muted px-1.5 py-0.5 rounded text-foreground">brain/12-ADMIN-PORTAL.md</code>,
               platform administrators do not silently inherit tenant workspace access. Exceptional access requires an
               explicit business justification, defined scope, time-bound expiry, and audit logging.
             </p>
@@ -299,7 +376,7 @@ export function AdminDashboard({ stats, health }: AdminDashboardProps) {
                   placeholder="e.g. acme-corp"
                   value={slug}
                   onChange={(e) => setSlug(e.target.value.toLowerCase().trim())}
-                  className="w-full px-3 py-2 text-sm rounded-md border border-input bg-background"
+                  className="w-full px-3 py-2 text-sm rounded-md border border-input bg-background focus:ring-2 focus:ring-primary/20 outline-none"
                 />
               </div>
 
@@ -308,7 +385,7 @@ export function AdminDashboard({ stats, health }: AdminDashboardProps) {
                 <select
                   value={scope}
                   onChange={(e) => setScope(e.target.value as 'READ_ONLY' | 'SUPPORT_MAINTENANCE')}
-                  className="w-full px-3 py-2 text-sm rounded-md border border-input bg-background"
+                  className="w-full px-3 py-2 text-sm rounded-md border border-input bg-background focus:ring-2 focus:ring-primary/20 outline-none"
                 >
                   <option value="READ_ONLY">READ_ONLY — Inspect records and troubleshoot state</option>
                   <option value="SUPPORT_MAINTENANCE">SUPPORT_MAINTENANCE — Active configuration adjustment</option>
@@ -320,7 +397,7 @@ export function AdminDashboard({ stats, health }: AdminDashboardProps) {
                 <select
                   value={durationHours}
                   onChange={(e) => setDurationHours(Number(e.target.value))}
-                  className="w-full px-3 py-2 text-sm rounded-md border border-input bg-background"
+                  className="w-full px-3 py-2 text-sm rounded-md border border-input bg-background focus:ring-2 focus:ring-primary/20 outline-none"
                 >
                   <option value={1}>1 hour</option>
                   <option value={2}>2 hours (Standard)</option>
@@ -337,19 +414,21 @@ export function AdminDashboard({ stats, health }: AdminDashboardProps) {
                   placeholder="Explain why support elevation is necessary (e.g., investigating webhook sync timeout for customer ticket #543)..."
                   value={reason}
                   onChange={(e) => setReason(e.target.value)}
-                  className="w-full px-3 py-2 text-sm rounded-md border border-input bg-background resize-none"
+                  className="w-full px-3 py-2 text-sm rounded-md border border-input bg-background resize-none focus:ring-2 focus:ring-primary/20 outline-none"
                 />
               </div>
 
               {errorMessage && (
-                <div className="p-3 text-xs text-red-600 bg-red-50 dark:bg-red-950/50 rounded-md">
-                  {errorMessage}
+                <div className="p-3 text-xs text-red-600 bg-red-50 dark:bg-red-950/50 rounded-md flex items-center gap-2">
+                  <AlertCircle className="w-4 h-4 shrink-0" />
+                  <span>{errorMessage}</span>
                 </div>
               )}
 
               {successMessage && (
-                <div className="p-3 text-xs text-emerald-600 bg-emerald-50 dark:bg-emerald-950/50 rounded-md">
-                  {successMessage}
+                <div className="p-3 text-xs text-emerald-600 bg-emerald-50 dark:bg-emerald-950/50 rounded-md flex items-center gap-2">
+                  <CheckCircle2 className="w-4 h-4 shrink-0" />
+                  <span>{successMessage}</span>
                 </div>
               )}
 
@@ -359,10 +438,16 @@ export function AdminDashboard({ stats, health }: AdminDashboardProps) {
                   variant="outline"
                   onClick={() => setElevationOpen(false)}
                   disabled={submitting}
+                  className="btn-3d-secondary text-xs"
                 >
                   Cancel
                 </Button>
-                <Button type="submit" variant="primary" disabled={submitting}>
+                <Button
+                  type="submit"
+                  variant="primary"
+                  disabled={submitting}
+                  className="btn-3d text-xs font-semibold"
+                >
                   {submitting ? 'Granting...' : 'Authorize Elevation'}
                 </Button>
               </div>

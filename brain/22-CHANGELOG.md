@@ -1,5 +1,38 @@
 # Changelog
 
+## 2026-10-15 — Full Platform UI Modernization: 3D Spatial Effects, Lucide Icon Packs, Tactile Click Physics & Dashboard Overhaul
+
+- Authentication & Account Recovery Modernization:
+  - Login & Registration Pages (`apps/web/src/app/(public)/login/page.tsx`, `register/page.tsx`):
+    - Replaced flat layouts with split-screen 3D showcase architecture featuring elevated `.card-3d` form panels and high-craft brand showcase aside panels.
+    - Integrated custom faceted `LogoMark`, enterprise security badges (`ShieldCheck`, `CheckCircle2`), and candidate value narratives.
+  - Authentication Form Component (`apps/web/src/components/auth-form.tsx`):
+    - Added interactive show/hide password visibility toggle (`Eye`, `EyeOff`) with accessible button controls.
+    - Integrated modern Lucide icon adornments (`Mail`, `Lock`, `User`) within input fields.
+    - Added tactile 3D submit button (`.btn-3d`) with loading spinner and modernized error alert banner.
+  - Password Reset & Email Verification (`apps/web/src/app/(public)/reset-password/page.tsx`, `verify-email/page.tsx`):
+    - Upgraded recovery flow with `.card-3d` containers, Lucide icons (`KeyRound`, `ShieldCheck`, `MailCheck`, `ArrowLeft`, `ArrowRight`, `Loader2`), dual password visibility toggles, and tactile action buttons.
+- Platform Admin Portal Dashboard Modernization (`apps/web/src/components/admin-dashboard.tsx`):
+  - Upgraded Platform Telemetry with 8 elevated `.card-3d` KPI cards featuring dedicated icon pills (`Users`, `Building2`, `Briefcase`, `FileText`, `Send`, `CheckCircle2`, `CreditCard`, `Activity`) with hover physics.
+  - Modernized Infrastructure Diagnostics with glowing metric headers (`Database`, `Cpu`, `Clock`, `Server`), latency indicators, and memory heap allocation meters.
+  - Upgraded Support Elevation modal with `.card-3d` dialog, `ShieldAlert` branding, and `.btn-3d` authorization physics.
+  - Enhanced Security & Audit Log feed with icon action tags, actor badges, and monospace correlation tags.
+- Recruiter ATS Kanban Pipeline Board Modernization (`apps/web/src/components/ats-pipeline-board.tsx`):
+  - Elevated Kanban candidate cards with `.card-3d`, subtle borders, and smooth hover physics.
+  - Integrated Lucide icons for Resume (`FileText`), Recruiter Notes (`MessageSquare`), Advance (`ArrowRight`), View (`Eye`), and Search (`Search`).
+  - Upgraded Candidate Dossier drawer with Lucide `Download` button, `X` close action, and tactile buttons.
+  - Modernized candidate disqualification modal with `.card-3d`, `UserX` icon, and tactile `.btn-3d` buttons.
+- Candidate Applications Hub Modernization (`apps/web/src/components/candidate-applications-list.tsx`):
+  - Upgraded overview stats with 4 modern `.card-3d` metric cards (`FileText`, `Clock`, `Briefcase`, `CheckCircle2`).
+  - Enhanced pipeline stage visualizer with glowing emerald active pulses and completed stage indicators.
+  - Modernized empty state with 3D card and `Sparkles` icon, plus `.card-3d` application cards with Lucide icons (`Building2`, `Calendar`, `FileText`).
+  - Upgraded application withdrawal modal with `.card-3d` and tactile `.btn-3d` buttons.
+- Monorepo Quality Gates:
+  - 193 unit tests passing across all packages.
+  - 0 ESLint errors across 13 packages.
+  - 0 TypeScript errors across 14 packages.
+  - Full Next.js Turbopack (20 static/dynamic routes) and NestJS tsup production builds succeeded.
+
 ## 2026-10-15 — Modern 3D Spatial UI, Interactive Evidence Showcase & Public Surface Modernization
 
 - Interactive 3D Evidence Match Showcase (`apps/web/src/components/interactive-hero-3d.tsx`):
