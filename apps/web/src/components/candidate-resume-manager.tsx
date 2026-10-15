@@ -4,6 +4,15 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Button, Card, Badge } from '@executive-match/ui';
 import type { CandidateProfileData } from '@/lib/api';
+import {
+  UploadCloud,
+  FileText,
+  CheckCircle2,
+  Download,
+  Trash2,
+  Star,
+  AlertCircle,
+} from 'lucide-react';
 
 const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000/api/v1';
 
@@ -168,39 +177,33 @@ export function CandidateResumeManager({
   return (
     <div className="space-y-8 max-w-4xl">
       {/* Upload Box */}
-      <Card variant="outline" className="p-6">
-        <h2 className="text-xl font-semibold mb-1 text-foreground">Upload Resume</h2>
-        <p className="text-sm text-muted-foreground mb-6">
-          Upload your latest CV in PDF or DOCX format (up to 10MB).
-        </p>
+      <Card className="card-3d p-6 space-y-4">
+        <div>
+          <h2 className="text-xl font-bold tracking-tight text-foreground">Upload Resume</h2>
+          <p className="text-sm text-muted-foreground mt-0.5">
+            Upload your latest executive CV in PDF or DOCX format (up to 10MB).
+          </p>
+        </div>
 
         {errorMessage && (
-          <div className="mb-4 p-3 rounded-lg bg-danger/10 border border-danger/20 text-danger text-sm">
-            {errorMessage}
+          <div className="p-3.5 rounded-xl bg-red-500/10 border border-red-500/20 text-red-600 dark:text-red-400 text-xs flex items-center gap-2">
+            <AlertCircle className="w-4 h-4 shrink-0" />
+            <span>{errorMessage}</span>
           </div>
         )}
 
         {successMessage && (
-          <div className="mb-4 p-3 rounded-lg bg-success/10 border border-success/20 text-success text-sm">
-            {successMessage}
+          <div className="p-3.5 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-800 dark:text-emerald-300 text-xs flex items-center gap-2">
+            <CheckCircle2 className="w-4 h-4 shrink-0 text-emerald-500" />
+            <span>{successMessage}</span>
           </div>
         )}
 
-        <div className="border-2 border-dashed border-border hover:border-primary/50 transition-colors rounded-xl p-8 text-center flex flex-col items-center justify-center bg-card/30">
-          <svg
-            className="w-12 h-12 text-muted-foreground mb-3"
-            fill="none"
-            viewBox="0 0 24 24"
-            stroke="currentColor"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={1.5}
-              d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"
-            />
-          </svg>
-          <p className="text-sm font-medium text-foreground mb-1">
+        <div className="border-2 border-dashed border-border/80 hover:border-primary/50 transition-colors rounded-2xl p-8 text-center flex flex-col items-center justify-center bg-card/40 backdrop-blur-xs">
+          <div className="w-14 h-14 rounded-2xl bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 flex items-center justify-center mb-3 shadow-xs">
+            <UploadCloud className="w-7 h-7" />
+          </div>
+          <p className="text-sm font-semibold text-foreground mb-1">
             Choose a resume file or drag and drop here
           </p>
           <p className="text-xs text-muted-foreground mb-4">
@@ -215,34 +218,44 @@ export function CandidateResumeManager({
               disabled={uploading}
               className="hidden"
             />
-            <span className="inline-flex items-center justify-center font-medium rounded-lg px-4 py-2 text-sm bg-primary text-primary-foreground hover:bg-primary/90 transition-colors cursor-pointer">
-              {uploading ? 'Uploading...' : 'Select Resume File'}
+            <span className="btn-3d inline-flex items-center justify-center font-semibold rounded-lg px-4 py-2 text-xs bg-primary text-primary-foreground hover:bg-primary/90 transition-colors cursor-pointer gap-2">
+              <UploadCloud className="w-3.5 h-3.5" />
+              <span>{uploading ? 'Uploading...' : 'Select Resume File'}</span>
             </span>
           </label>
         </div>
       </Card>
 
       {/* Resumes List */}
-      <Card variant="outline" className="p-6">
-        <h2 className="text-xl font-semibold mb-1 text-foreground">Your Resumes</h2>
-        <p className="text-sm text-muted-foreground mb-6">
-          Manage different versions. The primary resume is automatically highlighted to recruiters.
-        </p>
+      <Card className="card-3d p-6 space-y-4">
+        <div>
+          <h2 className="text-xl font-bold tracking-tight text-foreground">Your Resumes</h2>
+          <p className="text-sm text-muted-foreground mt-0.5">
+            Manage your CV versions. The primary resume is automatically highlighted to recruiters.
+          </p>
+        </div>
 
         {resumes.length === 0 ? (
-          <p className="text-sm text-muted-foreground italic">No resumes uploaded yet.</p>
+          <div className="p-8 text-center text-sm text-muted-foreground border border-dashed border-border/60 rounded-xl">
+            No resumes uploaded yet.
+          </div>
         ) : (
           <div className="space-y-4 divide-y divide-border">
             {resumes.map((resume) => (
               <div key={resume.id} className="pt-4 first:pt-0 flex flex-col sm:flex-row justify-between sm:items-center gap-4">
                 <div className="flex items-start gap-3">
-                  <div className="w-10 h-10 rounded-lg bg-primary/10 text-primary flex items-center justify-center font-bold text-xs uppercase shrink-0">
-                    {resume.fileName.endsWith('.pdf') ? 'PDF' : 'DOC'}
+                  <div className="w-10 h-10 rounded-xl bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 flex items-center justify-center font-bold text-xs uppercase shrink-0 shadow-xs">
+                    <FileText className="w-5 h-5" />
                   </div>
                   <div>
                     <div className="flex items-center gap-2 flex-wrap">
                       <h3 className="font-semibold text-foreground text-sm">{resume.fileName}</h3>
-                      {resume.isPrimary && <Badge variant="success">Primary</Badge>}
+                      {resume.isPrimary && (
+                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20">
+                          <Star className="w-3 h-3 fill-emerald-500" />
+                          <span>Primary</span>
+                        </span>
+                      )}
                       <Badge variant="outline">{resume.parsingStatus}</Badge>
                     </div>
                     <p className="text-xs text-muted-foreground mt-1">
@@ -261,26 +274,31 @@ export function CandidateResumeManager({
                     <Button
                       variant="ghost"
                       size="sm"
+                      className="btn-3d-secondary text-xs gap-1"
                       onClick={() => handleSetPrimary(resume.id)}
                     >
-                      Set Primary
+                      <Star className="w-3.5 h-3.5" />
+                      <span>Set Primary</span>
                     </Button>
                   )}
                   <Button
                     variant="secondary"
                     size="sm"
+                    className="btn-3d-secondary text-xs gap-1"
                     loading={downloadingId === resume.id}
                     onClick={() => handleDownload(resume.id)}
                   >
-                    Download
+                    <Download className="w-3.5 h-3.5" />
+                    <span>Download</span>
                   </Button>
                   <Button
                     variant="ghost"
                     size="sm"
-                    className="text-danger hover:text-danger/80"
+                    className="btn-3d-secondary text-xs text-red-500 hover:text-red-600 hover:bg-red-500/10 gap-1"
                     onClick={() => handleDelete(resume.id)}
                   >
-                    Delete
+                    <Trash2 className="w-3.5 h-3.5" />
+                    <span>Delete</span>
                   </Button>
                 </div>
               </div>

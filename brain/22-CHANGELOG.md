@@ -27,6 +27,17 @@
   - Enhanced pipeline stage visualizer with glowing emerald active pulses and completed stage indicators.
   - Modernized empty state with 3D card and `Sparkles` icon, plus `.card-3d` application cards with Lucide icons (`Building2`, `Calendar`, `FileText`).
   - Upgraded application withdrawal modal with `.card-3d` and tactile `.btn-3d` buttons.
+- Candidate Workflow Hubs Overhaul (Interviews, Offers, Saved Jobs & Resumes):
+  - Scheduled Interviews (`apps/web/src/components/candidate-interviews.tsx`):
+    - Upgraded interview cards with `.card-3d`, Lucide icons (`Calendar`, `Clock`, `Video`, `Building2`, `ExternalLink`, `ShieldCheck`), tactile `.btn-3d` video meeting launcher, and preparation guidelines callout.
+  - Job Offers & Digital E-Signatures (`apps/web/src/components/candidate-offers.tsx`):
+    - Upgraded job offers with elevated `.card-3d` cards, structured compensation grid (base salary, bonus, equity, start date), and legal ESIGN digital signature modal.
+    - Added onboarding checklist card with animated progress bar and checkbox task completion.
+    - Integrated Lucide icons (`Award`, `CheckCircle2`, `AlertCircle`, `FileSignature`, `Building2`, `ShieldCheck`, `ArrowRight`, `Sparkles`).
+  - Saved Jobs (`apps/web/src/components/candidate-saved-jobs.tsx`):
+    - Upgraded bookmarks with `.card-3d`, Lucide icons (`Bookmark`, `Building2`, `MapPin`, `DollarSign`, `Trash2`, `ArrowRight`, `Calendar`), salary pills, and tactile buttons.
+  - Resume Manager (`apps/web/src/components/candidate-resume-manager.tsx`):
+    - Upgraded upload container with `.card-3d`, modern drag-and-drop styling, Lucide icons (`UploadCloud`, `FileText`, `CheckCircle2`, `Download`, `Trash2`, `Star`), primary CV badge, and tactile action buttons.
 - Monorepo Quality Gates:
   - 193 unit tests passing across all packages.
   - 0 ESLint errors across 13 packages.
