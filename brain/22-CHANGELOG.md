@@ -1,5 +1,37 @@
 # Changelog
 
+## 2026-10-16 — Employer Workspace Modernization, AI Candidate Search & Admin Ledger Overhaul
+
+- Candidate Discovery Hub (`apps/web/src/components/candidate-search.tsx`):
+  - Upgraded search hero with `.card-3d`, input search icons, requisition filter selector, and skill tags with remove physics.
+  - Modernized Deterministic vs AI Semantic Match switcher with glowing 3D toggle pills, dense vector recalculation triggers, and feedback alerts.
+  - Upgraded candidate cards with 3D elevation, avatar gradient badges, verified skill tags, hybrid match diagnostics, and tactile `.btn-3d` actions.
+  - Upgraded Talent Dossier modal with glassmorphism backdrop, dense vector similarity radar, work experience timeline, and recruiter notes.
+- Requisition Management (`apps/web/src/components/workspace-jobs.tsx`):
+  - Upgraded requisition listings with `.card-3d` cards, Lucide icons (`Briefcase`, `Plus`, `Building2`, `MapPin`, `DollarSign`, `Trash2`, `ArrowRight`, `Clock`, `CheckCircle2`), and status pills.
+  - Modernized Create Requisition modal with `.card-3d`, structured policy selectors, salary range controls, and competency tags.
+- Recruiter Interview Coordination (`apps/web/src/components/workspace-interviews.tsx`):
+  - Upgraded interview schedule with `.card-3d` cards, tabbed status filters (All, Scheduled, Completed, Cancelled), Lucide icons (`Calendar`, `Clock`, `Video`, `ExternalLink`, `Star`, `FileText`), and Join Video Call action.
+  - Upgraded Schedule Interview Round and Evaluation Scorecard modals with 3D containers, interactive rating sliders, and recommendation options.
+- Compensation & Offer Management (`apps/web/src/components/workspace-offers.tsx`):
+  - Upgraded offer management with `.card-3d` cards, status filters, compensation term breakdown, Lucide icons (`FileSignature`, `DollarSign`, `CheckCircle2`, `Clock`, `Send`, `ShieldCheck`), and ESIGN certificate display.
+  - Modernized Create Offer modal, Onboarding Checklist task manager, and Rescind modal.
+- Workspace Analytics & Pipeline Velocity (`apps/web/src/components/workspace-analytics.tsx`):
+  - Upgraded KPI summary with 4 elevated `.card-3d` cards (`Users`, `TrendingUp`, `Clock`, `Award`), interactive requisition filter, stage-by-stage hiring funnel with conversion progress bars, offer outcome ratios, and requisition performance table.
+- Workspace Subscription & Billing (`apps/web/src/components/workspace-billing.tsx`):
+  - Upgraded subscription summary with `.card-3d`, Lucide icons (`ShieldCheck`, `Calendar`, `Users`, `Zap`, `Check`), requisition and candidate search meters, billing cycle switch, and 3D plan tier comparison cards.
+- Workspace Team & Access Control (`apps/web/src/components/workspace-team.tsx`):
+  - Upgraded team manager with `.card-3d`, Lucide icons (`Users`, `UserPlus`, `Shield`, `Mail`, `Trash2`, `Clock`), invitation form, and active member tables.
+- Candidate Profile Dossier (`apps/web/src/components/candidate-profile-form.tsx`):
+  - Upgraded profile editor with `.card-3d` panels, Lucide icons (`User`, `Layers`, `Briefcase`, `GraduationCap`, `Building2`, `Calendar`, `Save`), tactile form controls, and experience/education timelines.
+- Admin Portal Explorer Tables (`apps/web/src/components/admin-users-table.tsx`, `admin-workspaces-table.tsx`, `admin-system-table.tsx`):
+  - Modernized user management, workspace administration, and cryptographic audit log ledger with `.card-3d` panels, Lucide icons, tactile elevation modals, and formatted JSON inspection.
+- Monorepo Quality Gates:
+  - 193 unit tests passing across all packages.
+  - 0 ESLint errors across 13 packages.
+  - 0 TypeScript errors across 14 packages.
+  - Full Next.js Turbopack (20 static/dynamic routes) and NestJS tsup production builds succeeded.
+
 ## 2026-10-15 — Full Platform UI Modernization: 3D Spatial Effects, Lucide Icon Packs, Tactile Click Physics & Dashboard Overhaul
 
 - Authentication & Account Recovery Modernization:

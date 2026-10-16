@@ -1,8 +1,24 @@
 'use client';
 
 import { useState } from 'react';
-import { Card, Button, Badge, Input } from '@executive-match/ui';
+import { Button, Badge, Input } from '@executive-match/ui';
 import type { InterviewItem } from '@/lib/api';
+import {
+  Calendar,
+  Clock,
+  Video,
+  CheckCircle2,
+  XCircle,
+  Plus,
+  Star,
+  AlertCircle,
+  X,
+  Loader2,
+  Building2,
+  MapPin,
+  ExternalLink,
+  FileText,
+} from 'lucide-react';
 
 const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000/api/v1';
 
@@ -197,67 +213,86 @@ export function WorkspaceInterviews({
     <div className="space-y-6">
       {feedbackMsg && (
         <div
-          className={`p-3 rounded-md text-xs font-medium ${
+          className={`p-4 rounded-xl text-xs font-semibold flex items-center gap-2 shadow-sm ${
             feedbackMsg.type === 'success'
-              ? 'bg-emerald-500/10 border border-emerald-500/30 text-emerald-700 dark:text-emerald-400'
-              : 'bg-red-500/10 border border-red-500/30 text-red-700 dark:text-red-400'
+              ? 'bg-emerald-500/10 border border-emerald-500/30 text-emerald-600 dark:text-emerald-400'
+              : 'bg-red-500/10 border border-red-500/30 text-red-600 dark:text-red-400'
           }`}
         >
-          {feedbackMsg.text}
+          {feedbackMsg.type === 'success' ? (
+            <CheckCircle2 className="w-4 h-4 text-emerald-500 shrink-0" />
+          ) : (
+            <AlertCircle className="w-4 h-4 text-red-500 shrink-0" />
+          )}
+          <span>{feedbackMsg.text}</span>
         </div>
       )}
 
       {/* Header action and filters */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-5 rounded-2xl bg-card border border-border">
         {/* Filter Tabs */}
-        <div className="inline-flex rounded-md border border-border p-1 bg-muted/40">
+        <div className="inline-flex rounded-xl border border-border p-1 bg-muted/40 shadow-sm">
           {(['ALL', 'SCHEDULED', 'COMPLETED', 'CANCELLED'] as const).map((tab) => (
             <button
               key={tab}
               type="button"
               onClick={() => setActiveTab(tab)}
-              className={`px-3 py-1.5 text-xs rounded font-medium transition-colors ${
+              className={`px-3 py-1.5 text-xs rounded-lg font-semibold transition-all flex items-center gap-1.5 ${
                 activeTab === tab
                   ? 'bg-background text-foreground shadow-sm'
                   : 'text-muted-foreground hover:text-foreground'
               }`}
             >
-              {tab === 'ALL'
-                ? `All (${interviews.length})`
-                : tab === 'SCHEDULED'
-                  ? `Upcoming (${interviews.filter((i) => i.status === 'SCHEDULED').length})`
-                  : tab === 'COMPLETED'
-                    ? `Completed (${interviews.filter((i) => i.status === 'COMPLETED').length})`
-                    : `Cancelled (${interviews.filter((i) => i.status === 'CANCELLED').length})`}
+              {tab === 'SCHEDULED' && <Clock className="w-3.5 h-3.5 text-primary" />}
+              {tab === 'COMPLETED' && <CheckCircle2 className="w-3.5 h-3.5 text-emerald-500" />}
+              {tab === 'CANCELLED' && <XCircle className="w-3.5 h-3.5 text-muted-foreground" />}
+              <span>
+                {tab === 'ALL'
+                  ? `All (${interviews.length})`
+                  : tab === 'SCHEDULED'
+                    ? `Upcoming (${interviews.filter((i) => i.status === 'SCHEDULED').length})`
+                    : tab === 'COMPLETED'
+                      ? `Completed (${interviews.filter((i) => i.status === 'COMPLETED').length})`
+                      : `Cancelled (${interviews.filter((i) => i.status === 'CANCELLED').length})`}
+              </span>
             </button>
           ))}
         </div>
 
-        <Button variant="primary" onClick={() => setIsScheduleOpen(true)}>
-          + Schedule Interview Round
+        <Button
+          variant="primary"
+          onClick={() => setIsScheduleOpen(true)}
+          className="btn-3d h-10 px-4 text-xs flex items-center gap-2 shrink-0"
+        >
+          <Plus className="w-4 h-4" />
+          <span>Schedule Interview Round</span>
         </Button>
       </div>
 
       {/* Interview Cards List */}
       {filteredInterviews.length === 0 ? (
-        <Card className="p-12 text-center border-dashed space-y-3">
-          <div className="w-12 h-12 rounded-full bg-muted flex items-center justify-center mx-auto text-xl">
-            📅
+        <div className="card-3d p-12 text-center space-y-4">
+          <div className="w-14 h-14 rounded-2xl bg-muted/60 border border-border flex items-center justify-center mx-auto text-primary">
+            <Calendar className="w-7 h-7" />
           </div>
           <h3 className="font-bold text-foreground text-lg">No interviews found</h3>
-          <p className="text-sm text-muted-foreground max-w-md mx-auto">
+          <p className="text-xs text-muted-foreground max-w-md mx-auto">
             {activeTab === 'ALL'
               ? 'Schedule your first interview round with active applicants in your ATS pipeline.'
               : `No interviews currently in ${activeTab.toLowerCase()} status.`}
           </p>
           {activeTab === 'ALL' && (
             <div className="pt-2">
-              <Button variant="primary" onClick={() => setIsScheduleOpen(true)}>
+              <Button
+                variant="primary"
+                onClick={() => setIsScheduleOpen(true)}
+                className="btn-3d text-xs h-10 px-5"
+              >
                 Schedule First Interview
               </Button>
             </div>
           )}
-        </Card>
+        </div>
       ) : (
         <div className="grid grid-cols-1 gap-4">
           {filteredInterviews.map((item) => {
@@ -279,21 +314,22 @@ export function WorkspaceInterviews({
               : null;
 
             return (
-              <Card
+              <div
                 key={item.id}
-                variant="outline"
-                className="p-5 flex flex-col md:flex-row md:items-start justify-between gap-5 hover:border-primary/40 transition-colors"
+                className="card-3d p-6 flex flex-col md:flex-row md:items-start justify-between gap-6 group hover:border-primary/50 transition-all"
               >
                 <div className="flex items-start gap-4 flex-1">
                   {/* Candidate Avatar */}
-                  <div className="w-12 h-12 rounded-full bg-primary/10 border border-primary/20 text-primary font-bold flex items-center justify-center text-sm shrink-0">
+                  <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-primary/20 via-primary/10 to-primary/5 border border-primary/30 text-primary font-black flex items-center justify-center text-sm shrink-0 shadow-sm">
                     {candidateInitials}
                   </div>
 
                   <div className="space-y-2 flex-1">
                     <div className="flex flex-wrap items-center gap-2">
-                      <h3 className="text-base font-bold text-foreground">{item.title}</h3>
-                      <Badge variant="neutral">{item.type}</Badge>
+                      <h3 className="text-base font-bold text-foreground group-hover:text-primary transition-colors">
+                        {item.title}
+                      </h3>
+                      <Badge variant="neutral" className="text-xs">{item.type}</Badge>
                       <Badge
                         variant={
                           item.status === 'SCHEDULED'
@@ -302,21 +338,30 @@ export function WorkspaceInterviews({
                               ? 'success'
                               : 'neutral'
                         }
+                        className="text-xs"
                       >
+                        {item.status === 'SCHEDULED' && <Clock className="w-3 h-3 mr-1 text-primary inline" />}
+                        {item.status === 'COMPLETED' && <CheckCircle2 className="w-3 h-3 mr-1 text-emerald-500 inline" />}
+                        {item.status === 'CANCELLED' && <XCircle className="w-3 h-3 mr-1 text-muted-foreground inline" />}
                         {item.status}
                       </Badge>
                     </div>
 
-                    <div className="text-xs text-muted-foreground">
-                      Candidate:{' '}
-                      <strong className="text-foreground">{candidateName}</strong> • For{' '}
-                      <span className="font-semibold text-primary">{item.application.job.title}</span>
+                    <div className="text-xs text-muted-foreground flex items-center gap-1.5 flex-wrap">
+                      <span>Candidate:</span>
+                      <strong className="text-foreground">{candidateName}</strong>
+                      <span>•</span>
+                      <span>For:</span>
+                      <span className="font-semibold text-primary flex items-center gap-1">
+                        <Building2 className="w-3 h-3" />
+                        {item.application.job.title}
+                      </span>
                     </div>
 
                     {/* Schedule Time & Location */}
-                    <div className="flex flex-wrap items-center gap-3 text-xs text-foreground/80 pt-1">
-                      <span>
-                        🕒{' '}
+                    <div className="flex flex-wrap items-center gap-4 text-xs text-foreground/80 pt-1">
+                      <span className="flex items-center gap-1.5">
+                        <Clock className="w-3.5 h-3.5 text-primary" />
                         {new Date(item.scheduledAt).toLocaleString(undefined, {
                           weekday: 'short',
                           month: 'short',
@@ -327,26 +372,30 @@ export function WorkspaceInterviews({
                         ({item.durationMinutes} min)
                       </span>
                       {item.location && (
-                        <span>
-                          📍{' '}
+                        <span className="flex items-center gap-1.5">
                           {item.location.startsWith('http') ? (
                             <a
                               href={item.location}
                               target="_blank"
                               rel="noreferrer"
-                              className="text-primary hover:underline font-medium"
+                              className="text-primary hover:underline font-semibold flex items-center gap-1"
                             >
-                              Join Call URL ↗
+                              <Video className="w-3.5 h-3.5 text-emerald-500" />
+                              <span>Join Video Call</span>
+                              <ExternalLink className="w-3 h-3" />
                             </a>
                           ) : (
-                            item.location
+                            <>
+                              <MapPin className="w-3.5 h-3.5 text-muted-foreground" />
+                              <span>{item.location}</span>
+                            </>
                           )}
                         </span>
                       )}
                     </div>
 
                     {item.notes && (
-                      <p className="text-xs text-muted-foreground pt-1 line-clamp-2">
+                      <p className="text-xs text-muted-foreground pt-1 line-clamp-2 leading-relaxed">
                         {item.notes}
                       </p>
                     )}
@@ -355,8 +404,11 @@ export function WorkspaceInterviews({
                     {hasScorecard && (
                       <div className="flex items-center gap-2 pt-1 text-xs">
                         <span className="font-semibold text-foreground">Scorecard:</span>
-                        <Badge variant="success">★ {avgRating} / 5.0 Rating</Badge>
-                        <Badge variant="outline">
+                        <Badge variant="success" className="text-xs flex items-center gap-1 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/30">
+                          <Star className="w-3 h-3 fill-emerald-500 text-emerald-500" />
+                          <span>{avgRating} / 5.0 Rating</span>
+                        </Badge>
+                        <Badge variant="outline" className="text-xs">
                           {item.scorecards[0]?.recommendation.replace('_', ' ')}
                         </Badge>
                         <span className="text-[11px] text-muted-foreground">
@@ -368,14 +420,15 @@ export function WorkspaceInterviews({
                 </div>
 
                 {/* Right Actions */}
-                <div className="flex flex-row md:flex-col items-center md:items-end justify-between md:justify-start gap-2 shrink-0">
+                <div className="flex flex-row md:flex-col items-center md:items-end justify-between md:justify-start gap-2.5 shrink-0 pt-2 md:pt-0">
                   <Button
                     variant="outline"
                     size="sm"
                     onClick={() => setActiveScorecardInterview(item)}
-                    className="text-xs"
+                    className="btn-3d-secondary text-xs h-9 px-3.5 flex items-center gap-1.5"
                   >
-                    {hasScorecard ? '📝 Edit Scorecard' : '📝 Submit Scorecard'}
+                    <FileText className="w-3.5 h-3.5 text-primary" />
+                    <span>{hasScorecard ? 'Edit Scorecard' : 'Submit Scorecard'}</span>
                   </Button>
 
                   {item.status === 'SCHEDULED' && (
@@ -383,13 +436,13 @@ export function WorkspaceInterviews({
                       variant="outline"
                       size="sm"
                       onClick={() => setCancellingInterview(item)}
-                      className="text-xs text-muted-foreground hover:text-red-500"
+                      className="text-xs h-8 px-2.5 text-muted-foreground hover:text-red-500 transition-colors"
                     >
-                      Cancel
+                      Cancel Round
                     </Button>
                   )}
                 </div>
-              </Card>
+              </div>
             );
           })}
         </div>
@@ -397,21 +450,25 @@ export function WorkspaceInterviews({
 
       {/* Schedule Interview Modal */}
       {isScheduleOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 overflow-y-auto">
-          <Card className="w-full max-w-lg p-6 space-y-5 bg-card border-border shadow-2xl">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-md p-4 overflow-y-auto">
+          <div className="card-3d w-full max-w-lg p-6 sm:p-7 space-y-5 bg-card border-border shadow-2xl relative">
             <div className="flex items-start justify-between pb-3 border-b border-border">
               <div>
-                <h3 className="text-lg font-bold text-foreground">Schedule Interview Round</h3>
-                <p className="text-xs text-muted-foreground">
+                <h3 className="text-lg font-bold text-foreground flex items-center gap-2">
+                  <Calendar className="w-5 h-5 text-primary" />
+                  Schedule Interview Round
+                </h3>
+                <p className="text-xs text-muted-foreground mt-0.5">
                   Coordinate screening, technical, or executive interviews with an active applicant.
                 </p>
               </div>
               <button
                 type="button"
                 onClick={() => setIsScheduleOpen(false)}
-                className="text-muted-foreground hover:text-foreground text-xl font-bold"
+                className="text-muted-foreground hover:text-foreground p-1 rounded-lg hover:bg-muted"
+                aria-label="Close modal"
               >
-                ✕
+                <X className="w-5 h-5" />
               </button>
             </div>
 
@@ -425,6 +482,7 @@ export function WorkspaceInterviews({
                   value={applicationId}
                   onChange={(e) => setApplicationId(e.target.value)}
                   required
+                  className="h-10 bg-background/80"
                 />
               </div>
 
@@ -437,6 +495,7 @@ export function WorkspaceInterviews({
                   value={title}
                   onChange={(e) => setTitle(e.target.value)}
                   required
+                  className="h-10 bg-background/80"
                 />
               </div>
 
@@ -457,7 +516,7 @@ export function WorkspaceInterviews({
                           | 'FINAL',
                       )
                     }
-                    className="w-full h-9 px-2 rounded-md border border-input bg-background text-xs text-foreground"
+                    className="w-full h-10 px-2 rounded-lg border border-border bg-background text-xs text-foreground"
                   >
                     <option value="SCREENING">Recruiter Screening</option>
                     <option value="TECHNICAL">Technical Architecture</option>
@@ -474,7 +533,7 @@ export function WorkspaceInterviews({
                   <select
                     value={durationMinutes}
                     onChange={(e) => setDurationMinutes(Number(e.target.value))}
-                    className="w-full h-9 px-2 rounded-md border border-input bg-background text-xs text-foreground"
+                    className="w-full h-10 px-2 rounded-lg border border-border bg-background text-xs text-foreground"
                   >
                     <option value={30}>30 Minutes</option>
                     <option value={45}>45 Minutes</option>
@@ -494,7 +553,7 @@ export function WorkspaceInterviews({
                     value={scheduledAt}
                     onChange={(e) => setScheduledAt(e.target.value)}
                     required
-                    className="w-full h-9 px-2 rounded-md border border-input bg-background text-xs text-foreground"
+                    className="w-full h-10 px-2 rounded-lg border border-border bg-background text-xs text-foreground"
                   />
                 </div>
 
@@ -505,7 +564,7 @@ export function WorkspaceInterviews({
                   <select
                     value={timezone}
                     onChange={(e) => setTimezone(e.target.value)}
-                    className="w-full h-9 px-2 rounded-md border border-input bg-background text-xs text-foreground"
+                    className="w-full h-10 px-2 rounded-lg border border-border bg-background text-xs text-foreground"
                   >
                     <option value="UTC">UTC</option>
                     <option value="America/New_York">Eastern (EST/EDT)</option>
@@ -525,6 +584,7 @@ export function WorkspaceInterviews({
                   placeholder="https://meet.google.com/xyz or Zoom link..."
                   value={location}
                   onChange={(e) => setLocation(e.target.value)}
+                  className="h-10 bg-background/80"
                 />
               </div>
 
@@ -536,7 +596,7 @@ export function WorkspaceInterviews({
                   placeholder="Topics to evaluate, specific questions, or guidance for the hiring team..."
                   value={notes}
                   onChange={(e) => setNotes(e.target.value)}
-                  className="w-full h-20 p-2 rounded-md border border-input bg-background text-xs text-foreground resize-none"
+                  className="w-full h-20 p-2.5 rounded-lg border border-border bg-background/80 text-xs text-foreground resize-none"
                 />
               </div>
 
@@ -544,23 +604,33 @@ export function WorkspaceInterviews({
                 <Button variant="outline" size="sm" type="button" onClick={() => setIsScheduleOpen(false)}>
                   Cancel
                 </Button>
-                <Button variant="primary" size="sm" type="submit" disabled={scheduling}>
-                  {scheduling ? 'Scheduling...' : 'Confirm Schedule'}
+                <Button
+                  variant="primary"
+                  size="sm"
+                  type="submit"
+                  disabled={scheduling}
+                  className="btn-3d text-xs h-9 px-4 flex items-center gap-1.5"
+                >
+                  {scheduling ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Calendar className="w-3.5 h-3.5" />}
+                  <span>{scheduling ? 'Scheduling...' : 'Confirm Schedule'}</span>
                 </Button>
               </div>
             </form>
-          </Card>
+          </div>
         </div>
       )}
 
       {/* Scorecard Modal */}
       {activeScorecardInterview && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 overflow-y-auto">
-          <Card className="w-full max-w-lg p-6 space-y-5 bg-card border-border shadow-2xl">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-md p-4 overflow-y-auto">
+          <div className="card-3d w-full max-w-lg p-6 sm:p-7 space-y-5 bg-card border-border shadow-2xl relative max-h-[90vh] overflow-y-auto">
             <div className="flex items-start justify-between pb-3 border-b border-border">
               <div>
-                <h3 className="text-lg font-bold text-foreground">Interview Evaluation Scorecard</h3>
-                <p className="text-xs text-muted-foreground">
+                <h3 className="text-lg font-bold text-foreground flex items-center gap-2">
+                  <Star className="w-5 h-5 text-primary fill-primary" />
+                  Interview Evaluation Scorecard
+                </h3>
+                <p className="text-xs text-muted-foreground mt-0.5">
                   Candidate:{' '}
                   <strong>
                     {activeScorecardInterview.application.candidateProfile.user?.profile?.displayName}
@@ -571,9 +641,9 @@ export function WorkspaceInterviews({
               <button
                 type="button"
                 onClick={() => setActiveScorecardInterview(null)}
-                className="text-muted-foreground hover:text-foreground text-xl font-bold"
+                className="text-muted-foreground hover:text-foreground p-1 rounded-lg hover:bg-muted"
               >
-                ✕
+                <X className="w-5 h-5" />
               </button>
             </div>
 
@@ -593,7 +663,7 @@ export function WorkspaceInterviews({
                         | 'STRONG_NO_HIRE',
                     )
                   }
-                  className="w-full h-9 px-2 rounded-md border border-input bg-background text-xs text-foreground font-semibold"
+                  className="w-full h-10 px-3 rounded-lg border border-border bg-background text-xs text-foreground font-bold"
                 >
                   <option value="STRONG_HIRE">🌟 Strong Hire</option>
                   <option value="HIRE">✓ Hire</option>
@@ -603,55 +673,55 @@ export function WorkspaceInterviews({
               </div>
 
               {/* Rating Scales */}
-              <div className="grid grid-cols-2 gap-3 p-3 rounded-md bg-muted/40 border border-border">
-                <div className="space-y-1">
-                  <label className="font-medium text-muted-foreground">Overall Rating (1-5)</label>
+              <div className="grid grid-cols-2 gap-3 p-4 rounded-xl bg-muted/40 border border-border">
+                <div className="space-y-1.5">
+                  <label className="font-semibold text-muted-foreground">Overall Rating (1-5)</label>
                   <input
                     type="range"
                     min="1"
                     max="5"
                     value={overallRating}
                     onChange={(e) => setOverallRating(Number(e.target.value))}
-                    className="w-full"
+                    className="w-full accent-primary"
                   />
                   <div className="font-bold text-primary text-center">{overallRating} / 5 Stars</div>
                 </div>
 
-                <div className="space-y-1">
-                  <label className="font-medium text-muted-foreground">Technical Competence (1-5)</label>
+                <div className="space-y-1.5">
+                  <label className="font-semibold text-muted-foreground">Technical Competence</label>
                   <input
                     type="range"
                     min="1"
                     max="5"
                     value={technicalRating}
                     onChange={(e) => setTechnicalRating(Number(e.target.value))}
-                    className="w-full"
+                    className="w-full accent-primary"
                   />
                   <div className="font-bold text-primary text-center">{technicalRating} / 5 Stars</div>
                 </div>
 
-                <div className="space-y-1">
-                  <label className="font-medium text-muted-foreground">Communication (1-5)</label>
+                <div className="space-y-1.5">
+                  <label className="font-semibold text-muted-foreground">Communication</label>
                   <input
                     type="range"
                     min="1"
                     max="5"
                     value={communicationRating}
                     onChange={(e) => setCommunicationRating(Number(e.target.value))}
-                    className="w-full"
+                    className="w-full accent-primary"
                   />
                   <div className="font-bold text-primary text-center">{communicationRating} / 5 Stars</div>
                 </div>
 
-                <div className="space-y-1">
-                  <label className="font-medium text-muted-foreground">Culture & Collaboration (1-5)</label>
+                <div className="space-y-1.5">
+                  <label className="font-semibold text-muted-foreground">Culture & Leadership</label>
                   <input
                     type="range"
                     min="1"
                     max="5"
                     value={cultureRating}
                     onChange={(e) => setCultureRating(Number(e.target.value))}
-                    className="w-full"
+                    className="w-full accent-primary"
                   />
                   <div className="font-bold text-primary text-center">{cultureRating} / 5 Stars</div>
                 </div>
@@ -659,13 +729,13 @@ export function WorkspaceInterviews({
 
               <div className="space-y-1.5">
                 <label className="font-semibold text-foreground uppercase tracking-wider text-[11px]">
-                  Key Strengths
+                  Key Strengths Observed
                 </label>
                 <textarea
-                  placeholder="Evidence observed during the session..."
+                  placeholder="Evidence observed during the technical discussion or behavioral scenarios..."
                   value={strengths}
                   onChange={(e) => setStrengths(e.target.value)}
-                  className="w-full h-16 p-2 rounded-md border border-input bg-background text-xs text-foreground resize-none"
+                  className="w-full h-16 p-2.5 rounded-lg border border-border bg-background text-xs text-foreground resize-none"
                 />
               </div>
 
@@ -677,7 +747,7 @@ export function WorkspaceInterviews({
                   placeholder="Concerns or missing technical proficiencies..."
                   value={weaknesses}
                   onChange={(e) => setWeaknesses(e.target.value)}
-                  className="w-full h-16 p-2 rounded-md border border-input bg-background text-xs text-foreground resize-none"
+                  className="w-full h-16 p-2.5 rounded-lg border border-border bg-background text-xs text-foreground resize-none"
                 />
               </div>
 
@@ -689,7 +759,7 @@ export function WorkspaceInterviews({
                   placeholder="Additional observations for the hiring committee..."
                   value={scorecardNotes}
                   onChange={(e) => setScorecardNotes(e.target.value)}
-                  className="w-full h-16 p-2 rounded-md border border-input bg-background text-xs text-foreground resize-none"
+                  className="w-full h-16 p-2.5 rounded-lg border border-border bg-background text-xs text-foreground resize-none"
                 />
               </div>
 
@@ -702,19 +772,26 @@ export function WorkspaceInterviews({
                 >
                   Cancel
                 </Button>
-                <Button variant="primary" size="sm" type="submit" disabled={submittingScorecard}>
-                  {submittingScorecard ? 'Submitting...' : 'Save Scorecard'}
+                <Button
+                  variant="primary"
+                  size="sm"
+                  type="submit"
+                  disabled={submittingScorecard}
+                  className="btn-3d text-xs h-9 px-4 flex items-center gap-1.5"
+                >
+                  {submittingScorecard ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <CheckCircle2 className="w-3.5 h-3.5" />}
+                  <span>{submittingScorecard ? 'Submitting...' : 'Save Scorecard'}</span>
                 </Button>
               </div>
             </form>
-          </Card>
+          </div>
         </div>
       )}
 
       {/* Cancel Interview Modal */}
       {cancellingInterview && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
-          <Card className="w-full max-w-md p-6 space-y-4 bg-card border-border shadow-2xl">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-md p-4">
+          <div className="card-3d w-full max-w-md p-6 space-y-4 bg-card border-border shadow-2xl relative">
             <h3 className="text-base font-bold text-foreground">Cancel Interview Session</h3>
             <p className="text-xs text-muted-foreground">
               Are you sure you want to cancel &quot;{cancellingInterview.title}&quot;?
@@ -728,6 +805,7 @@ export function WorkspaceInterviews({
                 placeholder="e.g. Candidate withdrew, schedule conflict..."
                 value={cancellationReason}
                 onChange={(e) => setCancellationReason(e.target.value)}
+                className="h-10 bg-background/80"
               />
             </div>
 
@@ -744,12 +822,12 @@ export function WorkspaceInterviews({
                 size="sm"
                 onClick={handleCancelInterview}
                 disabled={isCancelling}
-                className="bg-red-600 hover:bg-red-700 text-white"
+                className="bg-red-600 hover:bg-red-700 text-white text-xs h-9 px-4"
               >
                 {isCancelling ? 'Cancelling...' : 'Confirm Cancellation'}
               </Button>
             </div>
-          </Card>
+          </div>
         </div>
       )}
     </div>

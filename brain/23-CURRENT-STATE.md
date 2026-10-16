@@ -67,6 +67,16 @@ Current Branch: `main` (tracking `origin/main` at `https://github.com/Patial-45/
   - Recruiter ATS Kanban Board (`AtsPipelineBoard`): Elevated 3D candidate cards, Lucide icons (`FileText`, `MessageSquare`, `ArrowRight`, `Eye`, `Download`, `UserX`, `Search`), candidate dossier drawer, and tactile 3D disqualification modal.
   - Candidate Applications Hub (`CandidateApplicationsList`): 4 modern 3D overview stat cards, glowing animated pipeline stage visualizer, 3D application cards with Lucide icons, and tactile `.btn-3d` buttons.
   - Candidate Workflow Hubs Overhaul: Upgraded Scheduled Interviews (`CandidateInterviews`), Job Offers & Digital E-Signatures (`CandidateOffers`), Saved Jobs (`CandidateSavedJobs`), and Resume Manager (`CandidateResumeManager`) with elevated `.card-3d` cards, Lucide icon sets, tactile `.btn-3d` controls, and animated progress visualizers.
+  - Employer Candidate Discovery Overhaul (`CandidateSearch`): 3D search hero with requisition filter, Deterministic vs AI Semantic Match switcher with glowing 3D toggle pills, `.card-3d` candidate cards with avatar badges and hybrid AI breakdown, and 3D Talent Dossier modal with vector cosine similarity indicators.
+  - Employer Workspace Management Hubs Overhaul:
+    - Requisitions (`WorkspaceJobs`): Elevated `.card-3d` listings, Lucide icons, status pills, and 3D Create Requisition modal.
+    - Interviews (`WorkspaceInterviews`): 3D interview schedule, status filter pills, Join Call links, and 3D Schedule & Scorecard modals.
+    - Offers & Onboarding (`WorkspaceOffers`): 3D offer cards, compensation terms grid, ESIGN certificate display, and Onboarding Checklist task manager.
+    - Analytics (`WorkspaceAnalytics`): 4 elevated `.card-3d` KPI stat cards, hiring funnel with conversion progress bars, offer win ratios, and requisition breakdown table.
+    - Subscriptions & Billing (`WorkspaceBilling`): 3D active plan card, requisition and search usage meters, billing cycle toggle, and 3D pricing tier cards.
+    - Team Collaborators (`WorkspaceTeam`): 3D invitation manager, Lucide role badges, and active collaborator tables.
+  - Candidate Profile Dossier (`CandidateProfileForm`): Elevated `.card-3d` panels with Lucide icons, tactile save buttons, and work/education history timelines.
+  - Admin Portal Explorer Tables (`AdminUsersTable`, `AdminWorkspacesTable`, `AdminSystemTable`): Elevated 3D tables, Lucide badges, support elevation modal, and cryptographic audit log ledger with formatted JSON inspect.
   - Candidate Portal Home (`/candidate`): 3D profile strength gauge, primary resume card, featured skills, and quick links with modern Lucide icons (`Briefcase`, `FileText`, `Sparkles`, `Upload`, `UserCheck`, `GraduationCap`, `Activity`).
   - Employer Workspace Overview (`/workspace/[slug]`): Real-time live 3D StatCards backed by `getWorkspaceJobs` and `getWorkspaceAnalytics`, and 6 high-impact command center cards for ATS Kanban, Candidate Discovery, Interviews, Analytics, Offers, and Integrations with Lucide icons.
   - Tactile 3D button press physics (`.btn-3d`, `.btn-3d-secondary`) with active state shadow collapse.

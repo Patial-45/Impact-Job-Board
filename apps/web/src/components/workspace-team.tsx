@@ -1,23 +1,19 @@
 'use client';
 
 import { useEffect, useState, type FormEvent } from 'react';
+import { Button, Input, Select, Badge } from '@executive-match/ui';
 import {
-  Button,
-  Card,
-  CardHeader,
-  CardTitle,
-  CardDescription,
-  CardContent,
-  Input,
-  Select,
-  Badge,
-  Table,
-  TableHeader,
-  TableBody,
-  TableRow,
-  TableHead,
-  TableCell,
-} from '@executive-match/ui';
+  Users,
+  UserPlus,
+  Shield,
+  Mail,
+  Trash2,
+  Clock,
+  CheckCircle2,
+  AlertCircle,
+  Loader2,
+  XCircle,
+} from 'lucide-react';
 
 const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000/api/v1';
 
@@ -98,7 +94,7 @@ export function WorkspaceTeam({ workspaceSlug }: { workspaceSlug: string }) {
         throw new Error(body?.message || 'Failed to send invitation.');
       }
 
-      setInviteSuccess(`Invitation sent to ${inviteEmail} as ${inviteRole}!`);
+      setInviteSuccess(`Invitation dispatched to ${inviteEmail} as ${inviteRole}!`);
       setInviteEmail('');
       await loadData();
     } catch (err) {
@@ -141,175 +137,232 @@ export function WorkspaceTeam({ workspaceSlug }: { workspaceSlug: string }) {
   }
 
   if (loading) {
-    return <p style={{ color: 'var(--muted)', padding: '24px' }}>Loading workspace team...</p>;
+    return (
+      <div className="card-3d p-12 text-center space-y-3">
+        <Loader2 className="w-6 h-6 animate-spin text-primary mx-auto" />
+        <p className="text-xs text-muted-foreground">Loading workspace collaborators...</p>
+      </div>
+    );
   }
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: '32px' }}>
+    <div className="space-y-8">
       {error && (
-        <p role="alert" style={{ color: 'var(--color-danger, #d13438)', margin: 0 }}>
-          {error}
-        </p>
+        <div className="p-4 rounded-xl bg-danger/10 border border-danger/20 text-danger text-xs flex items-center gap-2 shadow-sm">
+          <AlertCircle className="w-4 h-4 shrink-0" />
+          <span>{error}</span>
+        </div>
       )}
 
       {/* Invite Member Card */}
-      <Card>
-        <CardHeader>
-          <span className="ui-eyebrow">COLLABORATION</span>
-          <CardTitle>Invite New Team Member</CardTitle>
-          <CardDescription>
-            Add recruiters, hiring managers, or interviewers to this workspace
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <form
-            onSubmit={handleSendInvite}
-            style={{
-              display: 'grid',
-              gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr)) auto',
-              gap: '16px',
-              alignItems: 'flex-end',
-            }}
-          >
-            <label style={{ display: 'flex', flexDirection: 'column', gap: '6px', fontSize: '14px', fontWeight: 500 }}>
-              Email address
+      <div className="card-3d p-6 sm:p-7 space-y-6">
+        <div>
+          <span className="text-[10px] font-black uppercase tracking-wider text-primary">
+            WORKSPACE ACCESS CONTROL
+          </span>
+          <h2 className="text-lg font-bold text-foreground flex items-center gap-2 mt-1">
+            <UserPlus className="w-5 h-5 text-primary" />
+            Invite New Collaborator
+          </h2>
+          <p className="text-xs text-muted-foreground mt-0.5">
+            Add recruiters, executive hiring managers, or interview evaluators to this tenant workspace.
+          </p>
+        </div>
+
+        <form onSubmit={handleSendInvite} className="space-y-4">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 items-end">
+            <div className="space-y-1.5 md:col-span-2">
+              <label className="text-xs font-semibold text-foreground flex items-center gap-1.5">
+                <Mail className="w-3.5 h-3.5 text-muted-foreground" />
+                Collaborator Email Address *
+              </label>
               <Input
                 type="email"
                 required
-                placeholder="colleague@company.com"
+                placeholder="colleague@enterprise.com"
                 value={inviteEmail}
                 onChange={(e) => setInviteEmail(e.target.value)}
+                className="h-10 bg-background/80"
               />
-            </label>
+            </div>
 
-            <label style={{ display: 'flex', flexDirection: 'column', gap: '6px', fontSize: '14px', fontWeight: 500 }}>
-              Role
+            <div className="space-y-1.5">
+              <label className="text-xs font-semibold text-foreground flex items-center gap-1.5">
+                <Shield className="w-3.5 h-3.5 text-muted-foreground" />
+                Workspace Role
+              </label>
               <Select
                 value={inviteRole}
                 onChange={(e) => setInviteRole(e.target.value as 'ADMIN' | 'RECRUITER' | 'VIEWER')}
                 options={[
-                  { label: 'Admin (Full management)', value: 'ADMIN' },
-                  { label: 'Recruiter (Jobs, candidates, ATS)', value: 'RECRUITER' },
-                  { label: 'Viewer (Read-only observation)', value: 'VIEWER' },
+                  { label: 'Admin (Full Management)', value: 'ADMIN' },
+                  { label: 'Recruiter (ATS & Interviews)', value: 'RECRUITER' },
+                  { label: 'Viewer (Read-Only)', value: 'VIEWER' },
                 ]}
+                className="h-10 text-xs"
               />
-            </label>
+            </div>
+          </div>
 
-            <Button type="submit" variant="primary" disabled={inviteBusy}>
-              {inviteBusy ? 'Sending...' : 'Send Invitation'}
+          <div className="flex justify-end pt-2">
+            <Button
+              type="submit"
+              variant="primary"
+              disabled={inviteBusy}
+              className="btn-3d text-xs h-10 px-5 flex items-center gap-2"
+            >
+              {inviteBusy ? (
+                <>
+                  <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                  <span>Sending Invitation...</span>
+                </>
+              ) : (
+                <>
+                  <UserPlus className="w-3.5 h-3.5" />
+                  <span>Send Workspace Invitation</span>
+                </>
+              )}
             </Button>
-          </form>
+          </div>
+        </form>
 
-          {inviteSuccess && (
-            <p style={{ color: 'var(--accent)', fontSize: '14px', marginTop: '12px', fontWeight: 500 }}>
-              ✓ {inviteSuccess}
-            </p>
-          )}
-          {inviteError && (
-            <p role="alert" style={{ color: 'var(--color-danger, #d13438)', fontSize: '14px', marginTop: '12px' }}>
-              ✕ {inviteError}
-            </p>
-          )}
-        </CardContent>
-      </Card>
+        {inviteSuccess && (
+          <div className="p-3.5 rounded-xl bg-emerald-500/10 border border-emerald-500/30 text-xs text-emerald-600 dark:text-emerald-400 flex items-center gap-2">
+            <CheckCircle2 className="w-4 h-4 text-emerald-500 shrink-0" />
+            <span>{inviteSuccess}</span>
+          </div>
+        )}
+        {inviteError && (
+          <div className="p-3.5 rounded-xl bg-red-500/10 border border-red-500/30 text-xs text-red-600 dark:text-red-400 flex items-center gap-2">
+            <AlertCircle className="w-4 h-4 text-red-500 shrink-0" />
+            <span>{inviteError}</span>
+          </div>
+        )}
+      </div>
 
       {/* Active Members Table */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Active Members ({members.length})</CardTitle>
-          <CardDescription>Users who have active access to this tenant workspace</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>User</TableHead>
-                <TableHead>Role</TableHead>
-                <TableHead>Joined</TableHead>
-                <TableHead style={{ textAlign: 'right' }}>Actions</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {members.map((member) => (
-                <TableRow key={member.id}>
-                  <TableCell>
-                    <strong style={{ display: 'block', color: 'var(--ink)' }}>
-                      {member.displayName || 'Team Member'}
-                    </strong>
-                    <span style={{ color: 'var(--muted)', fontSize: '13px' }}>{member.email}</span>
-                  </TableCell>
-                  <TableCell>
-                    <Badge variant={member.role === 'OWNER' ? 'accent' : member.role === 'ADMIN' ? 'warning' : 'neutral'}>
-                      {member.role}
-                    </Badge>
-                  </TableCell>
-                  <TableCell style={{ color: 'var(--muted)', fontSize: '13px' }}>
-                    {new Date(member.joinedAt).toLocaleDateString()}
-                  </TableCell>
-                  <TableCell style={{ textAlign: 'right' }}>
-                    {member.role !== 'OWNER' && (
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        style={{ color: 'var(--color-danger, #d13438)' }}
-                        onClick={() => handleRemoveMember(member.id)}
+      <section className="space-y-4">
+        <div>
+          <h2 className="text-xl font-bold text-foreground flex items-center gap-2">
+            <Users className="w-5 h-5 text-primary" />
+            Active Team Members ({members.length})
+          </h2>
+          <p className="text-xs text-muted-foreground mt-0.5">
+            Users currently authenticated and granted role access to this workspace.
+          </p>
+        </div>
+
+        <div className="card-3d overflow-hidden">
+          <div className="overflow-x-auto">
+            <table className="w-full text-left text-sm">
+              <thead className="bg-muted/50 border-b border-border text-[11px] uppercase text-muted-foreground font-bold tracking-wider">
+                <tr>
+                  <th className="p-4">User / Name</th>
+                  <th className="p-4">Tenant Role</th>
+                  <th className="p-4">Joined Date</th>
+                  <th className="p-4 text-right">Actions</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-border">
+                {members.map((member) => (
+                  <tr key={member.id} className="hover:bg-muted/20 transition-colors">
+                    <td className="p-4">
+                      <div className="font-bold text-foreground">
+                        {member.displayName || 'Team Member'}
+                      </div>
+                      <div className="text-xs text-muted-foreground">{member.email}</div>
+                    </td>
+                    <td className="p-4">
+                      <Badge
+                        variant={
+                          member.role === 'OWNER'
+                            ? 'accent'
+                            : member.role === 'ADMIN'
+                            ? 'warning'
+                            : 'neutral'
+                        }
+                        className="text-xs"
                       >
-                        Remove
-                      </Button>
-                    )}
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </CardContent>
-      </Card>
+                        {member.role === 'OWNER' && <Shield className="w-3 h-3 mr-1 text-primary inline" />}
+                        {member.role}
+                      </Badge>
+                    </td>
+                    <td className="p-4 text-xs text-muted-foreground">
+                      {new Date(member.joinedAt).toLocaleDateString()}
+                    </td>
+                    <td className="p-4 text-right">
+                      {member.role !== 'OWNER' && (
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="text-danger hover:text-danger/80 h-8 px-2.5 text-xs"
+                          onClick={() => handleRemoveMember(member.id)}
+                        >
+                          <Trash2 className="w-3.5 h-3.5 mr-1" />
+                          Remove
+                        </Button>
+                      )}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
 
       {/* Pending Invitations Table */}
       {invitations.length > 0 && (
-        <Card>
-          <CardHeader>
-            <CardTitle>Pending Invitations ({invitations.length})</CardTitle>
-            <CardDescription>Invitations awaiting recipient acceptance</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Invited Email</TableHead>
-                  <TableHead>Role</TableHead>
-                  <TableHead>Expires</TableHead>
-                  <TableHead style={{ textAlign: 'right' }}>Actions</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {invitations.map((inv) => (
-                  <TableRow key={inv.id}>
-                    <TableCell>
-                      <strong style={{ color: 'var(--ink)' }}>{inv.email}</strong>
-                    </TableCell>
-                    <TableCell>
-                      <Badge variant="neutral">{inv.role}</Badge>
-                    </TableCell>
-                    <TableCell style={{ color: 'var(--muted)', fontSize: '13px' }}>
-                      {new Date(inv.expiresAt).toLocaleDateString()}
-                    </TableCell>
-                    <TableCell style={{ textAlign: 'right' }}>
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        style={{ color: 'var(--color-danger, #d13438)' }}
-                        onClick={() => handleRevokeInvite(inv.id)}
-                      >
-                        Revoke
-                      </Button>
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </CardContent>
-        </Card>
+        <section className="space-y-4">
+          <div>
+            <h2 className="text-lg font-bold text-foreground flex items-center gap-2">
+              <Clock className="w-5 h-5 text-primary" />
+              Pending Invitations ({invitations.length})
+            </h2>
+            <p className="text-xs text-muted-foreground mt-0.5">
+              Invitations awaiting recipient acceptance via email link.
+            </p>
+          </div>
+
+          <div className="card-3d overflow-hidden">
+            <div className="overflow-x-auto">
+              <table className="w-full text-left text-sm">
+                <thead className="bg-muted/50 border-b border-border text-[11px] uppercase text-muted-foreground font-bold tracking-wider">
+                  <tr>
+                    <th className="p-4">Invited Email</th>
+                    <th className="p-4">Role Assigned</th>
+                    <th className="p-4">Expiration Date</th>
+                    <th className="p-4 text-right">Actions</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-border">
+                  {invitations.map((inv) => (
+                    <tr key={inv.id} className="hover:bg-muted/20 transition-colors">
+                      <td className="p-4 font-bold text-foreground">{inv.email}</td>
+                      <td className="p-4">
+                        <Badge variant="neutral" className="text-xs">{inv.role}</Badge>
+                      </td>
+                      <td className="p-4 text-xs text-muted-foreground">
+                        {new Date(inv.expiresAt).toLocaleDateString()}
+                      </td>
+                      <td className="p-4 text-right">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="btn-3d-secondary text-xs text-danger hover:text-danger/80 h-8 px-3"
+                          onClick={() => handleRevokeInvite(inv.id)}
+                        >
+                          <XCircle className="w-3.5 h-3.5 mr-1" />
+                          Revoke
+                        </Button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </section>
       )}
     </div>
   );

@@ -1,8 +1,21 @@
 'use client';
 
 import React, { useState } from 'react';
-import { Card, Button, Badge } from '@executive-match/ui';
+import { Button, Badge } from '@executive-match/ui';
 import type { WorkspaceBillingData } from '@/lib/api';
+import {
+  CreditCard,
+  CheckCircle2,
+  Zap,
+  ShieldCheck,
+  AlertCircle,
+  Calendar,
+  Users,
+  Check,
+  Loader2,
+  X,
+  Sparkles,
+} from 'lucide-react';
 
 interface WorkspaceBillingProps {
   workspaceSlug: string;
@@ -20,12 +33,15 @@ export function WorkspaceBilling({ workspaceSlug, initialBilling }: WorkspaceBil
 
   if (!data) {
     return (
-      <Card className="p-12 text-center border-dashed">
-        <h3 className="font-bold text-foreground">Billing Service Unavailable</h3>
-        <p className="text-sm text-muted-foreground mt-1">
-          Unable to retrieve subscription and usage data for this workspace.
+      <div className="card-3d p-12 text-center space-y-4">
+        <div className="w-14 h-14 rounded-2xl bg-muted/60 border border-border flex items-center justify-center mx-auto text-primary">
+          <CreditCard className="w-7 h-7" />
+        </div>
+        <h3 className="font-bold text-foreground text-lg">Billing Service Unavailable</h3>
+        <p className="text-xs text-muted-foreground max-w-md mx-auto">
+          Unable to retrieve subscription and usage data for this workspace at this time.
         </p>
-      </Card>
+      </div>
     );
   }
 
@@ -101,49 +117,66 @@ export function WorkspaceBilling({ workspaceSlug, initialBilling }: WorkspaceBil
     <div className="space-y-8">
       {statusMessage && (
         <div
-          className={`p-4 rounded-md text-sm font-medium ${
+          className={`p-4 rounded-xl text-xs font-semibold flex items-center justify-between shadow-sm ${
             statusMessage.type === 'success'
-              ? 'bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800'
-              : 'bg-red-50 dark:bg-red-950/40 text-red-700 dark:text-red-300 border border-red-200 dark:border-red-800'
+              ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/30'
+              : 'bg-red-500/10 text-red-600 dark:text-red-400 border border-red-500/30'
           }`}
         >
-          {statusMessage.text}
+          <div className="flex items-center gap-2">
+            {statusMessage.type === 'success' ? (
+              <CheckCircle2 className="w-4 h-4 text-emerald-500 shrink-0" />
+            ) : (
+              <AlertCircle className="w-4 h-4 text-red-500 shrink-0" />
+            )}
+            <span>{statusMessage.text}</span>
+          </div>
+          <button
+            onClick={() => setStatusMessage(null)}
+            className="text-muted-foreground hover:text-foreground p-1"
+          >
+            <X className="w-4 h-4" />
+          </button>
         </div>
       )}
 
       {/* Current plan summary & Usage limits */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <Card className="p-6 space-y-4 md:col-span-2">
+        <div className="card-3d p-6 sm:p-7 space-y-5 md:col-span-2">
           <div className="flex items-center justify-between">
             <div>
-              <span className="text-xs uppercase font-semibold text-muted-foreground tracking-wider">
-                Current Subscription
+              <span className="text-[11px] uppercase font-bold text-muted-foreground tracking-wider flex items-center gap-1.5">
+                <ShieldCheck className="w-3.5 h-3.5 text-primary" />
+                Active Subscription
               </span>
-              <div className="flex items-center gap-3 mt-1">
+              <div className="flex items-center gap-3 mt-1.5">
                 <h2 className="text-2xl font-black text-foreground">{subscription.tier} Plan</h2>
-                <Badge variant={subscription.status === 'ACTIVE' ? 'success' : 'warning'}>
+                <Badge variant={subscription.status === 'ACTIVE' ? 'success' : 'warning'} className="text-xs">
                   {subscription.status}
                 </Badge>
               </div>
             </div>
             <div className="text-right">
-              <span className="text-xs text-muted-foreground">Billing Cycle</span>
+              <span className="text-xs text-muted-foreground">Cycle</span>
               <div className="text-sm font-bold text-foreground capitalize">
                 {subscription.billingCycle.toLowerCase()}
               </div>
             </div>
           </div>
 
-          <p className="text-xs text-muted-foreground">
-            {subscription.cancelAtPeriodEnd
-              ? `Your plan is active until ${new Date(subscription.currentPeriodEnd).toLocaleDateString()} and will not auto-renew.`
-              : `Renews automatically on ${new Date(subscription.currentPeriodEnd).toLocaleDateString()}.`}
+          <p className="text-xs text-muted-foreground flex items-center gap-1.5">
+            <Calendar className="w-3.5 h-3.5 text-muted-foreground shrink-0" />
+            <span>
+              {subscription.cancelAtPeriodEnd
+                ? `Your plan remains active until ${new Date(subscription.currentPeriodEnd).toLocaleDateString()} and will not auto-renew.`
+                : `Renews automatically on ${new Date(subscription.currentPeriodEnd).toLocaleDateString()}.`}
+            </span>
           </p>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2 border-t border-border">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-3 border-t border-border">
             {/* Active jobs meter */}
-            <div className="space-y-1.5">
-              <div className="flex justify-between text-xs font-semibold">
+            <div className="space-y-2 p-3.5 rounded-xl bg-muted/40 border border-border">
+              <div className="flex justify-between text-xs font-bold">
                 <span className="text-foreground">Active Requisitions</span>
                 <span className="text-muted-foreground font-mono">
                   {currentUsage.activeJobsCount} / {currentUsage.activeJobLimit}
@@ -151,7 +184,7 @@ export function WorkspaceBilling({ workspaceSlug, initialBilling }: WorkspaceBil
               </div>
               <div className="w-full bg-muted rounded-full h-2 overflow-hidden">
                 <div
-                  className={`h-full rounded-full ${jobUsagePct >= 100 ? 'bg-red-500' : 'bg-primary'}`}
+                  className={`h-full rounded-full transition-all duration-500 ${jobUsagePct >= 100 ? 'bg-red-500' : 'bg-primary'}`}
                   style={{ width: `${jobUsagePct}%` }}
                 />
               </div>
@@ -161,8 +194,8 @@ export function WorkspaceBilling({ workspaceSlug, initialBilling }: WorkspaceBil
             </div>
 
             {/* Candidate search meter */}
-            <div className="space-y-1.5">
-              <div className="flex justify-between text-xs font-semibold">
+            <div className="space-y-2 p-3.5 rounded-xl bg-muted/40 border border-border">
+              <div className="flex justify-between text-xs font-bold">
                 <span className="text-foreground">Candidate Discovery Searches</span>
                 <span className="text-muted-foreground font-mono">
                   {currentUsage.candidateSearchLimit} / mo
@@ -172,59 +205,63 @@ export function WorkspaceBilling({ workspaceSlug, initialBilling }: WorkspaceBil
                 <div className="h-full bg-indigo-500 rounded-full" style={{ width: '25%' }} />
               </div>
               <p className="text-[11px] text-muted-foreground">
-                Resets each billing cycle
+                Resets on next monthly cycle
               </p>
             </div>
           </div>
 
           {subscription.tier !== 'STARTER' && !subscription.cancelAtPeriodEnd && (
-            <div className="pt-2">
+            <div className="pt-1">
               <Button
                 variant="ghost"
-                className="text-xs text-red-600 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-950/30 p-0 h-auto"
+                className="text-xs text-red-500 hover:text-red-400 p-0 h-auto font-medium"
                 onClick={() => setCancelModalOpen(true)}
               >
                 Cancel Subscription
               </Button>
             </div>
           )}
-        </Card>
+        </div>
 
         {/* Team seats overview */}
-        <Card className="p-6 space-y-4 flex flex-col justify-between">
-          <div className="space-y-2">
-            <span className="text-xs uppercase font-semibold text-muted-foreground tracking-wider">
-              Workspace Team
+        <div className="card-3d p-6 sm:p-7 space-y-4 flex flex-col justify-between">
+          <div className="space-y-3">
+            <span className="text-[11px] uppercase font-bold text-muted-foreground tracking-wider flex items-center gap-1.5">
+              <Users className="w-3.5 h-3.5 text-primary" />
+              Workspace Team Seats
             </span>
             <div className="text-3xl font-black text-foreground">{currentUsage.membersCount}</div>
-            <p className="text-xs text-muted-foreground">
-              Recruiters, hiring managers, and evaluators collaborating in this workspace.
+            <p className="text-xs text-muted-foreground leading-relaxed">
+              Recruiters, hiring managers, and interview evaluators actively collaborating in this workspace.
             </p>
           </div>
           <div className="pt-3 border-t border-border">
-            <Badge variant="neutral">Unlimited Collaborator Seats</Badge>
+            <Badge variant="neutral" className="text-xs">Unlimited Collaborator Seats</Badge>
           </div>
-        </Card>
+        </div>
       </div>
 
       {/* Plan selection & comparison grid */}
       <section className="space-y-6">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div>
-            <h2 className="text-xl font-bold text-foreground">Available Subscription Plans</h2>
-            <p className="text-sm text-muted-foreground">
-              Scale your hiring capacity, unlock AI matching, and enable compliance workflows.
+            <h2 className="text-xl font-bold text-foreground flex items-center gap-2">
+              <Zap className="w-5 h-5 text-primary" />
+              Available Subscription Tiers
+            </h2>
+            <p className="text-xs text-muted-foreground mt-0.5">
+              Scale your hiring capacity, unlock AI matching, and enable enterprise ATS webhooks.
             </p>
           </div>
 
           {/* Billing cycle switch */}
-          <div className="flex items-center gap-1.5 p-1 rounded-lg bg-muted border border-border">
+          <div className="flex items-center gap-1.5 p-1 rounded-xl bg-muted/60 border border-border shadow-sm">
             <button
               type="button"
               onClick={() => setBillingCycle('MONTHLY')}
-              className={`px-3 py-1 text-xs font-semibold rounded-md transition-colors ${
+              className={`px-3 py-1.5 text-xs font-bold rounded-lg transition-all ${
                 billingCycle === 'MONTHLY'
-                  ? 'bg-card text-foreground shadow-xs'
+                  ? 'bg-card text-foreground shadow-sm'
                   : 'text-muted-foreground hover:text-foreground'
               }`}
             >
@@ -233,13 +270,16 @@ export function WorkspaceBilling({ workspaceSlug, initialBilling }: WorkspaceBil
             <button
               type="button"
               onClick={() => setBillingCycle('ANNUAL')}
-              className={`px-3 py-1 text-xs font-semibold rounded-md transition-colors ${
+              className={`px-3 py-1.5 text-xs font-bold rounded-lg transition-all flex items-center gap-1 ${
                 billingCycle === 'ANNUAL'
-                  ? 'bg-card text-foreground shadow-xs'
+                  ? 'bg-card text-foreground shadow-sm'
                   : 'text-muted-foreground hover:text-foreground'
               }`}
             >
-              Annual <span className="text-emerald-600 font-bold ml-0.5">(-16%)</span>
+              <span>Annual</span>
+              <span className="text-emerald-500 font-black text-[11px] bg-emerald-500/10 px-1.5 py-0.2 rounded">
+                -16%
+              </span>
             </button>
           </div>
         </div>
@@ -250,23 +290,27 @@ export function WorkspaceBilling({ workspaceSlug, initialBilling }: WorkspaceBil
             const price = billingCycle === 'ANNUAL' ? Math.round(plan.priceAnnual / 12) : plan.priceMonthly;
 
             return (
-              <Card
+              <div
                 key={plan.tier}
-                variant={isCurrent ? 'default' : 'outline'}
-                className={`p-6 flex flex-col justify-between space-y-6 relative ${
-                  isCurrent ? 'ring-2 ring-primary border-primary' : ''
+                className={`card-3d p-6 sm:p-7 flex flex-col justify-between space-y-6 relative group transition-all ${
+                  isCurrent ? 'ring-2 ring-primary border-primary shadow-glow' : ''
                 }`}
               >
                 {isCurrent && (
                   <div className="absolute -top-3 right-4">
-                    <Badge variant="success">Current Active Plan</Badge>
+                    <Badge variant="success" className="text-xs shadow-sm bg-emerald-500 text-white font-bold">
+                      Current Active Plan
+                    </Badge>
                   </div>
                 )}
 
                 <div className="space-y-4">
                   <div className="space-y-1">
-                    <h3 className="text-lg font-bold text-foreground">{plan.name}</h3>
-                    <div className="flex items-baseline gap-1">
+                    <h3 className="text-lg font-bold text-foreground flex items-center gap-1.5">
+                      {plan.name === 'Enterprise' && <Sparkles className="w-4 h-4 text-emerald-400" />}
+                      {plan.name}
+                    </h3>
+                    <div className="flex items-baseline gap-1 pt-1">
                       <span className="text-3xl font-black text-foreground">${price}</span>
                       <span className="text-xs text-muted-foreground">/ month</span>
                     </div>
@@ -277,10 +321,10 @@ export function WorkspaceBilling({ workspaceSlug, initialBilling }: WorkspaceBil
                     )}
                   </div>
 
-                  <ul className="space-y-2 text-xs text-muted-foreground">
+                  <ul className="space-y-2.5 text-xs text-muted-foreground pt-2">
                     {plan.features.map((feat) => (
                       <li key={feat} className="flex items-start gap-2">
-                        <span className="text-emerald-500 font-bold">✓</span>
+                        <Check className="w-3.5 h-3.5 text-emerald-500 shrink-0 mt-0.5" />
                         <span className="text-foreground">{feat}</span>
                       </li>
                     ))}
@@ -289,21 +333,28 @@ export function WorkspaceBilling({ workspaceSlug, initialBilling }: WorkspaceBil
 
                 <div className="pt-4 border-t border-border">
                   {isCurrent ? (
-                    <Button variant="outline" className="w-full text-xs" disabled>
+                    <Button variant="outline" className="w-full text-xs h-10" disabled>
                       Active Plan
                     </Button>
                   ) : (
                     <Button
                       variant="primary"
-                      className="w-full text-xs"
+                      className="btn-3d w-full text-xs h-10 flex items-center justify-center gap-2"
                       onClick={() => handleUpgrade(plan.tier)}
                       disabled={upgradingTier !== null}
                     >
-                      {upgradingTier === plan.tier ? 'Switching...' : `Select ${plan.name}`}
+                      {upgradingTier === plan.tier ? (
+                        <>
+                          <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                          <span>Switching...</span>
+                        </>
+                      ) : (
+                        <span>Select {plan.name}</span>
+                      )}
                     </Button>
                   )}
                 </div>
-              </Card>
+              </div>
             );
           })}
         </div>
@@ -311,15 +362,15 @@ export function WorkspaceBilling({ workspaceSlug, initialBilling }: WorkspaceBil
 
       {/* Cancel modal */}
       {cancelModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-xs p-4">
-          <Card className="w-full max-w-md p-6 space-y-4 bg-card border-border shadow-xl">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-md p-4">
+          <div className="card-3d w-full max-w-md p-6 sm:p-7 space-y-4 bg-card border-border shadow-2xl relative">
             <h3 className="text-lg font-bold text-foreground">Cancel Plan Subscription</h3>
-            <p className="text-xs text-muted-foreground">
+            <p className="text-xs text-muted-foreground leading-relaxed">
               Your subscription benefits will remain active until the end of your billing cycle on{' '}
               <strong className="text-foreground">
                 {new Date(subscription.currentPeriodEnd).toLocaleDateString()}
               </strong>
-              . After that, your workspace will revert to the Starter plan.
+              . After that, your workspace will revert to the Starter tier.
             </p>
 
             <form onSubmit={handleCancel} className="space-y-4">
@@ -330,16 +381,17 @@ export function WorkspaceBilling({ workspaceSlug, initialBilling }: WorkspaceBil
                   value={cancelReason}
                   onChange={(e) => setCancelReason(e.target.value)}
                   placeholder="Tell us what could have been better..."
-                  className="w-full px-3 py-2 text-sm rounded-md border border-input bg-background resize-none"
+                  className="w-full px-3 py-2 text-xs rounded-lg border border-border bg-background text-foreground resize-none"
                 />
               </div>
 
-              <div className="flex justify-end gap-2 pt-2 border-t">
+              <div className="flex justify-end gap-2 pt-3 border-t border-border">
                 <Button
                   type="button"
                   variant="outline"
                   onClick={() => setCancelModalOpen(false)}
                   disabled={canceling}
+                  className="text-xs"
                 >
                   Keep Subscription
                 </Button>
@@ -347,12 +399,13 @@ export function WorkspaceBilling({ workspaceSlug, initialBilling }: WorkspaceBil
                   type="submit"
                   variant="danger"
                   disabled={canceling}
+                  className="bg-red-600 hover:bg-red-700 text-white text-xs h-9 px-4"
                 >
                   {canceling ? 'Canceling...' : 'Confirm Cancellation'}
                 </Button>
               </div>
             </form>
-          </Card>
+          </div>
         </div>
       )}
     </div>

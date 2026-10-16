@@ -1,8 +1,22 @@
 'use client';
 
 import React, { useState } from 'react';
-import { Card, Badge, Button } from '@executive-match/ui';
+import { Badge, Button } from '@executive-match/ui';
 import type { AdminAuditLogItem, AdminSystemHealth } from '@/lib/api';
+import {
+  Activity,
+  Database,
+  Cpu,
+  Clock,
+  ShieldCheck,
+  Search,
+  Filter,
+  CheckCircle2,
+  Terminal,
+  ChevronDown,
+  ChevronUp,
+  Loader2,
+} from 'lucide-react';
 
 interface AdminSystemTableProps {
   health: AdminSystemHealth | null;
@@ -51,47 +65,76 @@ export function AdminSystemTable({
       {/* Health metrics */}
       {health && (
         <section className="space-y-4">
-          <h2 className="text-xl font-bold text-foreground">Operational Diagnostics</h2>
+          <div>
+            <h2 className="text-xl font-bold text-foreground flex items-center gap-2">
+              <Activity className="w-5 h-5 text-primary" />
+              Operational Diagnostics & Service State
+            </h2>
+            <p className="text-xs text-muted-foreground mt-0.5">
+              Real-time telemetry from NestJS runtime, PostgreSQL connection pool, and host resources.
+            </p>
+          </div>
+
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
-            <Card className="p-4 space-y-1">
-              <span className="text-xs uppercase font-semibold text-muted-foreground">Platform State</span>
-              <div className="flex items-center gap-2 mt-1">
+            <div className="card-3d p-5 space-y-2 group hover:border-emerald-500/50 transition-all">
+              <div className="flex items-center justify-between">
+                <span className="text-[11px] uppercase font-bold tracking-wider text-muted-foreground">
+                  Platform State
+                </span>
                 <span
                   className={`w-2.5 h-2.5 rounded-full ${
                     health.status === 'HEALTHY' ? 'bg-emerald-500' : 'bg-amber-500'
                   }`}
                 />
-                <span className="text-xl font-black text-foreground">{health.status}</span>
               </div>
-              <p className="text-xs text-muted-foreground">Service cluster state</p>
-            </Card>
+              <div className="text-2xl font-black text-foreground mt-1 flex items-center gap-2">
+                <CheckCircle2 className="w-5 h-5 text-emerald-500" />
+                <span>{health.status}</span>
+              </div>
+              <p className="text-xs text-muted-foreground">Core service cluster healthy</p>
+            </div>
 
-            <Card className="p-4 space-y-1">
-              <span className="text-xs uppercase font-semibold text-muted-foreground">Database Engine</span>
-              <div className="text-xl font-black text-foreground mt-1">
+            <div className="card-3d p-5 space-y-2 group hover:border-blue-500/50 transition-all">
+              <div className="flex items-center justify-between">
+                <span className="text-[11px] uppercase font-bold tracking-wider text-muted-foreground">
+                  Database Engine
+                </span>
+                <Database className="w-4 h-4 text-primary" />
+              </div>
+              <div className="text-2xl font-black text-foreground mt-1">
                 {health.database.latencyMs}ms Latency
               </div>
-              <p className="text-xs text-muted-foreground">Connection pool responsive</p>
-            </Card>
+              <p className="text-xs text-muted-foreground">pgvector pool responsive</p>
+            </div>
 
-            <Card className="p-4 space-y-1">
-              <span className="text-xs uppercase font-semibold text-muted-foreground">Memory Heap</span>
-              <div className="text-xl font-black text-foreground mt-1">
+            <div className="card-3d p-5 space-y-2 group hover:border-indigo-500/50 transition-all">
+              <div className="flex items-center justify-between">
+                <span className="text-[11px] uppercase font-bold tracking-wider text-muted-foreground">
+                  Memory Heap
+                </span>
+                <Cpu className="w-4 h-4 text-indigo-500" />
+              </div>
+              <div className="text-2xl font-black text-foreground mt-1">
                 {health.memory.heapUsedMb} MB
                 <span className="text-xs font-normal text-muted-foreground ml-1">
                   / {health.memory.heapTotalMb} MB
                 </span>
               </div>
-              <p className="text-xs text-muted-foreground">RSS: {health.memory.rssMb} MB</p>
-            </Card>
+              <p className="text-xs text-muted-foreground">RSS Allocation: {health.memory.rssMb} MB</p>
+            </div>
 
-            <Card className="p-4 space-y-1">
-              <span className="text-xs uppercase font-semibold text-muted-foreground">Runtime Uptime</span>
-              <div className="text-xl font-black text-foreground mt-1">
+            <div className="card-3d p-5 space-y-2 group hover:border-amber-500/50 transition-all">
+              <div className="flex items-center justify-between">
+                <span className="text-[11px] uppercase font-bold tracking-wider text-muted-foreground">
+                  Runtime Uptime
+                </span>
+                <Clock className="w-4 h-4 text-amber-500" />
+              </div>
+              <div className="text-2xl font-black text-foreground mt-1">
                 {formatUptime(health.uptimeSeconds)}
               </div>
               <p className="text-xs text-muted-foreground font-mono">{health.nodeVersion}</p>
-            </Card>
+            </div>
           </div>
         </section>
       )}
@@ -100,44 +143,54 @@ export function AdminSystemTable({
       <section className="space-y-4">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div>
-            <h2 className="text-xl font-bold text-foreground">Audit Log Ledger</h2>
-            <p className="text-sm text-muted-foreground">
-              Searchable cryptographic activity log for compliance and security forensics.
+            <h2 className="text-xl font-bold text-foreground flex items-center gap-2">
+              <ShieldCheck className="w-5 h-5 text-primary" />
+              Cryptographic Audit Log Ledger
+            </h2>
+            <p className="text-xs text-muted-foreground mt-0.5">
+              Immutable activity records for compliance, RBAC elevation auditing, and security forensics.
             </p>
           </div>
-          <span className="text-xs text-muted-foreground">
-            Showing {logs.length} of {initialTotal} events
+          <span className="text-xs text-muted-foreground font-medium">
+            Showing <strong className="text-foreground">{logs.length}</strong> of {initialTotal} immutable events
           </span>
         </div>
 
         {/* Filter bar */}
-        <div className="flex flex-wrap items-center gap-3 p-4 rounded-lg bg-card border border-border">
-          <input
-            type="text"
-            placeholder="Filter by Action (e.g. ELEVATION)..."
-            value={actionFilter}
-            onChange={(e) => setActionFilter(e.target.value.toUpperCase())}
-            className="px-3 py-1.5 text-xs rounded-md border border-input bg-background font-mono"
-          />
-          <input
-            type="text"
-            placeholder="Filter by Target (e.g. USER, WORKSPACE)..."
-            value={targetFilter}
-            onChange={(e) => setTargetFilter(e.target.value.toUpperCase())}
-            className="px-3 py-1.5 text-xs rounded-md border border-input bg-background font-mono"
-          />
+        <div className="card-3d p-5 flex flex-wrap items-center gap-3">
+          <div className="relative flex-1 min-w-[200px]">
+            <Terminal className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+            <input
+              type="text"
+              placeholder="Filter by Action (e.g. ELEVATION, ROLE)..."
+              value={actionFilter}
+              onChange={(e) => setActionFilter(e.target.value.toUpperCase())}
+              className="w-full pl-10 pr-3 py-2 text-xs rounded-lg border border-border bg-background text-foreground font-mono shadow-sm"
+            />
+          </div>
+          <div className="relative flex-1 min-w-[200px]">
+            <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+            <input
+              type="text"
+              placeholder="Filter by Target (e.g. USER, WORKSPACE)..."
+              value={targetFilter}
+              onChange={(e) => setTargetFilter(e.target.value.toUpperCase())}
+              className="w-full pl-10 pr-3 py-2 text-xs rounded-lg border border-border bg-background text-foreground font-mono shadow-sm"
+            />
+          </div>
           <Button
             variant="outline"
-            className="text-xs"
+            className="btn-3d-secondary text-xs h-9 px-4 flex items-center gap-1.5"
             onClick={() => fetchLogs(actionFilter, targetFilter)}
             disabled={loading}
           >
-            {loading ? 'Searching...' : 'Apply Filters'}
+            {loading ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Filter className="w-3.5 h-3.5 text-primary" />}
+            <span>Apply Filters</span>
           </Button>
           {(actionFilter || targetFilter) && (
             <Button
               variant="ghost"
-              className="text-xs text-muted-foreground"
+              className="text-xs text-muted-foreground h-9 px-3"
               onClick={() => {
                 setActionFilter('');
                 setTargetFilter('');
@@ -150,18 +203,18 @@ export function AdminSystemTable({
         </div>
 
         {/* Log table */}
-        <Card variant="outline" className="overflow-hidden">
+        <div className="card-3d overflow-hidden">
           {logs.length > 0 ? (
             <div className="overflow-x-auto">
               <table className="w-full text-left text-sm">
-                <thead className="bg-muted/50 border-b border-border text-xs uppercase text-muted-foreground font-semibold">
+                <thead className="bg-muted/50 border-b border-border text-[11px] uppercase text-muted-foreground font-bold tracking-wider">
                   <tr>
-                    <th className="p-3.5">Action</th>
-                    <th className="p-3.5">Target</th>
-                    <th className="p-3.5">Actor</th>
-                    <th className="p-3.5">Workspace</th>
-                    <th className="p-3.5">Timestamp</th>
-                    <th className="p-3.5 text-right">Details</th>
+                    <th className="p-4">Action</th>
+                    <th className="p-4">Target Entity</th>
+                    <th className="p-4">Actor Email</th>
+                    <th className="p-4">Workspace Scope</th>
+                    <th className="p-4">Timestamp</th>
+                    <th className="p-4 text-right">Details</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-border">
@@ -169,8 +222,8 @@ export function AdminSystemTable({
                     const isExpanded = expandedLogId === log.id;
                     return (
                       <React.Fragment key={log.id}>
-                        <tr className="hover:bg-muted/20">
-                          <td className="p-3.5">
+                        <tr className="hover:bg-muted/20 transition-colors">
+                          <td className="p-4">
                             <Badge
                               variant={
                                 log.action.includes('ELEVATION')
@@ -179,44 +232,49 @@ export function AdminSystemTable({
                                     ? 'neutral'
                                     : 'success'
                               }
+                              className="text-xs font-mono"
                             >
                               {log.action}
                             </Badge>
                           </td>
-                          <td className="p-3.5">
-                            <div className="font-mono text-xs text-foreground font-semibold">
+                          <td className="p-4">
+                            <div className="font-mono text-xs text-foreground font-bold">
                               {log.targetType}
                             </div>
                             {log.targetId && (
-                              <div className="font-mono text-[11px] text-muted-foreground truncate max-w-[120px]">
+                              <div className="font-mono text-[11px] text-muted-foreground truncate max-w-[140px] mt-0.5">
                                 {log.targetId}
                               </div>
                             )}
                           </td>
-                          <td className="p-3.5">
+                          <td className="p-4">
                             <div className="text-xs font-semibold text-foreground">{log.actorEmail}</div>
                           </td>
-                          <td className="p-3.5 text-xs text-muted-foreground">
+                          <td className="p-4 text-xs text-muted-foreground">
                             {log.workspace ? log.workspace.name : 'Platform-Wide'}
                           </td>
-                          <td className="p-3.5 text-xs text-muted-foreground whitespace-nowrap">
+                          <td className="p-4 text-xs text-muted-foreground whitespace-nowrap">
                             {new Date(log.createdAt).toLocaleString()}
                           </td>
-                          <td className="p-3.5 text-right">
+                          <td className="p-4 text-right">
                             <button
                               type="button"
                               onClick={() => setExpandedLogId(isExpanded ? null : log.id)}
-                              className="text-xs font-semibold text-primary hover:underline"
+                              className="text-xs font-bold text-primary hover:underline inline-flex items-center gap-1"
                             >
-                              {isExpanded ? 'Hide' : 'Inspect'}
+                              <span>{isExpanded ? 'Hide' : 'Inspect'}</span>
+                              {isExpanded ? <ChevronUp className="w-3.5 h-3.5" /> : <ChevronDown className="w-3.5 h-3.5" />}
                             </button>
                           </td>
                         </tr>
                         {isExpanded && log.details && (
                           <tr className="bg-muted/30">
-                            <td colSpan={6} className="p-4">
-                              <div className="text-xs font-bold text-foreground mb-1">Payload Metadata:</div>
-                              <pre className="p-3 rounded-md bg-background border border-border text-[11px] font-mono text-muted-foreground overflow-x-auto">
+                            <td colSpan={6} className="p-5">
+                              <div className="text-xs font-bold text-foreground mb-2 flex items-center gap-2">
+                                <Terminal className="w-4 h-4 text-primary" />
+                                <span>Audit Event Cryptographic Payload:</span>
+                              </div>
+                              <pre className="p-4 rounded-xl bg-background border border-border text-[11px] font-mono text-foreground/90 overflow-x-auto shadow-inner leading-relaxed">
                                 {JSON.stringify(log.details, null, 2)}
                               </pre>
                             </td>
@@ -229,11 +287,11 @@ export function AdminSystemTable({
               </table>
             </div>
           ) : (
-            <div className="p-10 text-center text-sm text-muted-foreground">
+            <div className="p-12 text-center text-sm text-muted-foreground">
               No audit log entries matching filters.
             </div>
           )}
-        </Card>
+        </div>
       </section>
     </div>
   );

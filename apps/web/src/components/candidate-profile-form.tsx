@@ -2,8 +2,21 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { Button, Input, Textarea, Card, SkillBadge } from '@executive-match/ui';
+import { Button, Input, Textarea, SkillBadge } from '@executive-match/ui';
 import type { CandidateProfileData } from '@/lib/api';
+import {
+  User,
+  Briefcase,
+  GraduationCap,
+  Building2,
+  Calendar,
+  Trash2,
+  CheckCircle2,
+  AlertCircle,
+  Save,
+  X,
+  Layers,
+} from 'lucide-react';
 
 const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000/api/v1';
 
@@ -25,7 +38,7 @@ export function CandidateProfileForm({ initialProfile }: { initialProfile: Candi
   const [openToRemote, setOpenToRemote] = useState(initialProfile.openToRemote);
 
   const [savingProfile, setSavingProfile] = useState(false);
-  const [profileMessage, setProfileMessage] = useState<string | null>(null);
+  const [profileMessage, setProfileMessage] = useState<{ text: string; type: 'success' | 'error' } | null>(null);
 
   // Experience modal/form state
   const [experiences, setExperiences] = useState(initialProfile.experiences || []);
@@ -85,10 +98,10 @@ export function CandidateProfileForm({ initialProfile }: { initialProfile: Candi
         throw new Error('Failed to update profile');
       }
 
-      setProfileMessage('Profile successfully updated.');
+      setProfileMessage({ text: 'Executive profile successfully updated.', type: 'success' });
       router.refresh();
     } catch {
-      setProfileMessage('Error saving profile. Please check all fields.');
+      setProfileMessage({ text: 'Error saving profile. Please check all fields.', type: 'error' });
     } finally {
       setSavingProfile(false);
     }
@@ -237,15 +250,31 @@ export function CandidateProfileForm({ initialProfile }: { initialProfile: Candi
   return (
     <div className="space-y-8 max-w-4xl">
       {/* Basic Profile Form */}
-      <Card variant="outline" className="p-6">
-        <h2 className="text-xl font-semibold mb-1 text-foreground">Personal & Professional Info</h2>
-        <p className="text-sm text-muted-foreground mb-6">
-          This information powers AI match recommendations and recruiter searches.
-        </p>
+      <div className="card-3d p-6 sm:p-7 space-y-6">
+        <div>
+          <h2 className="text-xl font-bold text-foreground flex items-center gap-2">
+            <User className="w-5 h-5 text-primary" />
+            Executive Dossier & Bio
+          </h2>
+          <p className="text-xs text-muted-foreground mt-0.5">
+            This information powers AI semantic matching recommendations and verified recruiter talent search.
+          </p>
+        </div>
 
         {profileMessage && (
-          <div className="mb-6 p-4 rounded-lg bg-primary/10 border border-primary/20 text-sm text-foreground">
-            {profileMessage}
+          <div
+            className={`p-4 rounded-xl text-xs font-semibold flex items-center gap-2 shadow-sm ${
+              profileMessage.type === 'success'
+                ? 'bg-emerald-500/10 border border-emerald-500/30 text-emerald-600 dark:text-emerald-400'
+                : 'bg-red-500/10 border border-red-500/30 text-red-600 dark:text-red-400'
+            }`}
+          >
+            {profileMessage.type === 'success' ? (
+              <CheckCircle2 className="w-4 h-4 text-emerald-500 shrink-0" />
+            ) : (
+              <AlertCircle className="w-4 h-4 text-red-500 shrink-0" />
+            )}
+            <span>{profileMessage.text}</span>
           </div>
         )}
 
@@ -253,16 +282,18 @@ export function CandidateProfileForm({ initialProfile }: { initialProfile: Candi
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <Input
               label="Professional Headline"
-              placeholder="e.g. Senior Full-Stack Engineer"
+              placeholder="e.g. VP of Engineering / Senior Infrastructure Architect"
               value={headline}
               onChange={(e) => setHeadline(e.target.value)}
-              helperText="Brief summary that highlights your key role"
+              helperText="High-impact summary that highlights your specialization"
+              className="h-10 bg-background/80"
             />
             <Input
               label="Location"
               placeholder="e.g. San Francisco, CA or Remote"
               value={location}
               onChange={(e) => setLocation(e.target.value)}
+              className="h-10 bg-background/80"
             />
           </div>
 
@@ -272,9 +303,10 @@ export function CandidateProfileForm({ initialProfile }: { initialProfile: Candi
               type="number"
               min="0"
               max="70"
-              placeholder="e.g. 8"
+              placeholder="e.g. 10"
               value={yearsOfExperience}
               onChange={(e) => setYearsOfExperience(e.target.value)}
+              className="h-10 bg-background/80"
             />
             <Input
               label="Contact Phone (Optional)"
@@ -282,15 +314,17 @@ export function CandidateProfileForm({ initialProfile }: { initialProfile: Candi
               placeholder="+1 (555) 000-0000"
               value={phone}
               onChange={(e) => setPhone(e.target.value)}
+              className="h-10 bg-background/80"
             />
           </div>
 
           <Textarea
-            label="Professional Bio / Summary"
-            placeholder="Tell employers about your leadership style, engineering focus, and key accomplishments..."
+            label="Professional Bio & Leadership Philosophy"
+            placeholder="Tell employers about your architectural expertise, leadership style, and high-impact business outcomes..."
             rows={4}
             value={bio}
             onChange={(e) => setBio(e.target.value)}
+            className="text-xs bg-background/80"
           />
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4 pt-2">
@@ -299,18 +333,21 @@ export function CandidateProfileForm({ initialProfile }: { initialProfile: Candi
               placeholder="https://..."
               value={websiteUrl}
               onChange={(e) => setWebsiteUrl(e.target.value)}
+              className="h-10 bg-background/80"
             />
             <Input
               label="LinkedIn Profile"
               placeholder="https://linkedin.com/in/..."
               value={linkedinUrl}
               onChange={(e) => setLinkedinUrl(e.target.value)}
+              className="h-10 bg-background/80"
             />
             <Input
               label="GitHub Profile"
               placeholder="https://github.com/..."
               value={githubUrl}
               onChange={(e) => setGithubUrl(e.target.value)}
+              className="h-10 bg-background/80"
             />
           </div>
 
@@ -320,78 +357,94 @@ export function CandidateProfileForm({ initialProfile }: { initialProfile: Candi
                 type="checkbox"
                 checked={searchVisible}
                 onChange={(e) => setSearchVisible(e.target.checked)}
-                className="w-4 h-4 rounded border-border text-primary focus:ring-primary"
+                className="w-4 h-4 rounded border-border text-primary focus:ring-primary accent-primary"
               />
-              <span className="text-sm font-medium">Visible in Recruiter Talent Search</span>
+              <span className="text-xs font-semibold text-foreground">Visible in Talent Search</span>
             </label>
             <label className="flex items-center gap-3 cursor-pointer">
               <input
                 type="checkbox"
                 checked={openToRemote}
                 onChange={(e) => setOpenToRemote(e.target.checked)}
-                className="w-4 h-4 rounded border-border text-primary focus:ring-primary"
+                className="w-4 h-4 rounded border-border text-primary focus:ring-primary accent-primary"
               />
-              <span className="text-sm font-medium">Open to Remote Positions</span>
+              <span className="text-xs font-semibold text-foreground">Open to Remote Positions</span>
             </label>
           </div>
 
           <div className="pt-4 flex justify-end">
-            <Button type="submit" variant="primary" loading={savingProfile}>
-              Save Profile Info
+            <Button
+              type="submit"
+              variant="primary"
+              loading={savingProfile}
+              className="btn-3d text-xs h-10 px-5 flex items-center gap-2"
+            >
+              <Save className="w-4 h-4" />
+              <span>Save Profile Changes</span>
             </Button>
           </div>
         </form>
-      </Card>
+      </div>
 
       {/* Skills Section */}
-      <Card variant="outline" className="p-6">
-        <div className="flex justify-between items-center mb-4">
-          <div>
-            <h2 className="text-xl font-semibold text-foreground">Skills & Expertise</h2>
-            <p className="text-sm text-muted-foreground">
-              Add primary skills to improve matching accuracy.
-            </p>
-          </div>
+      <div className="card-3d p-6 sm:p-7 space-y-6">
+        <div>
+          <h2 className="text-xl font-bold text-foreground flex items-center gap-2">
+            <Layers className="w-5 h-5 text-primary" />
+            Skills & Technical Proficiencies
+          </h2>
+          <p className="text-xs text-muted-foreground mt-0.5">
+            Add primary competencies to calibrate hybrid AI matching and deterministic filters.
+          </p>
         </div>
 
-        <form onSubmit={handleAddSkill} className="flex flex-wrap gap-3 items-end mb-6">
-          <div className="flex-1 min-w-[200px]">
+        <form onSubmit={handleAddSkill} className="flex flex-wrap gap-3 items-end">
+          <div className="flex-1 min-w-[200px] space-y-1">
+            <label className="text-xs font-semibold text-foreground">Skill Name</label>
             <Input
-              label="Skill Name"
-              placeholder="e.g. TypeScript, Distributed Systems"
+              placeholder="e.g. Distributed Systems, Kubernetes, Go"
               value={newSkillName}
               onChange={(e) => setNewSkillName(e.target.value)}
+              className="h-10 bg-background/80"
             />
           </div>
-          <div className="w-28">
+          <div className="w-28 space-y-1">
+            <label className="text-xs font-semibold text-foreground">Years Exp</label>
             <Input
-              label="Years Exp"
               type="number"
               min="0"
               max="50"
-              placeholder="Years"
+              placeholder="e.g. 6"
               value={newSkillYears}
               onChange={(e) => setNewSkillYears(e.target.value)}
+              className="h-10 bg-background/80"
             />
           </div>
-          <label className="flex items-center gap-2 pb-2 cursor-pointer text-sm">
+          <label className="flex items-center gap-2 pb-2.5 cursor-pointer text-xs font-semibold">
             <input
               type="checkbox"
               checked={newSkillPrimary}
               onChange={(e) => setNewSkillPrimary(e.target.checked)}
-              className="w-4 h-4 rounded border-border"
+              className="w-4 h-4 rounded border-border accent-primary"
             />
             Primary Skill
           </label>
-          <Button type="submit" variant="secondary" loading={savingSkill}>
+          <Button
+            type="submit"
+            variant="secondary"
+            loading={savingSkill}
+            className="btn-3d-secondary text-xs h-10 px-4"
+          >
             Add Skill
           </Button>
         </form>
 
         {skills.length === 0 ? (
-          <p className="text-sm text-muted-foreground italic">No skills listed yet.</p>
+          <p className="text-xs text-muted-foreground italic p-4 text-center bg-muted/20 rounded-xl border border-border">
+            No verified skills added yet. Add your core competencies above.
+          </p>
         ) : (
-          <div className="flex flex-wrap gap-2">
+          <div className="flex flex-wrap gap-2 pt-1">
             {skills.map((skill) => (
               <div key={skill.id} className="flex items-center gap-1 group">
                 <SkillBadge
@@ -401,25 +454,32 @@ export function CandidateProfileForm({ initialProfile }: { initialProfile: Candi
                 <button
                   type="button"
                   onClick={() => handleDeleteSkill(skill.id)}
-                  className="text-xs text-muted-foreground hover:text-danger px-1 rounded"
+                  className="text-xs text-muted-foreground hover:text-danger px-1 rounded transition-colors"
                   title="Remove skill"
                 >
-                  ×
+                  <X className="w-3.5 h-3.5" />
                 </button>
               </div>
             ))}
           </div>
         )}
-      </Card>
+      </div>
 
       {/* Work Experience Section */}
-      <Card variant="outline" className="p-6">
-        <div className="flex justify-between items-center mb-6">
+      <div className="card-3d p-6 sm:p-7 space-y-6">
+        <div className="flex justify-between items-center">
           <div>
-            <h2 className="text-xl font-semibold text-foreground">Work Experience</h2>
-            <p className="text-sm text-muted-foreground">Detail your career progression.</p>
+            <h2 className="text-xl font-bold text-foreground flex items-center gap-2">
+              <Briefcase className="w-5 h-5 text-primary" />
+              Work History & Leadership
+            </h2>
+            <p className="text-xs text-muted-foreground mt-0.5">Detail your career progression and achievements.</p>
           </div>
-          <Button variant="secondary" onClick={() => setShowExpModal(!showExpModal)}>
+          <Button
+            variant="secondary"
+            onClick={() => setShowExpModal(!showExpModal)}
+            className="btn-3d-secondary text-xs h-9 px-3"
+          >
             {showExpModal ? 'Cancel' : '+ Add Experience'}
           </Button>
         </div>
@@ -427,37 +487,41 @@ export function CandidateProfileForm({ initialProfile }: { initialProfile: Candi
         {showExpModal && (
           <form
             onSubmit={handleAddExperience}
-            className="mb-8 p-4 rounded-xl border border-border bg-card/50 space-y-4"
+            className="p-5 rounded-2xl border border-border bg-muted/30 space-y-4"
           >
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <Input
-                label="Company Name"
-                placeholder="e.g. Acme Corp"
+                label="Company Name *"
+                placeholder="e.g. Stripe, Datadog"
                 required
                 value={expCompany}
                 onChange={(e) => setExpCompany(e.target.value)}
+                className="h-10 bg-background/80"
               />
               <Input
-                label="Role Title"
+                label="Role Title *"
                 placeholder="e.g. Principal Software Engineer"
                 required
                 value={expTitle}
                 onChange={(e) => setExpTitle(e.target.value)}
+                className="h-10 bg-background/80"
               />
             </div>
             <Input
               label="Location (Optional)"
-              placeholder="e.g. New York, NY"
+              placeholder="e.g. New York, NY / Remote"
               value={expLocation}
               onChange={(e) => setExpLocation(e.target.value)}
+              className="h-10 bg-background/80"
             />
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <Input
-                label="Start Date"
+                label="Start Date *"
                 type="date"
                 required
                 value={expStartDate}
                 onChange={(e) => setExpStartDate(e.target.value)}
+                className="h-10 bg-background/80"
               />
               {!expIsCurrent && (
                 <Input
@@ -465,30 +529,32 @@ export function CandidateProfileForm({ initialProfile }: { initialProfile: Candi
                   type="date"
                   value={expEndDate}
                   onChange={(e) => setExpEndDate(e.target.value)}
+                  className="h-10 bg-background/80"
                 />
               )}
             </div>
-            <label className="flex items-center gap-2 cursor-pointer text-sm font-medium">
+            <label className="flex items-center gap-2 cursor-pointer text-xs font-semibold">
               <input
                 type="checkbox"
                 checked={expIsCurrent}
                 onChange={(e) => setExpIsCurrent(e.target.checked)}
-                className="w-4 h-4 rounded border-border"
+                className="w-4 h-4 rounded border-border accent-primary"
               />
               I currently work here
             </label>
             <Textarea
-              label="Key Responsibilities & Achievements"
+              label="Key Responsibilities & Quantified Impact"
               rows={3}
-              placeholder="Highlights, achievements, metrics and technologies used..."
+              placeholder="Highlights, achievements, architectural wins, and team scale..."
               value={expDescription}
               onChange={(e) => setExpDescription(e.target.value)}
+              className="text-xs bg-background/80"
             />
-            <div className="flex justify-end gap-2">
-              <Button type="button" variant="ghost" onClick={() => setShowExpModal(false)}>
+            <div className="flex justify-end gap-2 pt-2 border-t border-border">
+              <Button type="button" variant="ghost" onClick={() => setShowExpModal(false)} className="text-xs">
                 Cancel
               </Button>
-              <Button type="submit" variant="primary" loading={savingExp}>
+              <Button type="submit" variant="primary" loading={savingExp} className="btn-3d text-xs h-9 px-4">
                 Save Experience
               </Button>
             </div>
@@ -496,17 +562,21 @@ export function CandidateProfileForm({ initialProfile }: { initialProfile: Candi
         )}
 
         {experiences.length === 0 ? (
-          <p className="text-sm text-muted-foreground italic">No work experience added yet.</p>
+          <p className="text-xs text-muted-foreground italic p-4 text-center bg-muted/20 rounded-xl border border-border">
+            No work experience added yet. Add your positions above.
+          </p>
         ) : (
           <div className="space-y-4 divide-y divide-border">
             {experiences.map((exp) => (
-              <div key={exp.id} className="pt-4 first:pt-0 flex justify-between items-start">
-                <div>
-                  <h3 className="font-semibold text-foreground text-base">{exp.title}</h3>
-                  <p className="text-sm text-muted-foreground">
+              <div key={exp.id} className="pt-4 first:pt-0 flex justify-between items-start gap-4">
+                <div className="space-y-1">
+                  <h3 className="font-bold text-foreground text-base">{exp.title}</h3>
+                  <p className="text-xs font-semibold text-primary flex items-center gap-1">
+                    <Building2 className="w-3.5 h-3.5" />
                     {exp.companyName} {exp.location ? `• ${exp.location}` : ''}
                   </p>
-                  <p className="text-xs text-muted-foreground mt-1">
+                  <p className="text-xs text-muted-foreground flex items-center gap-1 mt-0.5">
+                    <Calendar className="w-3 h-3 text-muted-foreground" />
                     {new Date(exp.startDate).toLocaleDateString(undefined, {
                       year: 'numeric',
                       month: 'short',
@@ -522,7 +592,7 @@ export function CandidateProfileForm({ initialProfile }: { initialProfile: Candi
                       : 'Present'}
                   </p>
                   {exp.description && (
-                    <p className="text-sm text-foreground/80 mt-2 whitespace-pre-line">
+                    <p className="text-xs text-foreground/80 mt-2 whitespace-pre-line leading-relaxed">
                       {exp.description}
                     </p>
                   )}
@@ -531,24 +601,31 @@ export function CandidateProfileForm({ initialProfile }: { initialProfile: Candi
                   variant="ghost"
                   size="sm"
                   onClick={() => handleDeleteExperience(exp.id)}
-                  className="text-danger hover:text-danger/80"
+                  className="text-danger hover:text-danger/80 h-8 px-2 text-xs"
                 >
-                  Delete
+                  <Trash2 className="w-3.5 h-3.5" />
                 </Button>
               </div>
             ))}
           </div>
         )}
-      </Card>
+      </div>
 
       {/* Education Section */}
-      <Card variant="outline" className="p-6">
-        <div className="flex justify-between items-center mb-6">
+      <div className="card-3d p-6 sm:p-7 space-y-6">
+        <div className="flex justify-between items-center">
           <div>
-            <h2 className="text-xl font-semibold text-foreground">Education</h2>
-            <p className="text-sm text-muted-foreground">Degrees and academic background.</p>
+            <h2 className="text-xl font-bold text-foreground flex items-center gap-2">
+              <GraduationCap className="w-5 h-5 text-primary" />
+              Education & Academic Credentials
+            </h2>
+            <p className="text-xs text-muted-foreground mt-0.5">Degrees, academic honors, and higher education.</p>
           </div>
-          <Button variant="secondary" onClick={() => setShowEduModal(!showEduModal)}>
+          <Button
+            variant="secondary"
+            onClick={() => setShowEduModal(!showEduModal)}
+            className="btn-3d-secondary text-xs h-9 px-3"
+          >
             {showEduModal ? 'Cancel' : '+ Add Education'}
           </Button>
         </div>
@@ -556,57 +633,63 @@ export function CandidateProfileForm({ initialProfile }: { initialProfile: Candi
         {showEduModal && (
           <form
             onSubmit={handleAddEducation}
-            className="mb-8 p-4 rounded-xl border border-border bg-card/50 space-y-4"
+            className="p-5 rounded-2xl border border-border bg-muted/30 space-y-4"
           >
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <Input
-                label="Institution"
-                placeholder="e.g. Stanford University"
+                label="Institution *"
+                placeholder="e.g. Stanford University, MIT"
                 required
                 value={eduInstitution}
                 onChange={(e) => setEduInstitution(e.target.value)}
+                className="h-10 bg-background/80"
               />
               <Input
-                label="Degree"
-                placeholder="e.g. B.S."
+                label="Degree *"
+                placeholder="e.g. B.S., M.S., Ph.D."
                 required
                 value={eduDegree}
                 onChange={(e) => setEduDegree(e.target.value)}
+                className="h-10 bg-background/80"
               />
             </div>
             <Input
               label="Field of Study"
-              placeholder="e.g. Computer Science"
+              placeholder="e.g. Computer Science, Electrical Engineering"
               value={eduField}
               onChange={(e) => setEduField(e.target.value)}
+              className="h-10 bg-background/80"
             />
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <Input
-                label="Start Date"
+                label="Start Date *"
                 type="date"
                 required
                 value={eduStartDate}
                 onChange={(e) => setEduStartDate(e.target.value)}
+                className="h-10 bg-background/80"
               />
               <Input
                 label="End Date"
                 type="date"
                 value={eduEndDate}
                 onChange={(e) => setEduEndDate(e.target.value)}
+                className="h-10 bg-background/80"
               />
             </div>
             <Textarea
               label="Description (Optional)"
               rows={2}
-              placeholder="Honors, activities, thesis..."
+              placeholder="Honors, publications, coursework..."
               value={eduDescription}
               onChange={(e) => setEduDescription(e.target.value)}
+              className="text-xs bg-background/80"
             />
-            <div className="flex justify-end gap-2">
-              <Button type="button" variant="ghost" onClick={() => setShowEduModal(false)}>
+            <div className="flex justify-end gap-2 pt-2 border-t border-border">
+              <Button type="button" variant="ghost" onClick={() => setShowEduModal(false)} className="text-xs">
                 Cancel
               </Button>
-              <Button type="submit" variant="primary" loading={savingEdu}>
+              <Button type="submit" variant="primary" loading={savingEdu} className="btn-3d text-xs h-9 px-4">
                 Save Education
               </Button>
             </div>
@@ -614,37 +697,40 @@ export function CandidateProfileForm({ initialProfile }: { initialProfile: Candi
         )}
 
         {educations.length === 0 ? (
-          <p className="text-sm text-muted-foreground italic">No education records added yet.</p>
+          <p className="text-xs text-muted-foreground italic p-4 text-center bg-muted/20 rounded-xl border border-border">
+            No education records added yet. Add your academic history above.
+          </p>
         ) : (
           <div className="space-y-4 divide-y divide-border">
             {educations.map((edu) => (
-              <div key={edu.id} className="pt-4 first:pt-0 flex justify-between items-start">
-                <div>
-                  <h3 className="font-semibold text-foreground text-base">
+              <div key={edu.id} className="pt-4 first:pt-0 flex justify-between items-start gap-4">
+                <div className="space-y-1">
+                  <h3 className="font-bold text-foreground text-base">
                     {edu.degree} {edu.fieldOfStudy ? `in ${edu.fieldOfStudy}` : ''}
                   </h3>
-                  <p className="text-sm text-muted-foreground">{edu.institution}</p>
-                  <p className="text-xs text-muted-foreground mt-1">
+                  <p className="text-xs font-semibold text-primary">{edu.institution}</p>
+                  <p className="text-xs text-muted-foreground flex items-center gap-1 mt-0.5">
+                    <Calendar className="w-3 h-3 text-muted-foreground" />
                     {new Date(edu.startDate).getFullYear()} –{' '}
                     {edu.endDate ? new Date(edu.endDate).getFullYear() : 'Present'}
                   </p>
                   {edu.description && (
-                    <p className="text-sm text-foreground/80 mt-2">{edu.description}</p>
+                    <p className="text-xs text-foreground/80 mt-2 leading-relaxed">{edu.description}</p>
                   )}
                 </div>
                 <Button
                   variant="ghost"
                   size="sm"
                   onClick={() => handleDeleteEducation(edu.id)}
-                  className="text-danger hover:text-danger/80"
+                  className="text-danger hover:text-danger/80 h-8 px-2 text-xs"
                 >
-                  Delete
+                  <Trash2 className="w-3.5 h-3.5" />
                 </Button>
               </div>
             ))}
           </div>
         )}
-      </Card>
+      </div>
     </div>
   );
 }

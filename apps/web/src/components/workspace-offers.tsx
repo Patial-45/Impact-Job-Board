@@ -1,8 +1,26 @@
 'use client';
 
 import { useState } from 'react';
-import { Card, Button, Badge, Input } from '@executive-match/ui';
+import { Button, Badge, Input } from '@executive-match/ui';
 import type { OfferItem } from '@/lib/api';
+import {
+  FileSignature,
+  DollarSign,
+  CheckCircle2,
+  Clock,
+  AlertCircle,
+  XCircle,
+  Plus,
+  Send,
+  ShieldCheck,
+  FileText,
+  Sparkles,
+  X,
+  Loader2,
+  Calendar,
+  ListTodo,
+  CheckSquare,
+} from 'lucide-react';
 
 const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000/api/v1';
 
@@ -288,31 +306,38 @@ export function WorkspaceOffers({
       {/* Feedback Banner */}
       {feedbackMsg && (
         <div
-          className={`p-3 rounded-lg text-xs flex items-center justify-between ${
+          className={`p-4 rounded-xl text-xs font-semibold flex items-center justify-between shadow-sm ${
             feedbackMsg.type === 'success'
-              ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/30'
-              : 'bg-red-500/10 text-red-400 border border-red-500/30'
+              ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/30'
+              : 'bg-red-500/10 text-red-600 dark:text-red-400 border border-red-500/30'
           }`}
         >
-          <span>{feedbackMsg.text}</span>
+          <div className="flex items-center gap-2">
+            {feedbackMsg.type === 'success' ? (
+              <CheckCircle2 className="w-4 h-4 text-emerald-500 shrink-0" />
+            ) : (
+              <AlertCircle className="w-4 h-4 text-red-500 shrink-0" />
+            )}
+            <span>{feedbackMsg.text}</span>
+          </div>
           <button
             onClick={() => setFeedbackMsg(null)}
-            className="text-xs opacity-70 hover:opacity-100"
+            className="text-muted-foreground hover:text-foreground p-1"
           >
-            ✕
+            <X className="w-4 h-4" />
           </button>
         </div>
       )}
 
       {/* Action Bar */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-5 rounded-2xl bg-card border border-border">
         {/* Status Filter Tabs */}
-        <div className="flex flex-wrap items-center gap-1.5 p-1 rounded-lg bg-muted/40 border border-border">
+        <div className="flex flex-wrap items-center gap-1.5 p-1 rounded-xl bg-muted/40 border border-border shadow-sm">
           {['ALL', 'DRAFT', 'SENT', 'ACCEPTED', 'DECLINED', 'RESCINDED'].map((tab) => (
             <button
               key={tab}
               onClick={() => setActiveTab(tab)}
-              className={`px-3 py-1.5 rounded-md text-xs font-medium transition-colors ${
+              className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${
                 activeTab === tab
                   ? 'bg-primary text-primary-foreground shadow-sm'
                   : 'text-muted-foreground hover:text-foreground hover:bg-muted/60'
@@ -325,27 +350,38 @@ export function WorkspaceOffers({
           ))}
         </div>
 
-        <Button variant="primary" onClick={() => setIsCreateOpen(true)} className="text-xs">
-          + Draft Job Offer
+        <Button
+          variant="primary"
+          onClick={() => setIsCreateOpen(true)}
+          className="btn-3d h-10 px-4 text-xs flex items-center gap-2 shrink-0"
+        >
+          <Plus className="w-4 h-4" />
+          <span>Draft Job Offer</span>
         </Button>
       </div>
 
       {/* Offers List */}
       {filteredOffers.length === 0 ? (
-        <Card className="p-12 text-center border-dashed space-y-3">
-          <div className="text-3xl">📜</div>
-          <h3 className="text-base font-bold text-foreground">No job offers found</h3>
+        <div className="card-3d p-12 text-center space-y-4">
+          <div className="w-14 h-14 rounded-2xl bg-muted/60 border border-border flex items-center justify-center mx-auto text-primary">
+            <FileSignature className="w-7 h-7" />
+          </div>
+          <h3 className="text-base font-bold text-foreground text-lg">No job offers found</h3>
           <p className="text-xs text-muted-foreground max-w-md mx-auto">
             {activeTab === 'ALL'
               ? 'No offers have been generated yet. Select a qualified candidate from your ATS pipeline to draft an official offer.'
               : `No offers currently in ${activeTab} status.`}
           </p>
           <div className="pt-2">
-            <Button variant="primary" onClick={() => setIsCreateOpen(true)} className="text-xs">
+            <Button
+              variant="primary"
+              onClick={() => setIsCreateOpen(true)}
+              className="btn-3d text-xs h-10 px-5"
+            >
               Create First Offer
             </Button>
           </div>
-        </Card>
+        </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {filteredOffers.map((item) => {
@@ -359,16 +395,17 @@ export function WorkspaceOffers({
             const isDraft = item.status === 'DRAFT' || item.status === 'PENDING_APPROVAL';
 
             return (
-              <Card
+              <div
                 key={item.id}
-                variant="outline"
-                className="p-5 flex flex-col justify-between space-y-4 hover:border-primary/40 transition-colors"
+                className="card-3d p-6 flex flex-col justify-between space-y-4 group hover:border-primary/50 transition-all"
               >
                 <div className="space-y-3">
                   <div className="flex items-start justify-between gap-3">
                     <div>
-                      <h3 className="text-base font-bold text-foreground">{item.jobTitle}</h3>
-                      <p className="text-xs text-muted-foreground">
+                      <h3 className="text-base font-bold text-foreground group-hover:text-primary transition-colors">
+                        {item.jobTitle}
+                      </h3>
+                      <p className="text-xs text-muted-foreground mt-0.5">
                         Candidate: <strong className="text-foreground">{candidateName}</strong>
                       </p>
                     </div>
@@ -382,17 +419,22 @@ export function WorkspaceOffers({
                               ? 'neutral'
                               : 'neutral'
                       }
+                      className="text-xs"
                     >
+                      {isAccepted && <CheckCircle2 className="w-3 h-3 mr-1 text-emerald-500 inline" />}
+                      {isSent && <Clock className="w-3 h-3 mr-1 text-primary inline" />}
+                      {item.status === 'RESCINDED' && <XCircle className="w-3 h-3 mr-1 text-muted-foreground inline" />}
                       {item.status}
                     </Badge>
                   </div>
 
-                  <div className="grid grid-cols-2 gap-2 p-2.5 rounded-md bg-muted/30 border border-border text-xs">
+                  <div className="grid grid-cols-2 gap-2.5 p-3 rounded-xl bg-muted/40 border border-border text-xs">
                     <div>
                       <span className="text-muted-foreground block text-[10px] uppercase tracking-wider font-semibold">
                         Base Salary
                       </span>
-                      <span className="font-bold text-foreground">
+                      <span className="font-bold text-foreground flex items-center gap-0.5 mt-0.5">
+                        <DollarSign className="w-3.5 h-3.5 text-emerald-500" />
                         {item.currency} ${item.baseSalary.toLocaleString()}
                       </span>
                     </div>
@@ -401,7 +443,7 @@ export function WorkspaceOffers({
                         <span className="text-muted-foreground block text-[10px] uppercase tracking-wider font-semibold">
                           Bonus
                         </span>
-                        <span className="text-foreground">{item.bonus}</span>
+                        <span className="text-foreground font-medium mt-0.5 block">{item.bonus}</span>
                       </div>
                     )}
                     {item.equity && (
@@ -409,22 +451,26 @@ export function WorkspaceOffers({
                         <span className="text-muted-foreground block text-[10px] uppercase tracking-wider font-semibold">
                           Equity
                         </span>
-                        <span className="text-foreground">{item.equity}</span>
+                        <span className="text-foreground font-medium mt-0.5 block">{item.equity}</span>
                       </div>
                     )}
                     <div>
                       <span className="text-muted-foreground block text-[10px] uppercase tracking-wider font-semibold">
                         Target Start
                       </span>
-                      <span className="text-foreground">
+                      <span className="text-foreground font-medium mt-0.5 flex items-center gap-1">
+                        <Calendar className="w-3 h-3 text-muted-foreground" />
                         {new Date(item.startDate).toLocaleDateString()}
                       </span>
                     </div>
                   </div>
 
                   {item.signature && (
-                    <div className="p-2 rounded bg-emerald-500/10 border border-emerald-500/20 text-xs text-emerald-400 flex items-center justify-between">
-                      <span>✍️ Signed by: {item.signature.signerName}</span>
+                    <div className="p-3 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-xs text-emerald-600 dark:text-emerald-400 flex items-center justify-between">
+                      <span className="flex items-center gap-1.5 font-semibold">
+                        <CheckCircle2 className="w-3.5 h-3.5 text-emerald-500" />
+                        Signed by: {item.signature.signerName}
+                      </span>
                       <span className="text-[10px] opacity-80">
                         {new Date(item.signature.signedAt).toLocaleDateString()}
                       </span>
@@ -432,19 +478,21 @@ export function WorkspaceOffers({
                   )}
 
                   {item._count && item._count.onboardingTasks > 0 && (
-                    <div className="text-[11px] text-muted-foreground">
-                      📋 {item._count.onboardingTasks} Onboarding Tasks configured
+                    <div className="text-[11px] text-muted-foreground flex items-center gap-1.5">
+                      <ListTodo className="w-3.5 h-3.5 text-primary" />
+                      <span>{item._count.onboardingTasks} Onboarding Tasks configured</span>
                     </div>
                   )}
                 </div>
 
-                <div className="pt-2 flex flex-wrap items-center gap-2 border-t border-border">
+                <div className="pt-3 flex flex-wrap items-center gap-2 border-t border-border">
                   <Button
                     variant="outline"
-                    className="text-xs"
+                    className="btn-3d-secondary text-xs h-9 px-3 flex items-center gap-1.5"
                     onClick={() => setActiveOffer(item)}
                   >
-                    View Details
+                    <FileText className="w-3.5 h-3.5 text-primary" />
+                    <span>View Details</span>
                   </Button>
 
                   {isDraft && (
@@ -452,7 +500,7 @@ export function WorkspaceOffers({
                       {!item.approvedAt && (
                         <Button
                           variant="outline"
-                          className="text-xs"
+                          className="btn-3d-secondary text-xs h-9 px-3"
                           onClick={() => handleApprove(item.id)}
                         >
                           Approve
@@ -460,25 +508,26 @@ export function WorkspaceOffers({
                       )}
                       <Button
                         variant="primary"
-                        className="text-xs"
+                        className="btn-3d text-xs h-9 px-3 flex items-center gap-1.5"
                         onClick={() => handleSend(item.id)}
                       >
-                        Send Offer →
+                        <Send className="w-3.5 h-3.5" />
+                        <span>Send Offer</span>
                       </Button>
                     </>
                   )}
 
                   {(isDraft || isSent) && (
                     <Button
-                      variant="outline"
-                      className="text-xs text-red-400 hover:text-red-300 ml-auto"
+                      variant="ghost"
+                      className="text-xs text-red-500 hover:text-red-400 ml-auto h-9 px-2"
                       onClick={() => setRescindingOffer(item)}
                     >
                       Rescind
                     </Button>
                   )}
                 </div>
-              </Card>
+              </div>
             );
           })}
         </div>
@@ -486,20 +535,23 @@ export function WorkspaceOffers({
 
       {/* CREATE OFFER MODAL */}
       {isCreateOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-200">
-          <Card className="w-full max-w-xl max-h-[90vh] overflow-y-auto p-6 space-y-5 bg-background border-border shadow-2xl">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-md overflow-y-auto">
+          <div className="card-3d w-full max-w-xl max-h-[90vh] overflow-y-auto p-6 sm:p-7 space-y-5 bg-card border-border shadow-2xl relative">
             <div className="flex items-center justify-between pb-3 border-b border-border">
               <div>
-                <h2 className="text-lg font-bold text-foreground">Draft Official Job Offer</h2>
-                <p className="text-xs text-muted-foreground">
+                <h2 className="text-lg font-bold text-foreground flex items-center gap-2">
+                  <Sparkles className="w-5 h-5 text-emerald-400" />
+                  Draft Official Job Offer
+                </h2>
+                <p className="text-xs text-muted-foreground mt-0.5">
                   Specify compensation terms, start date, and legal agreement.
                 </p>
               </div>
               <button
                 onClick={() => setIsCreateOpen(false)}
-                className="text-muted-foreground hover:text-foreground text-sm font-bold"
+                className="text-muted-foreground hover:text-foreground p-1 rounded-lg hover:bg-muted"
               >
-                ✕
+                <X className="w-5 h-5" />
               </button>
             </div>
 
@@ -511,8 +563,9 @@ export function WorkspaceOffers({
                 <Input
                   value={applicationId}
                   onChange={(e) => setApplicationId(e.target.value)}
-                  placeholder="UUID of candidate application"
+                  placeholder="UUID of candidate application from ATS"
                   required
+                  className="h-10 bg-background/80"
                 />
               </div>
 
@@ -525,6 +578,7 @@ export function WorkspaceOffers({
                   onChange={(e) => setJobTitle(e.target.value)}
                   placeholder="e.g. Principal Staff Software Engineer"
                   required
+                  className="h-10 bg-background/80"
                 />
               </div>
 
@@ -539,6 +593,7 @@ export function WorkspaceOffers({
                     onChange={(e) => setBaseSalary(Number(e.target.value))}
                     min={1}
                     required
+                    className="h-10 bg-background/80"
                   />
                 </div>
                 <div className="space-y-1.5">
@@ -549,6 +604,7 @@ export function WorkspaceOffers({
                     value={currency}
                     onChange={(e) => setCurrency(e.target.value.toUpperCase())}
                     maxLength={3}
+                    className="h-10 bg-background/80"
                   />
                 </div>
               </div>
@@ -562,6 +618,7 @@ export function WorkspaceOffers({
                     value={bonus}
                     onChange={(e) => setBonus(e.target.value)}
                     placeholder="e.g. 20% annual performance bonus"
+                    className="h-10 bg-background/80"
                   />
                 </div>
                 <div className="space-y-1.5">
@@ -572,6 +629,7 @@ export function WorkspaceOffers({
                     value={equity}
                     onChange={(e) => setEquity(e.target.value)}
                     placeholder="e.g. 0.5% ISO options (4y vest)"
+                    className="h-10 bg-background/80"
                   />
                 </div>
               </div>
@@ -586,6 +644,7 @@ export function WorkspaceOffers({
                     value={signOnBonus}
                     onChange={(e) => setSignOnBonus(e.target.value)}
                     placeholder="e.g. 25000"
+                    className="h-10 bg-background/80"
                   />
                 </div>
                 <div className="space-y-1.5">
@@ -597,6 +656,7 @@ export function WorkspaceOffers({
                     onChange={(e) => setWorkLocation(e.target.value)}
                     placeholder="e.g. Hybrid - New York, NY"
                     required
+                    className="h-10 bg-background/80"
                   />
                 </div>
               </div>
@@ -611,6 +671,7 @@ export function WorkspaceOffers({
                     value={startDate}
                     onChange={(e) => setStartDate(e.target.value)}
                     required
+                    className="h-10 bg-background/80"
                   />
                 </div>
                 <div className="space-y-1.5">
@@ -622,6 +683,7 @@ export function WorkspaceOffers({
                     value={expiresAt}
                     onChange={(e) => setExpiresAt(e.target.value)}
                     required
+                    className="h-10 bg-background/80"
                   />
                 </div>
               </div>
@@ -635,7 +697,7 @@ export function WorkspaceOffers({
                   onChange={(e) => setOfferLetter(e.target.value)}
                   placeholder="Official congratulatory note and terms summary..."
                   rows={4}
-                  className="w-full p-2.5 rounded-md border border-input bg-background text-xs text-foreground resize-y"
+                  className="w-full p-2.5 rounded-lg border border-border bg-background/80 text-xs text-foreground resize-y"
                 />
               </div>
 
@@ -647,6 +709,7 @@ export function WorkspaceOffers({
                   value={notes}
                   onChange={(e) => setNotes(e.target.value)}
                   placeholder="Confidential approval notes or compensation rationale"
+                  className="h-10 bg-background/80"
                 />
               </div>
 
@@ -658,58 +721,64 @@ export function WorkspaceOffers({
                 >
                   Cancel
                 </Button>
-                <Button type="submit" variant="primary" disabled={creating}>
-                  {creating ? 'Drafting...' : 'Save Draft Offer'}
+                <Button
+                  type="submit"
+                  variant="primary"
+                  disabled={creating}
+                  className="btn-3d text-xs h-9 px-4 flex items-center gap-1.5"
+                >
+                  {creating ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <FileSignature className="w-3.5 h-3.5" />}
+                  <span>{creating ? 'Drafting...' : 'Save Draft Offer'}</span>
                 </Button>
               </div>
             </form>
-          </Card>
+          </div>
         </div>
       )}
 
       {/* OFFER DETAILS & ONBOARDING MODAL */}
       {activeOffer && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-200">
-          <Card className="w-full max-w-2xl max-h-[90vh] overflow-y-auto p-6 space-y-6 bg-background border-border shadow-2xl">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-md overflow-y-auto">
+          <div className="card-3d w-full max-w-2xl max-h-[90vh] overflow-y-auto p-6 sm:p-7 space-y-6 bg-card border-border shadow-2xl relative">
             <div className="flex items-start justify-between pb-3 border-b border-border">
               <div>
                 <div className="flex items-center gap-2">
                   <h2 className="text-lg font-bold text-foreground">{activeOffer.jobTitle}</h2>
-                  <Badge variant={activeOffer.status === 'ACCEPTED' ? 'success' : 'neutral'}>
+                  <Badge variant={activeOffer.status === 'ACCEPTED' ? 'success' : 'neutral'} className="text-xs">
                     {activeOffer.status}
                   </Badge>
                 </div>
-                <p className="text-xs text-muted-foreground">
-                  Offer ID: <span className="font-mono">{activeOffer.id}</span>
+                <p className="text-xs text-muted-foreground mt-0.5">
+                  Offer ID: <span className="font-mono text-[11px]">{activeOffer.id}</span>
                 </p>
               </div>
               <button
                 onClick={() => setActiveOffer(null)}
-                className="text-muted-foreground hover:text-foreground text-sm font-bold"
+                className="text-muted-foreground hover:text-foreground p-1 rounded-lg hover:bg-muted"
               >
-                ✕
+                <X className="w-5 h-5" />
               </button>
             </div>
 
             {/* Compensation breakdown */}
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 p-3.5 rounded-lg bg-muted/40 border border-border text-xs">
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 p-4 rounded-xl bg-muted/40 border border-border text-xs">
               <div>
                 <span className="text-muted-foreground block text-[10px] uppercase font-bold">Base</span>
-                <span className="text-sm font-bold text-foreground">
+                <span className="text-sm font-bold text-foreground mt-0.5 block">
                   ${activeOffer.baseSalary.toLocaleString()}
                 </span>
               </div>
               <div>
                 <span className="text-muted-foreground block text-[10px] uppercase font-bold">Bonus</span>
-                <span className="font-medium text-foreground">{activeOffer.bonus || '—'}</span>
+                <span className="font-medium text-foreground mt-0.5 block">{activeOffer.bonus || '—'}</span>
               </div>
               <div>
                 <span className="text-muted-foreground block text-[10px] uppercase font-bold">Equity</span>
-                <span className="font-medium text-foreground">{activeOffer.equity || '—'}</span>
+                <span className="font-medium text-foreground mt-0.5 block">{activeOffer.equity || '—'}</span>
               </div>
               <div>
                 <span className="text-muted-foreground block text-[10px] uppercase font-bold">Start Date</span>
-                <span className="font-medium text-foreground">
+                <span className="font-medium text-foreground mt-0.5 block">
                   {new Date(activeOffer.startDate).toLocaleDateString()}
                 </span>
               </div>
@@ -717,9 +786,12 @@ export function WorkspaceOffers({
 
             {/* Signature Certificate if Accepted */}
             {activeOffer.signature && (
-              <div className="p-4 rounded-lg bg-emerald-500/10 border border-emerald-500/30 space-y-2 text-xs">
+              <div className="p-4 rounded-xl bg-emerald-500/10 border border-emerald-500/30 space-y-2 text-xs">
                 <div className="flex items-center justify-between">
-                  <span className="font-bold text-emerald-400">✅ Legally Signed E-Signature</span>
+                  <span className="font-bold text-emerald-600 dark:text-emerald-400 flex items-center gap-1.5">
+                    <ShieldCheck className="w-4 h-4 text-emerald-500" />
+                    Legally Executed E-Signature (ESIGN Compliant)
+                  </span>
                   <span className="text-[10px] text-muted-foreground font-mono">
                     {new Date(activeOffer.signature.signedAt).toLocaleString()}
                   </span>
@@ -727,8 +799,8 @@ export function WorkspaceOffers({
                 <div className="text-muted-foreground">
                   Signer: <strong className="text-foreground">{activeOffer.signature.signerName}</strong> ({activeOffer.signature.signerEmail})
                 </div>
-                <div className="font-serif italic text-base text-foreground pl-2 border-l-2 border-emerald-500">
-                  {activeOffer.signature.signatureText}
+                <div className="font-serif italic text-base text-foreground pl-3 border-l-2 border-emerald-500 py-0.5">
+                  &ldquo;{activeOffer.signature.signatureText}&rdquo;
                 </div>
               </div>
             )}
@@ -737,14 +809,17 @@ export function WorkspaceOffers({
             <div className="space-y-3 pt-2">
               <div className="flex items-center justify-between">
                 <div>
-                  <h3 className="text-sm font-bold text-foreground">Onboarding Checklist</h3>
+                  <h3 className="text-sm font-bold text-foreground flex items-center gap-1.5">
+                    <CheckSquare className="w-4 h-4 text-primary" />
+                    Onboarding Checklist
+                  </h3>
                   <p className="text-[11px] text-muted-foreground">
                     Required verification and preparation tasks for this candidate.
                   </p>
                 </div>
                 <Button
                   variant="outline"
-                  className="text-xs"
+                  className="btn-3d-secondary text-xs h-8 px-2.5"
                   onClick={() => setIsAddTaskOpen(!isAddTaskOpen)}
                 >
                   {isAddTaskOpen ? 'Cancel' : '+ Add Task'}
@@ -755,7 +830,7 @@ export function WorkspaceOffers({
               {isAddTaskOpen && (
                 <form
                   onSubmit={handleAddTask}
-                  className="p-3.5 rounded-lg bg-muted/30 border border-border space-y-3 text-xs"
+                  className="p-4 rounded-xl bg-muted/40 border border-border space-y-3 text-xs"
                 >
                   <div className="space-y-1">
                     <label className="font-semibold text-foreground">Task Title *</label>
@@ -764,6 +839,7 @@ export function WorkspaceOffers({
                       onChange={(e) => setTaskTitle(e.target.value)}
                       placeholder="e.g. Verify legal identity & right to work"
                       required
+                      className="h-9 bg-background/80"
                     />
                   </div>
                   <div className="grid grid-cols-2 gap-2">
@@ -772,7 +848,7 @@ export function WorkspaceOffers({
                       <select
                         value={taskCategory}
                         onChange={(e) => setTaskCategory(e.target.value)}
-                        className="w-full h-9 px-2 rounded-md border border-input bg-background text-xs text-foreground"
+                        className="w-full h-9 px-2 rounded-lg border border-border bg-background text-xs text-foreground"
                       >
                         <option value="GENERAL">General</option>
                         <option value="COMPLIANCE">Compliance</option>
@@ -786,10 +862,16 @@ export function WorkspaceOffers({
                         type="date"
                         value={taskDueDate}
                         onChange={(e) => setTaskDueDate(e.target.value)}
+                        className="h-9 bg-background/80"
                       />
                     </div>
                   </div>
-                  <Button type="submit" variant="primary" disabled={addingTask} className="w-full text-xs">
+                  <Button
+                    type="submit"
+                    variant="primary"
+                    disabled={addingTask}
+                    className="btn-3d w-full text-xs h-9"
+                  >
                     {addingTask ? 'Adding...' : 'Save Task to Checklist'}
                   </Button>
                 </form>
@@ -797,7 +879,7 @@ export function WorkspaceOffers({
 
               {/* Task list */}
               {(!activeOffer.onboardingTasks || activeOffer.onboardingTasks.length === 0) ? (
-                <p className="text-xs text-muted-foreground italic p-3 text-center bg-muted/20 rounded border border-border">
+                <p className="text-xs text-muted-foreground italic p-4 text-center bg-muted/20 rounded-xl border border-border">
                   No onboarding tasks added yet. When candidate accepts the offer, standard tasks are auto-seeded.
                 </p>
               ) : (
@@ -805,14 +887,14 @@ export function WorkspaceOffers({
                   {activeOffer.onboardingTasks.map((task) => (
                     <div
                       key={task.id}
-                      className="p-3 rounded-lg border border-border bg-card flex items-center justify-between gap-3 text-xs hover:border-primary/30 transition-colors"
+                      className="p-3.5 rounded-xl border border-border bg-card flex items-center justify-between gap-3 text-xs hover:border-primary/40 transition-colors"
                     >
                       <div className="flex items-center gap-3">
                         <input
                           type="checkbox"
                           checked={task.status === 'COMPLETED'}
                           onChange={() => handleToggleTaskStatus(task.id, task.status)}
-                          className="h-4 w-4 rounded border-input text-primary"
+                          className="h-4 w-4 rounded border-border text-primary accent-primary"
                         />
                         <div>
                           <span
@@ -822,12 +904,12 @@ export function WorkspaceOffers({
                           >
                             {task.title}
                           </span>
-                          <span className="text-[10px] text-muted-foreground block">
+                          <span className="text-[10px] text-muted-foreground block mt-0.5">
                             {task.category} {task.dueDate ? `• Due ${new Date(task.dueDate).toLocaleDateString()}` : ''}
                           </span>
                         </div>
                       </div>
-                      <Badge variant={task.status === 'COMPLETED' ? 'success' : 'neutral'}>
+                      <Badge variant={task.status === 'COMPLETED' ? 'success' : 'neutral'} className="text-[10px]">
                         {task.status}
                       </Badge>
                     </div>
@@ -837,18 +919,22 @@ export function WorkspaceOffers({
             </div>
 
             <div className="flex items-center justify-end gap-3 pt-3 border-t border-border">
-              <Button variant="outline" onClick={() => setActiveOffer(null)}>
+              <Button
+                variant="outline"
+                onClick={() => setActiveOffer(null)}
+                className="btn-3d-secondary text-xs h-9 px-4"
+              >
                 Close
               </Button>
             </div>
-          </Card>
+          </div>
         </div>
       )}
 
       {/* RESCIND MODAL */}
       {rescindingOffer && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-200">
-          <Card className="w-full max-w-md p-6 space-y-4 bg-background border-border shadow-2xl">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-md">
+          <div className="card-3d w-full max-w-md p-6 space-y-4 bg-card border-border shadow-2xl relative">
             <h3 className="text-base font-bold text-foreground">Rescind Job Offer</h3>
             <p className="text-xs text-muted-foreground">
               Are you sure you want to rescind the offer for{' '}
@@ -863,7 +949,7 @@ export function WorkspaceOffers({
                 placeholder="Reason for rescinding (e.g. Requisition cancelled, business restructuring)..."
                 required
                 rows={3}
-                className="w-full p-2.5 rounded-md border border-input bg-background text-xs text-foreground resize-none"
+                className="w-full p-2.5 rounded-lg border border-border bg-background text-xs text-foreground resize-none"
               />
 
               <div className="flex items-center justify-end gap-2 pt-2">
@@ -871,20 +957,21 @@ export function WorkspaceOffers({
                   type="button"
                   variant="outline"
                   onClick={() => setRescindingOffer(null)}
+                  className="text-xs"
                 >
                   Cancel
                 </Button>
                 <Button
                   type="submit"
                   variant="primary"
-                  className="bg-red-600 hover:bg-red-700 text-white"
+                  className="bg-red-600 hover:bg-red-700 text-white text-xs h-9 px-4"
                   disabled={isRescinding}
                 >
                   {isRescinding ? 'Rescinding...' : 'Confirm Rescind'}
                 </Button>
               </div>
             </form>
-          </Card>
+          </div>
         </div>
       )}
     </div>

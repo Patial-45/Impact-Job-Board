@@ -1,8 +1,18 @@
 'use client';
 
 import React, { useState } from 'react';
-import { Card, Badge, Button } from '@executive-match/ui';
+import { Badge, Button } from '@executive-match/ui';
 import type { AdminUserItem } from '@/lib/api';
+import {
+  Search,
+  Filter,
+  Shield,
+  ShieldAlert,
+  ShieldCheck,
+  CheckCircle2,
+  AlertCircle,
+  Loader2,
+} from 'lucide-react';
 
 interface AdminUsersTableProps {
   initialUsers: AdminUserItem[];
@@ -70,85 +80,99 @@ export function AdminUsersTable({ initialUsers, initialTotal }: AdminUsersTableP
     <div className="space-y-6">
       {message && (
         <div
-          className={`p-3 text-xs rounded-md ${
+          className={`p-4 rounded-xl text-xs font-semibold flex items-center gap-2 shadow-sm ${
             message.type === 'success'
-              ? 'bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800'
-              : 'bg-red-50 dark:bg-red-950/40 text-red-700 dark:text-red-300 border border-red-200 dark:border-red-800'
+              ? 'bg-emerald-500/10 border border-emerald-500/30 text-emerald-600 dark:text-emerald-400'
+              : 'bg-red-500/10 border border-red-500/30 text-red-600 dark:text-red-400'
           }`}
         >
-          {message.text}
+          {message.type === 'success' ? (
+            <CheckCircle2 className="w-4 h-4 text-emerald-500 shrink-0" />
+          ) : (
+            <AlertCircle className="w-4 h-4 text-red-500 shrink-0" />
+          )}
+          <span>{message.text}</span>
         </div>
       )}
 
       {/* Filter toolbar */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-4 rounded-lg bg-card border border-border">
+      <div className="card-3d p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div className="flex flex-1 items-center gap-3">
-          <input
-            type="text"
-            placeholder="Search by email or name..."
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            onKeyDown={(e) => e.key === 'Enter' && fetchUsers(search, roleFilter)}
-            className="w-full max-w-sm px-3 py-1.5 text-xs rounded-md border border-input bg-background"
-          />
+          <div className="relative flex-1 max-w-sm">
+            <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+            <input
+              type="text"
+              placeholder="Search by email, name, or candidate profile..."
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              onKeyDown={(e) => e.key === 'Enter' && fetchUsers(search, roleFilter)}
+              className="w-full pl-10 pr-3 py-2 text-xs rounded-lg border border-border bg-background text-foreground shadow-sm"
+            />
+          </div>
           <select
             value={roleFilter}
             onChange={(e) => {
               setRoleFilter(e.target.value);
               fetchUsers(search, e.target.value);
             }}
-            className="px-3 py-1.5 text-xs rounded-md border border-input bg-background"
+            className="px-3 py-2 text-xs rounded-lg border border-border bg-background text-foreground font-medium shadow-sm"
           >
             <option value="">All Global Roles</option>
             <option value="USER">USER</option>
             <option value="PLATFORM_ADMIN">PLATFORM_ADMIN</option>
             <option value="SUPER_ADMIN">SUPER_ADMIN</option>
           </select>
-          <Button variant="outline" className="text-xs" onClick={() => fetchUsers(search, roleFilter)} disabled={loading}>
-            {loading ? 'Searching...' : 'Filter'}
+          <Button
+            variant="outline"
+            className="btn-3d-secondary text-xs h-9 px-3.5 flex items-center gap-1.5"
+            onClick={() => fetchUsers(search, roleFilter)}
+            disabled={loading}
+          >
+            {loading ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Filter className="w-3.5 h-3.5 text-primary" />}
+            <span>Filter</span>
           </Button>
         </div>
-        <span className="text-xs text-muted-foreground whitespace-nowrap">
-          Showing {users.length} of {initialTotal} users
+        <span className="text-xs text-muted-foreground whitespace-nowrap font-medium">
+          Showing <strong className="text-foreground">{users.length}</strong> of {initialTotal} platform identities
         </span>
       </div>
 
       {/* Users table */}
-      <Card variant="outline" className="overflow-hidden">
+      <div className="card-3d overflow-hidden">
         {users.length > 0 ? (
           <div className="overflow-x-auto">
             <table className="w-full text-left text-sm">
-              <thead className="bg-muted/50 border-b border-border text-xs uppercase text-muted-foreground font-semibold">
+              <thead className="bg-muted/50 border-b border-border text-[11px] uppercase text-muted-foreground font-bold tracking-wider">
                 <tr>
-                  <th className="p-3.5">User / Name</th>
-                  <th className="p-3.5">Candidate Profile</th>
-                  <th className="p-3.5">Workspaces</th>
-                  <th className="p-3.5">Global Role</th>
-                  <th className="p-3.5">Joined</th>
-                  <th className="p-3.5 text-right">Actions</th>
+                  <th className="p-4">User / Name</th>
+                  <th className="p-4">Candidate Profile</th>
+                  <th className="p-4">Tenant Workspaces</th>
+                  <th className="p-4">Global Role</th>
+                  <th className="p-4">Joined Date</th>
+                  <th className="p-4 text-right">Access Controls</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-border">
                 {users.map((u) => (
-                  <tr key={u.id} className="hover:bg-muted/20">
-                    <td className="p-3.5">
+                  <tr key={u.id} className="hover:bg-muted/20 transition-colors">
+                    <td className="p-4">
                       <div className="font-bold text-foreground">{u.profile?.displayName || 'Unnamed User'}</div>
-                      <div className="text-xs text-muted-foreground font-mono">{u.email}</div>
+                      <div className="text-xs text-muted-foreground font-mono mt-0.5">{u.email}</div>
                     </td>
-                    <td className="p-3.5">
+                    <td className="p-4">
                       {u.candidate ? (
-                        <div className="text-xs text-foreground max-w-xs truncate">
+                        <div className="text-xs text-foreground max-w-xs truncate font-medium">
                           {u.candidate.headline || 'Profile Active'}
                         </div>
                       ) : (
-                        <span className="text-xs text-muted-foreground">None</span>
+                        <span className="text-xs text-muted-foreground">—</span>
                       )}
                     </td>
-                    <td className="p-3.5">
+                    <td className="p-4">
                       {u.memberships.length > 0 ? (
-                        <div className="flex flex-wrap gap-1">
+                        <div className="flex flex-wrap gap-1.5">
                           {u.memberships.map((m) => (
-                            <Badge key={m.workspace.id} variant="neutral">
+                            <Badge key={m.workspace.id} variant="neutral" className="text-[11px]">
                               {m.workspace.name} ({m.role})
                             </Badge>
                           ))}
@@ -157,7 +181,7 @@ export function AdminUsersTable({ initialUsers, initialTotal }: AdminUsersTableP
                         <span className="text-xs text-muted-foreground">0 Workspaces</span>
                       )}
                     </td>
-                    <td className="p-3.5">
+                    <td className="p-4">
                       <Badge
                         variant={
                           u.globalRole === 'SUPER_ADMIN'
@@ -166,19 +190,23 @@ export function AdminUsersTable({ initialUsers, initialTotal }: AdminUsersTableP
                               ? 'warning'
                               : 'neutral'
                         }
+                        className="text-xs"
                       >
+                        {u.globalRole === 'SUPER_ADMIN' && <ShieldAlert className="w-3 h-3 mr-1 text-red-500 inline" />}
+                        {u.globalRole === 'PLATFORM_ADMIN' && <ShieldCheck className="w-3 h-3 mr-1 text-amber-500 inline" />}
+                        {u.globalRole === 'USER' && <Shield className="w-3 h-3 mr-1 text-muted-foreground inline" />}
                         {u.globalRole}
                       </Badge>
                     </td>
-                    <td className="p-3.5 text-xs text-muted-foreground whitespace-nowrap">
+                    <td className="p-4 text-xs text-muted-foreground whitespace-nowrap">
                       {new Date(u.createdAt).toLocaleDateString()}
                     </td>
-                    <td className="p-3.5 text-right">
+                    <td className="p-4 text-right">
                       <select
                         value={u.globalRole}
                         disabled={updatingId === u.id}
                         onChange={(e) => handleRoleChange(u.id, e.target.value)}
-                        className="px-2 py-1 text-xs rounded border border-input bg-background font-medium"
+                        className="px-2.5 py-1.5 text-xs rounded-lg border border-border bg-background text-foreground font-semibold shadow-xs"
                       >
                         <option value="USER">Make USER</option>
                         <option value="PLATFORM_ADMIN">Make PLATFORM_ADMIN</option>
@@ -191,11 +219,11 @@ export function AdminUsersTable({ initialUsers, initialTotal }: AdminUsersTableP
             </table>
           </div>
         ) : (
-          <div className="p-10 text-center text-sm text-muted-foreground">
+          <div className="p-12 text-center text-sm text-muted-foreground">
             No platform users found matching criteria.
           </div>
         )}
-      </Card>
+      </div>
     </div>
   );
 }
