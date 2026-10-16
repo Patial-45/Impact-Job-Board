@@ -1,5 +1,29 @@
 # Changelog
 
+## 2026-10-16 — 3D Motion Physics, Ambient Mesh, Talent Competency Radar, Live AI Resume Parser & Production Cloud Blueprints
+
+- Framer Motion Spring Physics & Cursor Tracking (`apps/web/src/components/motion-card-3d.tsx`):
+  - Installed `framer-motion` v12 in `@executive-match/web`.
+  - Built reusable `MotionCard3D` wrapper with normalized mouse cursor position tracking (`-0.5` to `0.5`), spring physics (`stiffness: 350, damping: 25`), dynamic specular glare positioning, and `translateZ(20px)` depth translation.
+- Ambient 3D Animated Background (`apps/web/src/components/mesh-background-3d.tsx`):
+  - Created `MeshBackground3D` featuring 3 floating luminous orbs (emerald, electric indigo, and cyan) with multi-frequency looping path animations (`easeInOut`, 18s-25s) and subtle radial grid lattice pattern.
+  - Integrated into homepage root (`apps/web/src/app/(public)/page.tsx`) behind hero and editorial sections.
+- 3D Interactive Talent Competency Radar (`apps/web/src/components/talent-radar-3d.tsx`):
+  - Built multi-axis SVG 3D competency radar visualization supporting 6 core executive dimensions (Systems Architecture, Org Leadership, Technical Depth, Execution Velocity, Strategic Alignment, Domain Depth).
+  - Features spring polygon morphing, candidate actual score vs requisition benchmark comparison, interactive data vertex nodes, and qualitative evidence inspector card.
+  - Integrated into public homepage (`apps/web/src/app/(public)/page.tsx`) under Section 02 and inside Employer Candidate Discovery Talent Dossier modal (`apps/web/src/components/candidate-search.tsx`).
+- Live AI Executive Resume Parser (`apps/web/src/components/live-resume-parser.tsx`):
+  - Created client-side live resume parser with drag-and-drop zone, neural parsing progress simulation (4-stage analysis), structured milestone timelines, extracted competency rings, and one-click import into candidate profile.
+  - Integrated mode switcher in Candidate Resume Manager (`apps/web/src/components/candidate-resume-manager.tsx`) toggling between AES-256 Document Vault and Live AI Parser.
+- Production Cloud Deployment Blueprints & Infrastructure-as-Code:
+  - `railway.toml`: Multi-service deployment definition for NestJS REST API and BullMQ background worker with Nixpacks build command, `/api/v1/health/ready` probe, and restart policies.
+  - `render.yaml`: Infrastructure-as-code specification defining Web Service (`executive-match-api`), Background Worker (`executive-match-worker`), managed PostgreSQL 16 database, and managed Redis 7.
+  - `.env.production.example`: Exhaustive production environment variable specification documenting required encryption secrets, PostgreSQL SSL, Redis TLS, Cloudflare R2 presigned storage, and AI inference keys.
+  - `deploy/DEPLOYMENT-GUIDE.md`: Comprehensive step-by-step production operations manual covering Vercel, Railway, Render, database migrations, Cloudflare R2 CORS, BullMQ workers, and monitoring.
+  - Updated `brain/16-DEPLOYMENT.md` with infrastructure blueprint references.
+- Monorepo Quality Gates:
+  - 100% clean check: `pnpm typecheck`, `pnpm lint --concurrency=2`, `pnpm test --concurrency=2`, `pnpm build --concurrency=2` (193 tests, 20 routes built).
+
 ## 2026-10-16 — Employer Workspace Modernization, AI Candidate Search & Admin Ledger Overhaul
 
 - Candidate Discovery Hub (`apps/web/src/components/candidate-search.tsx`):

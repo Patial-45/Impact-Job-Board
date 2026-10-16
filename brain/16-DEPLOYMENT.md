@@ -18,3 +18,9 @@ Production Probes & Observability (Verified Phase 12):
    - Production error boundaries: `apps/web/src/app/not-found.tsx`, `error.tsx` (with digest display and retry physics), and `global-error.tsx`.
    - Next.js security headers in `next.config.ts`: HSTS, X-Frame-Options DENY, nosniff, Referrer-Policy, Permissions-Policy.
 
+Production Blueprints & Infrastructure Specifications:
+- `railway.toml`: Multi-service deployment definition for NestJS REST API and standalone BullMQ worker on Railway with automated Nixpacks build and readiness probe.
+- `render.yaml`: Infrastructure-as-code specification for Render defining Web Service, Background Worker, managed PostgreSQL 16 with pgvector, and Redis 7.
+- `.env.production.example`: Full production environment specification including cryptographic keys, PostgreSQL SSL, Redis TLS, Cloudflare R2 presigned storage, and AI inference keys.
+- `deploy/DEPLOYMENT-GUIDE.md`: Step-by-step production rollout guide covering Vercel, Railway, Render, managed database, Cloudflare R2, BullMQ background worker, domain SSL, and health probe monitoring.
+

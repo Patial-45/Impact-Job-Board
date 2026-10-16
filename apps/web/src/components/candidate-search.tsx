@@ -22,6 +22,7 @@ import {
   AlertCircle,
   Layers,
 } from 'lucide-react';
+import { TalentRadar3D } from '@/components/talent-radar-3d';
 
 const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000/api/v1';
 
@@ -956,6 +957,25 @@ export function CandidateSearch({
                 </div>
               )
             )}
+
+            {/* 3D Talent Competency Radar */}
+            <div className="space-y-3 pt-2">
+              <div className="flex items-center justify-between">
+                <h4 className="text-xs font-bold text-foreground uppercase tracking-wider flex items-center gap-1.5">
+                  <Sparkles className="w-3.5 h-3.5 text-primary" />
+                  Executive Competency Radar
+                </h4>
+                <span className="text-[11px] text-muted-foreground font-semibold">
+                  3D Multi-Axis Benchmark
+                </span>
+              </div>
+              <div className="rounded-2xl border border-border/80 bg-background/50 p-2 shadow-xs">
+                <TalentRadar3D
+                  candidateName={selectedCandidate.user?.profile?.displayName || 'Executive Candidate'}
+                  roleTitle={selectedCandidate.headline || 'Senior Executive'}
+                />
+              </div>
+            </div>
 
             {/* Candidate Bio */}
             {selectedCandidate.bio && (

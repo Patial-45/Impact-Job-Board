@@ -1,0 +1,19 @@
+# ==============================================================================
+# Executive Match — Railway Cloud Deployment Blueprint
+# Multi-service configuration: NestJS REST API + BullMQ Background Worker
+# ==============================================================================
+
+[build]
+builder = "NIXPACKS"
+buildCommand = "pnpm install --frozen-lockfile && pnpm db:generate && pnpm --filter @executive-match/api build && pnpm --filter @executive-match/processing build"
+
+[deploy]
+startCommand = "pnpm --filter @executive-match/api start:prod"
+healthcheckPath = "/api/v1/health/ready"
+healthcheckTimeout = 100
+restartPolicyType = "ON_FAILURE"
+restartPolicyMaxRetries = 10
+
+# Railway Worker Service Deployment Override
+# When provisioning a separate worker service in Railway dashboard, set startCommand to:
+# pnpm --filter @executive-match/processing start

@@ -28,10 +28,15 @@ import {
   StatCard,
 } from '@executive-match/ui';
 import { InteractiveHero3D } from '@/components/interactive-hero-3d';
+import { MeshBackground3D } from '@/components/mesh-background-3d';
+import { TalentRadar3D } from '@/components/talent-radar-3d';
 
 export default function HomePage() {
   return (
-    <main className="pb-16">
+    <main className="pb-16 relative overflow-hidden">
+      {/* Ambient 3D Animated Mesh Background with Floating Luminous Orbs */}
+      <MeshBackground3D />
+
       {/* 1. Hero Section with Interactive 3D Evidence Match Showcase */}
       <section className="hero container pt-12 pb-16">
         <div className="hero-copy">
@@ -101,12 +106,38 @@ export default function HomePage() {
         </div>
       </section>
 
+      {/* 2.5. 3D Talent Intelligence & Multi-Axis Competency Radar */}
+      <section className="talent-radar-section container py-16" id="radar">
+        <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-8">
+          <div>
+            <span className="font-mono text-xs font-bold text-emerald-700 uppercase tracking-widest">
+              02 / MULTI-AXIS TALENT INTELLIGENCE
+            </span>
+            <h2 className="font-display text-2xl sm:text-3xl font-extrabold text-gray-900 tracking-tight mt-1">
+              Multi-dimensional competency evaluation in real-time 3D.
+            </h2>
+            <p className="text-gray-600 text-sm mt-2 max-w-2xl">
+              Compare executive candidate verified signals against requisition benchmark requirements across 6 critical dimensions with explainable evidence.
+            </p>
+          </div>
+          <Badge variant="accent" className="self-start md:self-auto flex items-center gap-1.5 px-3 py-1">
+            <Sparkles className="w-3.5 h-3.5 text-emerald-600" />
+            <span>Interactive 3D Radar</span>
+          </Badge>
+        </div>
+
+        <TalentRadar3D
+          candidateName="Alex Vance"
+          roleTitle="VP of Engineering"
+        />
+      </section>
+
       {/* 3. Product UI Preview Mockup */}
       <section className="preview-section container py-16">
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-8">
           <div>
             <span className="font-mono text-xs font-bold text-emerald-700 uppercase tracking-widest">
-              02 / INTERFACE PREVIEW
+              03 / INTERFACE PREVIEW
             </span>
             <h2 className="font-display text-2xl sm:text-3xl font-extrabold text-gray-900 tracking-tight mt-1">
               Designed for speed, clarity, and deep evaluation.
@@ -196,7 +227,7 @@ export default function HomePage() {
         <div className="container">
           <div className="mb-12">
             <span className="font-mono text-xs font-bold text-emerald-700 uppercase tracking-widest">
-              03 / HOW IT WORKS
+              04 / HOW IT WORKS
             </span>
             <h2 className="font-display text-2xl sm:text-3xl font-extrabold text-gray-900 tracking-tight mt-1">
               Structured workflows for candidates and hiring teams.
@@ -363,7 +394,7 @@ export default function HomePage() {
       <section className="platform-section container py-16" id="features">
         <div className="mb-12">
           <span className="font-mono text-xs font-bold text-emerald-700 uppercase tracking-widest">
-            04 / PLATFORM CAPABILITIES
+            05 / PLATFORM CAPABILITIES
           </span>
           <h2 className="font-display text-2xl sm:text-3xl font-extrabold text-gray-900 tracking-tight mt-1">
             Engineered for precision. Built for modern hiring teams.

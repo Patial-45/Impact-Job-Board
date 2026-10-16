@@ -1,0 +1,77 @@
+# ==============================================================================
+# Executive Match — Render Infrastructure-as-Code Blueprint
+# Defines API Web Service, BullMQ Background Worker, PostgreSQL & Redis
+# ==============================================================================
+
+services:
+  # 1. NestJS Modular REST API
+  - type: web
+    name: executive-match-api
+    runtime: node
+    plan: starter
+    region: ohio
+    buildCommand: pnpm install --frozen-lockfile && pnpm db:generate && pnpm --filter @executive-match/api build
+    startCommand: pnpm --filter @executive-match/api start:prod
+    healthCheckPath: /api/v1/health/ready
+    autoDeploy: true
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: API_PORT
+        value: 10000
+      - key: DATABASE_URL
+        fromDatabase:
+          name: executive-match-postgres
+          property: connectionString
+      - key: REDIS_URL
+        fromService:
+          type: redis
+          name: executive-match-redis
+          property: connectionString
+      - key: AUTH_SECRET
+        generateValue: true
+      - key: WEB_URL
+        sync: false
+      - key: NEXT_PUBLIC_API_URL
+        sync: false
+
+  # 2. BullMQ Standalone Processing Worker
+  - type: worker
+    name: executive-match-worker
+    runtime: node
+    plan: starter
+    region: ohio
+    buildCommand: pnpm install --frozen-lockfile && pnpm db:generate && pnpm --filter @executive-match/processing build
+    startCommand: pnpm --filter @executive-match/processing start
+    autoDeploy: true
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: DATABASE_URL
+        fromDatabase:
+          name: executive-match-postgres
+          property: connectionString
+      - key: REDIS_URL
+        fromService:
+          type: redis
+          name: executive-match-redis
+          property: connectionString
+      - key: AUTH_SECRET
+        fromService:
+          type: web
+          name: executive-match-api
+          envVarKey: AUTH_SECRET
+
+databases:
+  # Managed PostgreSQL 16
+  - name: executive-match-postgres
+    plan: starter
+    region: ohio
+    postgresMajorVersion: "16"
+
+  # Managed Redis 7
+  - name: executive-match-redis
+    type: redis
+    plan: starter
+    region: ohio
+    maxmemoryPolicy: allkeys-lru
